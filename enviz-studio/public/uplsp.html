@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Space | EnvizStudio</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#d8b9ff", "on-primary-container": "#3c0077",
+                        secondary: "#b7d24e", "on-secondary": "#2a3400",
+                        background: "#100f31", "on-background": "#e2dfff",
+                        surface: "#100f31", "on-surface": "#e2dfff",
+                        "surface-container-lowest": "#0a092c",
+                        "surface-container-low": "#181739",
+                        "surface-container": "#1c1c3e",
+                        "surface-container-high": "#272649",
+                        "surface-container-highest": "#323154",
+                        "on-surface-variant": "#cec2d7", outline: "#978da0", error: "#ffb4ab"
+                    },
+                    fontFamily: { headline: ["Plus Jakarta Sans"], body: ["Inter"] }
+                }
+            }
+        };
+    </script>
+    <style>
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .spinner { animation: spin 1s linear infinite; display: inline-block; width: 1em; height: 1em; border: 2px solid currentcolor; border-top-color: transparent; border-radius: 50%; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        .shake { animation: shake 0.5s; }
+        @keyframes shake { 0%, 100% {transform: translateX(0);} 10%, 30%, 50%, 70%, 90% {transform: translateX(-5px);} 20%, 40%, 60%, 80% {transform: translateX(5px);} }
+        #toast-container { position: fixed; top: 20px; right: 20px; z-index: 100; display: flex; flex-direction: column; gap: 10px; }
+        .toast { padding: 12px 20px; border-radius: 8px; display: flex; align-items: center; gap: 8px; color: white; font-weight: bold; animation: slideIn 0.3s; }
+        .toast.success { background-color: #4ade80; color: #064e3b; }
+        .toast.error { background-color: #ef4444; }
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body selection:bg-primary selection:text-on-primary">
+    <div id="toast-container"></div>
+    
+    <nav class="bg-[#100f31] backdrop-blur-xl bg-opacity-60 font-['Plus_Jakarta_Sans'] docked full-width top-0 sticky z-50">
+        <div class="flex justify-between items-center w-full px-8 py-4 max-w-screen-2xl mx-auto">
+            <div class="flex items-center gap-12">
+                <a href="/" class="text-2xl font-bold tracking-tighter text-[#d8b9ff] hover:opacity-80 transition-opacity">EnvizStudio</a>
+                <div class="hidden md:flex gap-8">
+                    <a class="text-[#cec2d7] hover:text-[#d8b9ff] transition-all duration-300" href="/">Spaces</a>
+                </div>
+            </div>
+            <div class="flex items-center gap-6">
+                <button class="bg-secondary text-on-secondary px-6 py-2 rounded-full font-bold opacity-50 cursor-default">Upload</button>
+            </div>
+        </div>
+    </nav>
+    
+    <main class="max-w-screen-2xl mx-auto px-8 py-12">
+        <header class="mb-12">
+            <h1 class="text-4xl md:text-5xl font-headline font-extrabold tracking-tighter text-on-surface">Upload Space</h1>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 mb-24">
+            <form id="space-form" class="lg:col-span-8 space-y-12" onsubmit="event.preventDefault(); saveSpace();">
+                <section class="space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="space-y-2">
+                            <label class="font-label text-xs uppercase text-on-surface-variant">Space Title</label>
+                            <input id="title" required class="w-full bg-surface-container-lowest border border-outline/20 rounded-lg p-4 text-on-surface" type="text" placeholder="Modern Villa" />
+                        </div>
+                        <div class="space-y-2">
+                            <label class="font-label text-xs uppercase text-on-surface-variant">URL Slug</label>
+                            <input id="slug" required class="w-full bg-surface-container-lowest border border-outline/20 rounded-lg p-4 text-on-surface" type="text" placeholder="modern-villa" />
+                        </div>
+                    </div>
+                </section>
+
+                <section class="space-y-4">
+                    <h3 class="text-xl font-headline font-bold text-on-surface">Space Deployment</h3>
+                    <div class="relative group">
+                        <div class="w-full h-64 border-2 border-dashed border-outline/30 rounded-xl bg-surface-container-low flex flex-col items-center justify-center gap-4 transition-all">
+                            <div class="w-16 h-16 rounded-full bg-surface-container-highest flex items-center justify-center text-primary">
+                                <span class="material-symbols-outlined text-4xl">cloud_upload</span>
+                            </div>
+                            <div class="text-center">
+                                <p class="text-on-surface font-medium">Select Unity WebGL Build ZIP</p>
+                                <p class="text-on-surface-variant text-sm mt-1" id="file-name-display">Max 500MB</p>
+                            </div>
+                            <input type="file" id="build-file" class="hidden" accept=".zip" onchange="document.getElementById('file-name-display').innerText = this.files[0] ? this.files[0].name : 'Max 500MB'" />
+                            <button onclick="document.getElementById('build-file').click()" type="button" class="mt-2 bg-surface-container-highest text-primary px-6 py-2 rounded-lg font-bold">Select Archive</button>
+                        </div>
+                    </div>
+                </section>
+            </form>
+            
+            <aside class="lg:col-span-4 space-y-8">
+                <!-- Submission Info Box -->
+                <div class="p-6 rounded-2xl bg-surface-container-highest border border-primary/20">
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="material-symbols-outlined text-secondary">verified</span>
+                        <span class="font-bold text-on-surface">Upload Status</span>
+                    </div>
+                    <ul class="space-y-3" id="status-list">
+                        <li class="flex items-center gap-3 text-sm text-on-surface-variant">
+                            <span class="material-symbols-outlined text-base" id="status-metadata">circle</span> Metadata Saved
+                        </li>
+                        <li class="flex items-center gap-3 text-sm text-on-surface-variant">
+                            <span class="material-symbols-outlined text-base" id="status-build">circle</span> Build Uploaded
+                        </li>
+                    </ul>
+                </div>
+            </aside>
+        </div>
+    </main>
+
+    <div class="fixed bottom-0 left-0 right-0 bg-surface-container/80 border-t border-outline/10 z-40">
+        <div class="max-w-screen-2xl mx-auto px-8 py-6 flex justify-between items-center">
+            <div class="flex items-center gap-4">
+                <div class="w-2 h-2 rounded-full bg-secondary" id="save-indicator"></div>
+                <span class="text-sm font-medium text-on-surface-variant" id="last-saved-text">Not saved yet</span>
+            </div>
+            <div class="flex items-center gap-6">
+                <a id="view-page-link" class="text-on-surface-variant font-bold hover:text-primary transition-colors flex items-center gap-2 hidden" href="#">
+                    <span class="material-symbols-outlined text-xl">visibility</span> View Page
+                </a>
+                <button id="save-button" onclick="saveSpace()" class="bg-secondary text-on-secondary px-10 py-3 rounded-xl font-bold text-lg hover:brightness-110 active:scale-95 transition-all">
+                    Save Space
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentSpaceId = null;
+
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `<span class="material-symbols-outlined">${type === 'success' ? 'check_circle' : 'error'}</span> ${message}`;
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        async function saveSpace() {
+            const saveBtn = document.getElementById('save-button');
+            const title = document.getElementById('title').value;
+            const slug = document.getElementById('slug').value;
+            const fileInput = document.getElementById('build-file');
+
+            if (!title || !slug) {
+                saveBtn.classList.add('shake');
+                showToast('Please fill out Title and Slug.', 'error');
+                setTimeout(() => saveBtn.classList.remove('shake'), 500);
+                return;
+            }
+
+            saveBtn.disabled = true;
+            saveBtn.innerHTML = 'Saving... <span class="spinner"></span>';
+
+            try {
+                // 1. Save Metadata
+                const metaRes = await fetch('/api/spaces', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ title, slug })
+                });
+                const metaData = await metaRes.json();
+                
+                if (!metaData.success) {
+                    throw new Error(metaData.error);
+                }
+                
+                currentSpaceId = metaData.id;
+                document.getElementById('status-metadata').innerText = 'check_circle';
+                document.getElementById('status-metadata').classList.add('text-secondary');
+
+                // 2. Upload File if selected
+                if (fileInput.files.length > 0) {
+                    saveBtn.innerHTML = 'Uploading... <span class="spinner"></span>';
+                    const formData = new FormData();
+                    formData.append('build', fileInput.files[0]);
+                    formData.append('spaceId', currentSpaceId);
+
+                    const uploadRes = await fetch('/api/upload/space-build', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    const uploadData = await uploadRes.json();
+                    
+                    if (!uploadData.success) {
+                        throw new Error(uploadData.error);
+                    }
+                    
+                    document.getElementById('status-build').innerText = 'check_circle';
+                    document.getElementById('status-build').classList.add('text-secondary');
+                }
+
+                // Success UI Updates
+                saveBtn.classList.remove('bg-secondary');
+                saveBtn.classList.add('bg-[#4ade80]');
+                saveBtn.innerHTML = 'Saved <span class="material-symbols-outlined text-sm align-middle">check</span>';
+                document.getElementById('last-saved-text').innerText = 'Last saved: Just now';
+                showToast('Space saved successfully!', 'success');
+                
+                const viewLink = document.getElementById('view-page-link');
+                viewLink.href = '/provie.html?slug=' + metaData.slug;
+                viewLink.classList.remove('hidden');
+
+                setTimeout(() => {
+                    saveBtn.disabled = false;
+                    saveBtn.classList.add('bg-secondary');
+                    saveBtn.classList.remove('bg-[#4ade80]');
+                    saveBtn.innerHTML = 'Save Space';
+                }, 3000);
+
+            } catch (err) {
+                console.error(err);
+                saveBtn.classList.add('shake');
+                saveBtn.disabled = false;
+                saveBtn.innerHTML = 'Save Space';
+                showToast(err.message || 'Save failed. Please try again.', 'error');
+                setTimeout(() => saveBtn.classList.remove('shake'), 500);
+            }
+        }
+    </script>
+</body>
+</html>

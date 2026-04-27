@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">tailwind.config = {darkMode: "class", theme: {extend: {colors: {"on-secondary-container": "#242d00", "on-primary-fixed": "#290055", "primary-fixed-dim": "#d8b9ff", "on-tertiary-fixed": "#1a1c1c", "secondary-container": "#839a17", "on-surface": "#e2dfff", primary: "#d8b9ff", "secondary-fixed-dim": "#b7d24e", "inverse-surface": "#e2dfff", tertiary: "#c6c6c7", "tertiary-fixed": "#e2e2e2", "on-tertiary-fixed-variant": "#454747", "on-tertiary": "#2f3131", "primary-fixed": "#eddcff", "surface-container-lowest": "#0a092c", "tertiary-fixed-dim": "#c6c6c7", "tertiary-container": "#909191", "inverse-primary": "#7c2dda", "surface-tint": "#d8b9ff", "inverse-on-surface": "#2d2d50", "on-error": "#690005", "surface-dim": "#100f31", "on-primary-fixed-variant": "#6200bc", "on-primary": "#450087", "surface-variant": "#323154", "surface-container": "#1c1c3e", "surface-container-highest": "#323154", secondary: "#b7d24e", "outline-variant": "#4b4454", "surface-bright": "#363559", error: "#ffb4ab", "on-error-container": "#ffdad6", "surface-container-high": "#272649", "on-secondary-fixed": "#181e00", outline: "#978da0", "on-primary-container": "#3c0077", surface: "#100f31", "on-secondary-fixed-variant": "#3f4c00", "surface-container-low": "#181739", "error-container": "#93000a", "on-surface-variant": "#cec2d7", "on-tertiary-container": "#282a2a", "secondary-fixed": "#d3ef67", "on-secondary": "#2a3400", "primary-container": "#ad72ff", background: "#100f31", "on-background": "#e2dfff"}, borderRadius: {DEFAULT: "0.25rem", lg: "0.5rem", xl: "0.75rem", full: "9999px"}, fontFamily: {headline: ["Plus Jakarta Sans"], body: ["Inter"], label: ["Inter"], display: "Plus Jakarta Sans"}}}};</script>
+<style>
+        body { font-family: 'Inter', sans-serif; background-color: #100f31; }
+        .font-jakarta { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .glass-panel { backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+        .primary-gradient-cta { background: linear-gradient(135deg, #d8b9ff 0%, #ad72ff 100%); }
+    </style>
+</head>
+<body class="bg-surface text-on-surface-variant selection:bg-primary-container selection:text-on-primary-container">
+<!-- TopNavBar -->
+<nav class="bg-[#100f31] dark:bg-[#100f31] backdrop-blur-xl bg-opacity-60 font-['Plus_Jakarta_Sans'] tracking-tight docked full-width top-0 sticky z-50 tonal-shift-no-borders bg-[#272649] flat no shadows">
+<div class="flex justify-between items-center w-full px-8 py-4 max-w-screen-2xl mx-auto">
+<div class="flex items-center gap-12">
+<a href="/" class="text-2xl font-bold tracking-tighter text-[#d8b9ff]">EnvizStudio</a>
+<div class="hidden md:flex gap-8 items-center">
+<a class="text-[#d8b9ff] font-bold border-b-2 border-[#b7d24e] pb-1 hover:bg-[#323154] hover:bg-opacity-40 transition-all duration-300 scale-95 active:scale-90" href="/brsp.html">Spaces</a>
+<a class="text-[#cec2d7] hover:text-[#d8b9ff] hover:bg-[#323154] hover:bg-opacity-40 transition-all duration-300 scale-95 active:scale-90" href="#">Solutions</a>
+<a class="text-[#cec2d7] hover:text-[#d8b9ff] hover:bg-[#323154] hover:bg-opacity-40 transition-all duration-300 scale-95 active:scale-90" href="#">Pricing</a>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<button class="text-[#cec2d7] hover:text-[#d8b9ff] font-medium transition-colors">Log In</button>
+<button onclick="window.location.href='/uplsp.html'" class="bg-[#b7d24e] text-[#2a3400] px-6 py-2 rounded-lg font-bold hover:brightness-110 transition-all scale-95 active:scale-90">Upload</button>
+</div>
+</div>
+</nav>
+<main>
+<!-- Hero Section -->
+<section class="relative h-[921px] flex items-center justify-center overflow-hidden">
+<div class="absolute inset-0 z-0">
+<img class="w-full h-full object-cover" data-alt="ultra-realistic high-end luxury penthouse interior with floor-to-ceiling windows, cinematic sunset lighting, and minimalist furniture in a 3D architectural visualization style" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD1t8HpM3ksCKV7J-qfcXaugPkNAxjvrLhcts1IoI4q9ULPw2b1Q5nls7WknNBycQhjdbAEy6I8JnRuoUIvcnARI6bt8KpwWymWbj7zDHobqknZ79T8wNTFZVDAoRCaIwTWfQ8Fk57gMjMh1BqiweHIPUBDM1P1kJOJBb21q-OfsoOmmx2pKRSGwNKOHKEAj167d58JSg8Z8ipYeMPREzdG6LT3FuiyPhTvMd-Ba8ujshs9c_-iG-DT_jSwiRQDmCB0PEAX9s9ncHg"/>
+<div class="absolute inset-0 bg-gradient-to-b from-surface/20 via-surface/40 to-surface"></div>
+</div>
+<div class="relative z-10 text-center max-w-4xl px-6">
+<h1 class="font-headline text-5xl md:text-7xl font-extrabold text-on-surface tracking-tighter mb-8 leading-tight">
+                    Experience Interior Design <br/> in <span class="text-primary">Real-Time</span>
+</h1>
+<div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
+<button onclick="window.location.href='/brsp.html'" class="primary-gradient-cta text-on-primary-container px-10 py-4 rounded-full font-bold text-lg hover:shadow-xl transition-all scale-100 hover:scale-105 active:scale-95">
+                        Explore Spaces
+                    </button>
+<button onclick="window.location.href='/uplsp.html'" class="bg-surface-container-highest text-primary px-10 py-4 rounded-full font-bold text-lg hover:bg-surface-variant transition-all scale-100 hover:scale-105 active:scale-95">
+                        Upload Model
+                    </button>
+</div>
+</div>
+</section>
+<!-- Embedded Viewer Preview -->
+<section class="py-24 px-8 max-w-screen-2xl mx-auto">
+<div class="bg-surface-container-low rounded-xl overflow-hidden relative group">
+<div class="aspect-video relative">
+<img class="w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-700" data-alt="modern 3D living room model with interactive lighting highlights and detailed textures inside a digital viewport interface" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBx1191rygwcUsbMOl3lXWp-q4l2STTWMdfu1C7hoT-ihc6qm47Wj6FHq_OZl2ooLPr3nGYyoQlSKPO-A6Q97RsoxDGKeTDCtxhCvpl492Llx60aGwBiqD3Nhgo0pEQQhBF9_NPkfzLB1YFgUlyYmW6IC7aY6_gwIe3-YJsdYjYYnDwDgLfL74nfR3DoBg2kXVrzqocRY0t3CSn_FXpHlucU4cig1tZCwrYrTKDh4UVVXqxi077bpkC-EqLVJvzI_hMJ4BB64fjkm0"/>
+<!-- Glass Play Button Overlay -->
+<div class="absolute inset-0 flex items-center justify-center">
+<button class="glass-panel bg-surface-variant/60 w-24 h-24 rounded-full flex items-center justify-center group-hover:bg-primary-container/80 transition-all duration-300">
+<span class="material-symbols-outlined text-5xl text-primary group-hover:text-on-primary-container" style="font-variation-settings: 'FILL' 1;">play_arrow</span>
+</button>
+</div>
+<!-- Viewer UI Elements -->
+<div class="absolute top-6 left-6 flex gap-3">
+<div class="glass-panel bg-surface-variant/60 px-4 py-2 rounded-full text-xs font-bold text-secondary uppercase tracking-widest flex items-center gap-2">
+<span class="w-2 h-2 bg-secondary rounded-full"></span>
+                            Live Unity Engine
+                        </div>
+</div>
+</div>
+<div class="p-8 flex flex-col md:flex-row justify-between items-center gap-6">
+<div>
+<h3 class="font-headline text-2xl font-bold text-on-surface">Interactive Walkthrough Preview</h3>
+<p class="text-on-surface-variant mt-2 max-w-xl">Fully immersive, browser-based visualization. Test lighting, swap materials, and navigate through your 3D assets without any downloads.</p>
+</div>
+<div class="flex gap-4">
+<span class="material-symbols-outlined p-3 bg-surface-container rounded-lg text-primary">view_in_ar</span>
+<span class="material-symbols-outlined p-3 bg-surface-container rounded-lg text-primary">light_mode</span>
+<span class="material-symbols-outlined p-3 bg-surface-container rounded-lg text-primary">texture</span>
+</div>
+</div>
+</div>
+</section>
+<!-- How It Works Section -->
+<section class="py-24 bg-surface-container-lowest">
+<div class="max-w-screen-2xl mx-auto px-8">
+<div class="mb-16">
+<h2 class="font-headline text-4xl font-bold text-on-surface tracking-tight mb-4">The Digital Atelier Workflow</h2>
+<div class="h-1 w-24 bg-secondary"></div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-12">
+<!-- Step 1 -->
+<div class="group">
+<div class="bg-surface-container-high w-20 h-20 rounded-2xl flex items-center justify-center mb-8 group-hover:bg-primary-container transition-colors duration-300">
+<span class="material-symbols-outlined text-4xl text-primary group-hover:text-on-primary-container">upload_file</span>
+</div>
+<h4 class="font-headline text-xl font-bold text-on-surface mb-4">Upload ZIP</h4>
+<p class="text-on-surface-variant leading-relaxed">Package your Unity or Unreal Engine export into a single ZIP file. Our automated pipeline processes geometry and textures instantly.</p>
+</div>
+<!-- Step 2 -->
+<div class="group">
+<div class="bg-surface-container-high w-20 h-20 rounded-2xl flex items-center justify-center mb-8 group-hover:bg-primary-container transition-colors duration-300">
+<span class="material-symbols-outlined text-4xl text-primary group-hover:text-on-primary-container">tune</span>
+</div>
+<h4 class="font-headline text-xl font-bold text-on-surface mb-4">Configure Settings</h4>
+<p class="text-on-surface-variant leading-relaxed">Fine-tune exposure, interaction hot-spots, and custom brand overlays through our professional submission dashboard.</p>
+</div>
+<!-- Step 3 -->
+<div class="group">
+<div class="bg-surface-container-high w-20 h-20 rounded-2xl flex items-center justify-center mb-8 group-hover:bg-primary-container transition-colors duration-300">
+<span class="material-symbols-outlined text-4xl text-primary group-hover:text-on-primary-container">ios_share</span>
+</div>
+<h4 class="font-headline text-xl font-bold text-on-surface mb-4">Share Tour</h4>
+<p class="text-on-surface-variant leading-relaxed">Generate a high-performance URL or embed the experience directly into your client presentations and website.</p>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="bg-[#0b092c] dark:bg-[#0b092c] full-width py-12 px-8 tonal-shift from surface-container-lowest flat no shadows">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center max-w-screen-2xl mx-auto">
+<div>
+<span class="text-lg font-black text-[#d8b9ff] font-['Plus_Jakarta_Sans']">EnvizStudio</span>
+<p class="text-[#cec2d7] mt-4 font-['Inter'] text-sm tracking-wide uppercase">© 2024 EnvizStudio. The Digital Atelier.</p>
+</div>
+<div class="flex flex-wrap gap-8 md:justify-end">
+<a class="font-['Inter'] text-sm tracking-wide uppercase text-[#cec2d7] hover:text-[#d8b9ff] transition-colors opacity-80 hover:opacity-100" href="#">Resources</a>
+<a class="font-['Inter'] text-sm tracking-wide uppercase text-[#cec2d7] hover:text-[#d8b9ff] transition-colors opacity-80 hover:opacity-100" href="#">Privacy Policy</a>
+<a class="font-['Inter'] text-sm tracking-wide uppercase text-[#cec2d7] hover:text-[#d8b9ff] transition-colors opacity-80 hover:opacity-100" href="#">Terms of Service</a>
+<a class="font-['Inter'] text-sm tracking-wide uppercase text-[#cec2d7] hover:text-[#d8b9ff] transition-colors opacity-80 hover:opacity-100" href="#">Help Center</a>
+</div>
+</div>
+</footer>
+</body></html>

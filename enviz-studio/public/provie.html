@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EnvizStudio | Project Viewer</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#d8b9ff", "on-primary-container": "#3c0077",
+                        secondary: "#b7d24e", "on-secondary": "#2a3400",
+                        background: "#100f31", "on-background": "#e2dfff",
+                        surface: "#100f31", "on-surface": "#e2dfff",
+                        "surface-container-lowest": "#0a092c",
+                        "surface-container-low": "#181739",
+                        "surface-container": "#1c1c3e",
+                        "surface-container-high": "#272649",
+                        "surface-container-highest": "#323154",
+                        "on-surface-variant": "#cec2d7", outline: "#978da0", error: "#ffb4ab",
+                        "primary-container": "#ad72ff"
+                    },
+                    fontFamily: { headline: ["Plus Jakarta Sans"], body: ["Inter"] }
+                }
+            }
+        };
+    </script>
+    <style>
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .glass-panel { background: rgba(50, 49, 84, 0.6); backdrop-filter: blur(20px); }
+    </style>
+</head>
+<body class="bg-surface text-on-surface font-body selection:bg-primary-container selection:text-on-primary-container">
+    
+    <nav class="bg-[#100f31] backdrop-blur-xl bg-opacity-60 docked full-width top-0 sticky z-50">
+        <div class="flex justify-between items-center w-full px-8 py-4 max-w-screen-2xl mx-auto font-['Plus_Jakarta_Sans']">
+            <div class="flex items-center gap-8">
+                <a href="/" class="text-2xl font-bold tracking-tighter text-[#d8b9ff] hover:opacity-80 transition-opacity">EnvizStudio</a>
+                <div class="hidden md:flex gap-6 items-center">
+                    <a class="text-[#cec2d7] hover:text-[#d8b9ff] transition-all duration-300" href="/">Spaces</a>
+                </div>
+            </div>
+            <div class="flex items-center gap-4">
+                <button class="bg-secondary text-on-secondary px-6 py-2 rounded-xl font-bold hover:opacity-90 transition-all duration-300" onclick="window.location.href='/uplsp.html'">Upload</button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-screen-2xl mx-auto px-8 py-12">
+        <header class="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6">
+            <div class="space-y-3">
+                <div class="flex items-center gap-3">
+                    <span class="bg-surface-container-highest text-secondary text-xs font-bold tracking-widest px-3 py-1 rounded-full uppercase" id="space-visibility">Public</span>
+                    <h1 id="space-title" class="text-display-lg font-headline font-extrabold text-on-surface tracking-tighter text-4xl md:text-6xl">Loading...</h1>
+                </div>
+                <p id="space-subtitle" class="text-on-surface-variant text-xl font-medium tracking-tight">...</p>
+            </div>
+        </header>
+
+        <section class="mb-6 relative group">
+            <div class="aspect-video w-full rounded-xl overflow-hidden bg-surface-container-lowest relative shadow-2xl" id="iframe-container">
+                <!-- Iframe injected here -->
+                <div id="loading-overlay" class="absolute inset-0 flex flex-col items-center justify-center bg-surface-dim/80 backdrop-blur-sm z-10">
+                    <h2 class="font-headline font-bold text-2xl text-primary animate-pulse">Initializing Unity Build...</h2>
+                </div>
+            </div>
+            
+            <div class="mt-6 flex flex-wrap items-center justify-between gap-4 glass-panel p-4 rounded-xl">
+                <div class="flex items-center gap-2">
+                    <button class="flex items-center gap-2 px-4 py-2 rounded-full hover:bg-surface-variant transition-colors group">
+                        <span class="material-symbols-outlined text-on-surface-variant group-hover:text-error transition-colors">favorite</span>
+                        <span class="text-sm font-bold">Like</span>
+                    </button>
+                    <button class="flex items-center gap-2 px-4 py-2 rounded-full hover:bg-surface-variant transition-colors group">
+                        <span class="material-symbols-outlined text-on-surface-variant group-hover:text-secondary transition-colors">visibility</span>
+                        <span id="view-count" class="text-sm font-bold">0</span>
+                    </button>
+                </div>
+                <div class="flex items-center gap-4">
+                    <button onclick="document.getElementById('unity-iframe').requestFullscreen()" class="flex items-center gap-2 px-6 py-2 bg-primary-container text-on-primary-container rounded-full font-bold hover:brightness-110 transition-all scale-95 active:scale-90">
+                        <span class="material-symbols-outlined text-xl">fullscreen</span>
+                        <span>Fullscreen</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <section class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div class="lg:col-span-2 space-y-6">
+                <h2 class="text-headline-md font-headline font-bold text-2xl mb-4 text-on-surface">About this Space</h2>
+                <div class="prose prose-invert max-w-none text-on-surface-variant leading-relaxed text-lg" id="space-description">
+                    No description provided.
+                </div>
+            </div>
+            <div class="bg-surface-container-low p-6 rounded-xl space-y-6">
+                <div>
+                    <h4 class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-4">Metadata</h4>
+                    <ul class="space-y-4">
+                        <li class="flex justify-between items-center">
+                            <span class="text-sm text-on-surface-variant">Type</span>
+                            <span class="text-sm font-bold" id="space-type">Unknown</span>
+                        </li>
+                        <li class="flex justify-between items-center">
+                            <span class="text-sm text-on-surface-variant">Class</span>
+                            <span class="text-sm font-bold" id="space-class">Unknown</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        async function loadSpace() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const slug = urlParams.get('slug');
+            
+            if (!slug) {
+                document.getElementById('space-title').innerText = "Space Not Found";
+                document.getElementById('loading-overlay').innerHTML = "<h2 class='text-error'>Missing space slug in URL</h2>";
+                return;
+            }
+
+            try {
+                const res = await fetch(`/api/spaces/${slug}`);
+                const data = await res.json();
+                if (!data.success) throw new Error(data.error);
+
+                const space = data.space;
+                document.getElementById('space-title').innerText = space.title;
+                document.getElementById('space-subtitle').innerText = space.tagline || '';
+                document.getElementById('space-visibility').innerText = space.visibility;
+                document.getElementById('view-count').innerText = space.view_count;
+                document.getElementById('space-type').innerText = space.project_type || 'Unity WebGL';
+                document.getElementById('space-class').innerText = space.classification || 'Unclassified';
+
+                // Embed the Unity Build
+                if (space.build_folder_path) {
+                    const iframeUrl = `${space.build_folder_path}/index.html`;
+                    const iframe = document.createElement('iframe');
+                    iframe.id = 'unity-iframe';
+                    iframe.src = iframeUrl;
+                    // Try to preserve settings specified by user
+                    iframe.style.width = '100%';
+                    iframe.style.height = '100%';
+                    iframe.frameBorder = '0';
+                    iframe.allowFullscreen = true;
+                    iframe.allow = "autoplay; fullscreen; xr-spatial-tracking";
+                    iframe.onload = () => {
+                        document.getElementById('loading-overlay').style.display = 'none';
+                    };
+                    document.getElementById('iframe-container').appendChild(iframe);
+
+                    // Track View
+                    fetch(`/api/spaces/${space.id}/view`, { method: 'POST' });
+                } else {
+                    document.getElementById('loading-overlay').innerHTML = "<h2 class='text-primary text-xl'>Space metadata loaded. Currently no build uploaded for this space.</h2>";
+                }
+
+            } catch (err) {
+                console.error(err);
+                document.getElementById('space-title').innerText = "Error Loading Space";
+                document.getElementById('loading-overlay').innerHTML = `<h2 class='text-error'>${err.message}</h2>`;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', loadSpace);
+    </script>
+</body>
+</html>

@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Spaces | EnvizStudio</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">tailwind.config = {darkMode: "class", theme: {extend: {colors: {"on-secondary-container": "#242d00", "on-primary-fixed": "#290055", "primary-fixed-dim": "#d8b9ff", "on-tertiary-fixed": "#1a1c1c", "secondary-container": "#839a17", "on-surface": "#e2dfff", primary: "#d8b9ff", "secondary-fixed-dim": "#b7d24e", "inverse-surface": "#e2dfff", tertiary: "#c6c6c7", "tertiary-fixed": "#e2e2e2", "on-tertiary-fixed-variant": "#454747", "on-tertiary": "#2f3131", "primary-fixed": "#eddcff", "surface-container-lowest": "#0a092c", "tertiary-fixed-dim": "#c6c6c7", "tertiary-container": "#909191", "inverse-primary": "#7c2dda", "surface-tint": "#d8b9ff", "inverse-on-surface": "#2d2d50", "on-error": "#690005", "surface-dim": "#100f31", "on-primary-fixed-variant": "#6200bc", "on-primary": "#450087", "surface-variant": "#323154", "surface-container": "#1c1c3e", "surface-container-highest": "#323154", secondary: "#b7d24e", "outline-variant": "#4b4454", "surface-bright": "#363559", error: "#ffb4ab", "on-error-container": "#ffdad6", "surface-container-high": "#272649", "on-secondary-fixed": "#181e00", outline: "#978da0", "on-primary-container": "#3c0077", surface: "#100f31", "on-secondary-fixed-variant": "#3f4c00", "surface-container-low": "#181739", "error-container": "#93000a", "on-surface-variant": "#cec2d7", "on-tertiary-container": "#282a2a", "secondary-fixed": "#d3ef67", "on-secondary": "#2a3400", "primary-container": "#ad72ff", background: "#100f31", "on-background": "#e2dfff"}, borderRadius: {DEFAULT: "0.25rem", lg: "0.5rem", xl: "0.75rem", full: "9999px"}, fontFamily: {headline: ["Plus Jakarta Sans"], body: ["Inter"], label: ["Inter"], display: "Plus Jakarta Sans"}}}};</script>
+<style>
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+      .glass-card {
+        backdrop-filter: blur(20px);
+        background-color: rgba(50, 49, 84, 0.6);
+      }
+      .no-scrollbar::-webkit-scrollbar {
+        display: none;
+      }
+      .no-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+      }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body selection:bg-primary selection:text-on-primary">
+<!-- TopNavBar -->
+<nav class="bg-[#100f31] dark:bg-[#100f31] backdrop-blur-xl bg-opacity-60 font-['Plus_Jakarta_Sans'] tracking-tight docked full-width top-0 sticky z-50 tonal-shift-no-borders bg-[#272649] flat no shadows">
+<div class="flex justify-between items-center w-full px-8 py-4 max-w-screen-2xl mx-auto">
+<div class="flex items-center gap-12">
+<span class="text-2xl font-bold tracking-tighter text-[#d8b9ff]">EnvizStudio</span>
+<div class="hidden md:flex gap-8">
+<a class="text-[#d8b9ff] font-bold border-b-2 border-[#b7d24e] pb-1 transition-all duration-300" href="#">Spaces</a>
+<a class="text-[#cec2d7] hover:text-[#d8b9ff] transition-all duration-300" href="#">Solutions</a>
+<a class="text-[#cec2d7] hover:text-[#d8b9ff] transition-all duration-300" href="#">Pricing</a>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<button class="text-[#cec2d7] hover:text-[#d8b9ff] transition-all duration-300 scale-95 active:scale-90">Log In</button>
+<button class="bg-secondary text-on-secondary px-6 py-2 rounded-full font-bold hover:opacity-90 transition-all duration-300 scale-95 active:scale-90">Upload</button>
+<div class="w-10 h-10 rounded-full bg-surface-container-highest overflow-hidden border border-outline-variant/20">
+<img alt="User Profile" data-alt="professional headshot of a creative director in a dark studio setting with soft atmospheric lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBDA6S5rno5Z_5xVnECABI_C-3rNPdddT_goEYGBw4o-G1fidmzs172jMCZDMHWMzEw5DrjFtNmjJCZT5lsEiIIY8owiefJX9vepQA-OO2PFuwPRIElkAG-upCruzHYEh311AzrlaVFDyNj7DWs_cekaG34igFOks87xyhgmUjeifXSisc6W7HdLY0UTBWRAHxMjspRfm18hSdPQ-7QT4QGJPBvKtYKhpfGTKoK7mIz1eMwGmNtvoX3moz9VR4YIleVTk3IzVjY88c"/>
+</div>
+</div>
+</div>
+</nav>
+<main class="max-w-screen-2xl mx-auto px-8 py-12">
+<!-- Browse Filter Section -->
+<section class="mb-16">
+<div class="flex flex-col md:flex-row gap-4 items-center">
+<button class="flex items-center gap-2 bg-surface-container-high px-6 py-3 rounded-xl hover:bg-[#323154] hover:bg-opacity-40 transition-all duration-300 scale-95 active:scale-90">
+<span class="material-symbols-outlined" data-icon="tune">tune</span>
+<span class="font-medium">Filter</span>
+</button>
+<div class="flex-grow relative">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant/50" data-icon="search">search</span>
+<input class="w-full bg-surface-container-lowest border-none focus:ring-1 focus:ring-primary rounded-xl py-3 pl-12 pr-4 text-on-surface placeholder:text-outline transition-all" placeholder="Search spaces, creators, or architectural styles..." type="text"/>
+</div>
+<div class="relative min-w-[200px]">
+<select class="w-full bg-surface-container-high border-none rounded-xl py-3 pl-4 pr-10 appearance-none text-on-surface focus:ring-0">
+<option>Recommended</option>
+<option>Newest First</option>
+<option>Most Viewed</option>
+<option>Trending</option>
+</select>
+<span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none" data-icon="expand_more">expand_more</span>
+</div>
+</div>
+</section>
+<!-- Featured Spaces Section -->
+<section class="mb-24">
+<div class="flex justify-between items-end mb-8">
+<div>
+<h2 class="font-headline text-3xl font-extrabold tracking-tight text-primary mb-2">Featured Spaces</h2>
+<p class="text-on-surface-variant font-medium">Curated environments from top architectural visualizers.</p>
+</div>
+<a class="text-secondary font-bold hover:underline flex items-center gap-2" href="#">
+                    View All <span class="material-symbols-outlined text-sm" data-icon="arrow_forward">arrow_forward</span>
+</a>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+<!-- Large Card 1 -->
+<div class="group relative bg-surface-container-high rounded-xl overflow-hidden transition-all duration-500 hover:-translate-y-2">
+<div class="aspect-[16/10] overflow-hidden relative">
+<img alt="Luxury Interior" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" data-alt="ultra-modern living room with massive floor-to-ceiling windows overlooking a misty pine forest, moody twilight lighting with warm interior accents" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDlubLSPHjkt4zoc6ldkTR6uR19iJlO9Wl0qnkiZaud8Egq08VL_-dhHpNfWIWO1oYgIDSJa6JZBF6rdfTlSpAYx2akIq2hHGh4iVHhJPkJXqWRltNsBShkU1GzYHQRP-BZTiq8ygyE6VXGH4OVGchJ-8YzUE3nI-v0dm16-QfUQRi8yX-6UkOW0VweQoObGwbayUB6JKk8F_91vyF1Bo4ntDxvf2RsU8xN1L5T2VI1j4RojyE6UpEe2nwIlNefT8V6iUpDIoTCFao"/>
+<div class="absolute top-4 left-4 bg-primary text-on-primary-container text-xs font-black px-2 py-1 rounded-sm tracking-widest uppercase">PRO</div>
+<div class="absolute bottom-4 right-4 glass-card px-3 py-1.5 rounded-full flex gap-3 text-xs font-medium text-on-surface">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[16px]" data-icon="visibility">visibility</span> 583</span>
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[16px]" data-icon="favorite" style="font-variation-settings: 'FILL' 1;">favorite</span> 1</span>
+</div>
+</div>
+<div class="p-6 flex justify-between items-start">
+<div>
+<h3 class="font-headline text-xl font-bold mb-1 group-hover:text-primary transition-colors">Wellness Inspired Living</h3>
+<p class="text-on-surface-variant text-sm font-medium">by Studio Archi</p>
+</div>
+<button class="text-on-surface-variant hover:text-secondary transition-colors">
+<span class="material-symbols-outlined" data-icon="bookmark">bookmark</span>
+</button>
+</div>
+<div class="absolute top-0 left-0 w-full h-1 bg-secondary scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-500"></div>
+</div>
+<!-- Large Card 2 -->
+<div class="group relative bg-surface-container-high rounded-xl overflow-hidden transition-all duration-500 hover:-translate-y-2">
+<div class="aspect-[16/10] overflow-hidden relative">
+<img alt="Luxury Interior" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" data-alt="minimalist bedroom with organic textures, beige limewash walls, and soft morning sunlight casting long shadows across textured linen bedding" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAaF61Zlto92onUzm4WZacDy4OJXuW-8F-DQopotxj3nqsYRfLvdtRpyaIfiUYhIaE6sCNh9CYI6RIIIWdb4v2gV_3UZ6wou5WJGdDdOGO_VsJMldBrgVqqFoyfMydG-OzJ-oo9bJ49Tg5Fe5_uBvbmgoxH4Hswa1w8JZ5OGV-FHuL0MLt-AznoJvGVbuKIvpWXSehvtmkIncWBR_FZXwTOi_R1jQFfxHLXJX_V4-bZz_3ZAYLN0esrWRPNA9kMCLedyJ_RMYzcYao"/>
+<div class="absolute top-4 left-4 bg-primary text-on-primary-container text-xs font-black px-2 py-1 rounded-sm tracking-widest uppercase">PRO</div>
+<div class="absolute bottom-4 right-4 glass-card px-3 py-1.5 rounded-full flex gap-3 text-xs font-medium text-on-surface">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[16px]" data-icon="visibility">visibility</span> 583</span>
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[16px]" data-icon="favorite" style="font-variation-settings: 'FILL' 1;">favorite</span> 1</span>
+</div>
+</div>
+<div class="p-6 flex justify-between items-start">
+<div>
+<h3 class="font-headline text-xl font-bold mb-1 group-hover:text-primary transition-colors">Nordic Sanctuary</h3>
+<p class="text-on-surface-variant text-sm font-medium">by Elena K.</p>
+</div>
+<button class="text-on-surface-variant hover:text-secondary transition-colors">
+<span class="material-symbols-outlined" data-icon="bookmark">bookmark</span>
+</button>
+</div>
+<div class="absolute top-0 left-0 w-full h-1 bg-secondary scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-500"></div>
+</div>
+<!-- Large Card 3 -->
+<div class="group relative bg-surface-container-high rounded-xl overflow-hidden transition-all duration-500 hover:-translate-y-2">
+<div class="aspect-[16/10] overflow-hidden relative">
+<img alt="Luxury Interior" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" data-alt="dramatic brutalist concrete kitchen with integrated brass lighting and dark marble island, atmospheric night-time rendering with glowing recessed lights" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDAqOeP3k-VQCeuWyaW7U1jQDw-4nWfaZeWMdzslDLcdGYz9sH1WvkuRvfzQZbKgHiv3jj0P_gjMs60_Is1GBT9ILGQ5BLVkcblT5-wKDkaqSLnHL0wdo2qt3C4ZK3vVe4R0gIEW7IImNx_AlDnFszjaQeUDWhPdQytAVzrCUxReC_ebZ_9JNmZHlMs7UQoeSF0l8b3ze5sLOWeRBn4S6c-lp6g0M67rRLxvUNnZJvEYdYadTmS-cJUXUGoIDBTfZa-vgeiTNGasIY"/>
+<div class="absolute top-4 left-4 bg-primary text-on-primary-container text-xs font-black px-2 py-1 rounded-sm tracking-widest uppercase">PRO</div>
+<div class="absolute bottom-4 right-4 glass-card px-3 py-1.5 rounded-full flex gap-3 text-xs font-medium text-on-surface">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[16px]" data-icon="visibility">visibility</span> 583</span>
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[16px]" data-icon="favorite" style="font-variation-settings: 'FILL' 1;">favorite</span> 1</span>
+</div>
+</div>
+<div class="p-6 flex justify-between items-start">
+<div>
+<h3 class="font-headline text-xl font-bold mb-1 group-hover:text-primary transition-colors">Brutalist Gourmet</h3>
+<p class="text-on-surface-variant text-sm font-medium">by Raw Form Labs</p>
+</div>
+<button class="text-on-surface-variant hover:text-secondary transition-colors">
+<span class="material-symbols-outlined" data-icon="bookmark">bookmark</span>
+</button>
+</div>
+<div class="absolute top-0 left-0 w-full h-1 bg-secondary scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-500"></div>
+</div>
+<!-- Large Card 4 -->
+<div class="group relative bg-surface-container-high rounded-xl overflow-hidden transition-all duration-500 hover:-translate-y-2">
+<div class="aspect-[16/10] overflow-hidden relative">
+<img alt="Luxury Interior" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" data-alt="opulent master bathroom with emerald green marble walls and a floating onyx tub, dramatic lighting reflecting off gold fixtures" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBBtLkk7miVPJZE4hfn9akrURhQcB6GcPyg7OwAsJe99YZM6qCt5gBk0bv0zca_tG-gAjgosFOMiAiAR6cgqYMVRahukcF68JGKXfYlWyXPJ1G1QQ2SRbifmbSY_xcOsrcu4LVwDNuuvVD-DyfaAyA6Acw1Km-I0z2rAPfIuKoWfrotG8NvNru-ySquzojMe8nSKgdARENpfNiwGFleDVMwrEV46Ay3X4hbLIx1kVpSJIpv22l4Mq_9ayD2Iq6eG9Kn-ENLg0fbCzk"/>
+<div class="absolute top-4 left-4 bg-primary text-on-primary-container text-xs font-black px-2 py-1 rounded-sm tracking-widest uppercase">PRO</div>
+<div class="absolute bottom-4 right-4 glass-card px-3 py-1.5 rounded-full flex gap-3 text-xs font-medium text-on-surface">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[16px]" data-icon="visibility">visibility</span> 583</span>
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[16px]" data-icon="favorite" style="font-variation-settings: 'FILL' 1;">favorite</span> 1</span>
+</div>
+</div>
+<div class="p-6 flex justify-between items-start">
+<div>
+<h3 class="font-headline text-xl font-bold mb-1 group-hover:text-primary transition-colors">Emerald Retreat</h3>
+<p class="text-on-surface-variant text-sm font-medium">by LuxViz</p>
+</div>
+<button class="text-on-surface-variant hover:text-secondary transition-colors">
+<span class="material-symbols-outlined" data-icon="bookmark">bookmark</span>
+</button>
+</div>
+<div class="absolute top-0 left-0 w-full h-1 bg-secondary scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-500"></div>
+</div>
+<!-- Large Card 5 -->
+<div class="group relative bg-surface-container-high rounded-xl overflow-hidden transition-all duration-500 hover:-translate-y-2">
+<div class="aspect-[16/10] overflow-hidden relative">
+<img alt="Luxury Interior" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" data-alt="spacious open-plan loft with industrial brick walls and modern floating staircase, warm afternoon sun rays creating dust motes in the air" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC0RdgvdSI4BYgN_y9So3bDH1tt228DTS9VWrsVUrBKsZQ2mm8DbnwDbdGKPhMPHzJfZWlnZ3bxginKsdWOvnN8FjsGYRgZis4iwLtb9C12Nl6HF5jcoByNd4AuFuGBvw39DljplnCiD8-ihM8HegiDxH2NO_qr_ncdabvcgaDlB7vWrbcgFkvSZKD4gcJO8qq9kUPuG-6ha9Zio5FMVni1qY26wjhpX9URR099meg35T9tMmTYqBIFGGJUKkSmDT37T2UP_Rh3T2Q"/>
+<div class="absolute top-4 left-4 bg-primary text-on-primary-container text-xs font-black px-2 py-1 rounded-sm tracking-widest uppercase">PRO</div>
+<div class="absolute bottom-4 right-4 glass-card px-3 py-1.5 rounded-full flex gap-3 text-xs font-medium text-on-surface">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[16px]" data-icon="visibility">visibility</span> 583</span>
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[16px]" data-icon="favorite" style="font-variation-settings: 'FILL' 1;">favorite</span> 1</span>
+</div>
+</div>
+<div class="p-6 flex justify-between items-start">
+<div>
+<h3 class="font-headline text-xl font-bold mb-1 group-hover:text-primary transition-colors">Urban Loft Concept</h3>
+<p class="text-on-surface-variant text-sm font-medium">by Loft Studio</p>
+</div>
+<button class="text-on-surface-variant hover:text-secondary transition-colors">
+<span class="material-symbols-outlined" data-icon="bookmark">bookmark</span>
+</button>
+</div>
+<div class="absolute top-0 left-0 w-full h-1 bg-secondary scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-500"></div>
+</div>
+<!-- Large Card 6 -->
+<div class="group relative bg-surface-container-high rounded-xl overflow-hidden transition-all duration-500 hover:-translate-y-2">
+<div class="aspect-[16/10] overflow-hidden relative">
+<img alt="Luxury Interior" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" data-alt="quiet home office with floor-to-ceiling bookshelves and a large wooden desk, soft focused view of a rainy garden through glass doors" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAVB4KkFqDMHPpQlmUjVkGAUWgTTGzCG97q_qpIKArK8EU4hYKnwR7xBOWns7Z_oboubdnaxUke2Ht4i5NYFsV5ACSzpYZd5EY0vaDrjLvhzo_gWRTMgRnwHL6E1A_oynkfCdjgTJq_Z4T2v2_P_gunW1WGUWTMhljTVIsPlmrJaWeoCpHUufmm7VBw3wIRfpJgZk1hD4lL0bx1DEzEWda95Sopu1QmijSdaFyf5ZmOAKqv4HRZZgxgXxErYX1F_L4hzY7yCHFpufk"/>
+<div class="absolute top-4 left-4 bg-primary text-on-primary-container text-xs font-black px-2 py-1 rounded-sm tracking-widest uppercase">PRO</div>
+<div class="absolute bottom-4 right-4 glass-card px-3 py-1.5 rounded-full flex gap-3 text-xs font-medium text-on-surface">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[16px]" data-icon="visibility">visibility</span> 583</span>
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[16px]" data-icon="favorite" style="font-variation-settings: 'FILL' 1;">favorite</span> 1</span>
+</div>
+</div>
+<div class="p-6 flex justify-between items-start">
+<div>
+<h3 class="font-headline text-xl font-bold mb-1 group-hover:text-primary transition-colors">The Writer's Room</h3>
+<p class="text-on-surface-variant text-sm font-medium">by Atmosphere 3D</p>
+</div>
+<button class="text-on-surface-variant hover:text-secondary transition-colors">
+<span class="material-symbols-outlined" data-icon="bookmark">bookmark</span>
+</button>
+</div>
+<div class="absolute top-0 left-0 w-full h-1 bg-secondary scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-500"></div>
+</div>
+</div>
+</section>
+<!-- All Spaces Section -->
+<section>
+<div class="mb-8">
+<h2 class="font-headline text-3xl font-extrabold tracking-tight text-primary mb-2">All Spaces</h2>
+<div class="h-1 w-20 bg-secondary rounded-full"></div>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+<!-- Small Card Repeater (x8) -->
+<div class="group relative bg-surface-container rounded-xl overflow-hidden transition-all duration-300 hover:bg-surface-container-high shadow-lg">
+<div class="aspect-square overflow-hidden relative">
+<img alt="Interior" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" data-alt="chic contemporary dining area with a round oak table and velvet chairs, warm pendant lighting and abstract art in the background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBcO9DN5jNXsDFbJ5yC86xUNZGb9aNJQ4tdJKCnF7nx6S8C61m4k5MDhW_fFp793Wb0HTXeOnYranBkJKiB2tCa8Q-Gxr_xGe-Dy2IzTISagB9gYFeQ8RfD40fxU-fm4tBgFTqaahlJ3duosgE_tVyvXrTkbZunSJoZFFGxQ1OugnvOzSdXVzzwcGnTgByL7lwFI-aUx3n72nscYKU9yXBVldqqwRNiHLjg6Ymk9CHgppnP0YeZ_QMpuGxi2XsdpKJ4TckF7xJ0URU"/>
+<div class="absolute top-3 left-3 bg-primary text-on-primary-container text-[10px] font-black px-1.5 py-0.5 rounded-sm tracking-widest uppercase">PRO</div>
+<div class="absolute bottom-3 right-3 glass-card px-2 py-1 rounded-full flex gap-2 text-[10px] font-medium text-on-surface">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[12px]" data-icon="visibility">visibility</span> 412</span>
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[12px]" data-icon="favorite" style="font-variation-settings: 'FILL' 1;">favorite</span> 12</span>
+</div>
+</div>
+<div class="p-4">
+<h4 class="font-headline text-base font-bold truncate">Modern Dining Concept</h4>
+<p class="text-on-surface-variant text-xs mt-1">Marcus Visuals</p>
+</div>
+</div>
+<div class="group relative bg-surface-container rounded-xl overflow-hidden transition-all duration-300 hover:bg-surface-container-high shadow-lg">
+<div class="aspect-square overflow-hidden relative">
+<img alt="Interior" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" data-alt="calm meditation space with bamboo floors, shoji screens, and a small bonsai tree on a low pedestal, soft diffused natural light" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA3AnH3thmWm4lbVJKST9n_tZZ4QlqlWOYqIC7VtxVZ9ESu3TcaekOHvPoAx6AHJF4MaqYU1qEe7cmRBPBwG9p_DYDiUqUhZB32c3SvU9GvYu6WqBqoc74vuQYgIqArde0JJeui3ItsOjUscVrim8lbnKtlAfx9-wPzP7q0SsYRenlrlkvlfFdvVA0M63rRstEQv1DYAEcZ68d09AQvbU7NjU2fXd1miWfwRqaih-R-Mz-9ceyfROENz6vvB3mqikJfCjHLDHHiNZs"/>
+<div class="absolute top-3 left-3 bg-primary text-on-primary-container text-[10px] font-black px-1.5 py-0.5 rounded-sm tracking-widest uppercase">PRO</div>
+<div class="absolute bottom-3 right-3 glass-card px-2 py-1 rounded-full flex gap-2 text-[10px] font-medium text-on-surface">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[12px]" data-icon="visibility">visibility</span> 295</span>
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[12px]" data-icon="favorite" style="font-variation-settings: 'FILL' 1;">favorite</span> 8</span>
+</div>
+</div>
+<div class="p-4">
+<h4 class="font-headline text-base font-bold truncate">Zen Garden Loft</h4>
+<p class="text-on-surface-variant text-xs mt-1">Interior Mind</p>
+</div>
+</div>
+<div class="group relative bg-surface-container rounded-xl overflow-hidden transition-all duration-300 hover:bg-surface-container-high shadow-lg">
+<div class="aspect-square overflow-hidden relative">
+<img alt="Interior" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" data-alt="luxurious kitchen with dark navy cabinets and gold hardware, white marble countertops and professional gas range under warm spotlighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCwpFe4tcpjOxDG2XE2gLRX80-mjUvoHjuFvEsPOqnFuYPGA0P1O2J5dmz4QoXsCNpZ8LHzRHGYzPohWgrVSMWaHhJeWujohQI4uEX9sU3C7-2LBDBjzUCg2bFctLMe6ZhwASuygmCDxDHVDbiNcbH_5PgrqkAoim7zc77evax-IVgzGG6RsF9jHk-ooV6tTHzwitDWxWl32htTXLI8iFuNkr3-XzZ4Ynl9v-jCDDuW7blZH44HBKFksBor9DgV0abpn-QH6NSQXb8"/>
+<div class="absolute top-3 left-3 bg-primary text-on-primary-container text-[10px] font-black px-1.5 py-0.5 rounded-sm tracking-widest uppercase">PRO</div>
+<div class="absolute bottom-3 right-3 glass-card px-2 py-1 rounded-full flex gap-2 text-[10px] font-medium text-on-surface">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[12px]" data-icon="visibility">visibility</span> 841</span>
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[12px]" data-icon="favorite" style="font-variation-settings: 'FILL' 1;">favorite</span> 34</span>
+</div>
+</div>
+<div class="p-4">
+<h4 class="font-headline text-base font-bold truncate">Chef's Dream Kitchen</h4>
+<p class="text-on-surface-variant text-xs mt-1">Kitchen Craft</p>
+</div>
+</div>
+<div class="group relative bg-surface-container rounded-xl overflow-hidden transition-all duration-300 hover:bg-surface-container-high shadow-lg">
+<div class="aspect-square overflow-hidden relative">
+<img alt="Interior" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" data-alt="sleek home theater with plush leather seating and recessed neon blue lighting along the floor and ceiling, large dark screen at the front" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAGJmMQy1k53d2pwycTqOsAU96-cBuSA_4p4h4tkrgOyxME1mgqvHeSa6bnYjO9toEpL8I3JMyXebcDoBAJZ6oKUFsgjS8T1FFB5SfgsiHA55fPPqwvT0hiw7MtK0VJf4yPF-Q1sEueDiQ8aET2fDOqVxHOOQEl-ySFRH6PbaAwg7Mv8aeW_AJ5ZaR53kNvYd1CpxsOvC6PL2F79cvjirS9kdu4OTdssPdeJ018egOSSkTUpMqkaAETo6dt15ecgm7HbWbBdLyN3E0"/>
+<div class="absolute top-3 left-3 bg-primary text-on-primary-container text-[10px] font-black px-1.5 py-0.5 rounded-sm tracking-widest uppercase">PRO</div>
+<div class="absolute bottom-3 right-3 glass-card px-2 py-1 rounded-full flex gap-2 text-[10px] font-medium text-on-surface">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[12px]" data-icon="visibility">visibility</span> 1.2k</span>
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[12px]" data-icon="favorite" style="font-variation-settings: 'FILL' 1;">favorite</span> 56</span>
+</div>
+</div>
+<div class="p-4">
+<h4 class="font-headline text-base font-bold truncate">Cinematic Lounge</h4>
+<p class="text-on-surface-variant text-xs mt-1">Future Home</p>
+</div>
+</div>
+</div>
+<div class="mt-12 flex justify-center">
+<button class="bg-surface-container-highest text-primary px-8 py-3 rounded-full font-bold hover:bg-surface-variant transition-all scale-95 active:scale-90">Load More Spaces</button>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="bg-[#0b092c] dark:bg-[#0b092c] full-width py-12 px-8 tonal-shift from surface-container-lowest border-t border-outline-variant/10">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center max-w-screen-2xl mx-auto">
+<div class="flex flex-col gap-4">
+<span class="text-lg font-black text-[#d8b9ff]">EnvizStudio</span>
+<p class="font-['Inter'] text-sm tracking-wide uppercase text-[#cec2d7]">© 2024 EnvizStudio. The Digital Atelier.</p>
+</div>
+<div class="flex flex-wrap gap-8 md:justify-end">
+<a class="font-['Inter'] text-sm tracking-wide uppercase text-[#cec2d7] hover:text-[#d8b9ff] transition-colors opacity-80 hover:opacity-100" href="#">Resources</a>
+<a class="font-['Inter'] text-sm tracking-wide uppercase text-[#cec2d7] hover:text-[#d8b9ff] transition-colors opacity-80 hover:opacity-100" href="#">Privacy Policy</a>
+<a class="font-['Inter'] text-sm tracking-wide uppercase text-[#cec2d7] hover:text-[#d8b9ff] transition-colors opacity-80 hover:opacity-100" href="#">Terms of Service</a>
+<a class="font-['Inter'] text-sm tracking-wide uppercase text-[#cec2d7] hover:text-[#d8b9ff] transition-colors opacity-80 hover:opacity-100" href="#">Help Center</a>
+</div>
+</div>
+</footer>
+</body></html>
