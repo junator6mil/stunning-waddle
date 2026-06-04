@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Construction Cost Estimator | EnvizStudio</title>
+<meta name="description" content="Free Indian construction cost estimator. Enter floor dimensions and get instant material cost breakdown in ₹."/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script id="tc">tailwind.config={darkMode:"class",theme:{extend:{colors:{primary:"#d8b9ff","on-primary-container":"#3c0077","primary-container":"#ad72ff",secondary:"#b7d24e","on-secondary":"#2a3400","surface-container-lowest":"#0a092c","surface-container-low":"#181739","surface-container":"#1c1c3e","surface-container-high":"#272649","surface-container-highest":"#323154","on-surface":"#e2dfff","on-surface-variant":"#cec2d7","surface-variant":"#323154",surface:"#100f31",background:"#100f31",outline:"#978da0","outline-variant":"#4b4454",error:"#ffb4ab"},fontFamily:{headline:["Plus Jakarta Sans"],body:["Inter"]}}}};</script>
+<style>
+*{box-sizing:border-box;}
+body{font-family:'Inter',sans-serif;background:#100f31;color:#e2dfff;}
+.material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;}
+@keyframes fadein{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.fadein{animation:fadein 0.5s ease forwards;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.spin{animation:spin 1s linear infinite;}
+.prog-bar{height:3px;background:linear-gradient(90deg,#d8b9ff,#ad72ff);border-radius:2px;transition:width .4s ease;}
+/* Hide native spinners — we use custom +/- buttons */
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0;}
+input[type=number]{-moz-appearance:textfield;}
+input[type=range]{accent-color:#d8b9ff;}
+.row-even{background:#1c1c3e;} .row-odd{background:#272649;}
+/* Grid corner overlay — breathing */
+@keyframes grid-breathe{
+  0%,100%{ -webkit-mask-size:55% 55%; mask-size:55% 55%; opacity:.75; }
+  50%{     -webkit-mask-size:110% 110%; mask-size:110% 110%; opacity:1;  }
+}
+.grid-corner{
+  position:fixed;top:0;right:0;
+  width:100vw;height:100vh;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.055) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,0.055) 1px,transparent 1px);
+  background-size:38px 38px;
+  background-color:#0d1235;
+  /* mask: radial fade from top-right corner outward */
+  -webkit-mask:radial-gradient(ellipse at 100% 0%,#000 0%,transparent 65%) no-repeat;
+  mask:radial-gradient(ellipse at 100% 0%,#000 0%,transparent 65%) no-repeat;
+  -webkit-mask-position:top right;
+  mask-position:top right;
+  -webkit-mask-size:55% 55%;
+  mask-size:55% 55%;
+  pointer-events:none;z-index:0;
+  animation:grid-breathe 10s ease-in-out infinite;
+}
+/* Ambient orbs */
+@keyframes orb-drift{0%,100%{transform:translate(0,0) scale(1);}50%{transform:translate(12px,-8px) scale(1.04);}}
+.orb{
+  position:fixed;border-radius:50%;filter:blur(90px);
+  pointer-events:none;z-index:0;opacity:0.18;
+  animation:orb-drift 9s ease-in-out infinite;
+}
+/* Card hover glow */
+.glow-card{
+  transition:border-color .3s,box-shadow .3s;
+}
+.glow-card:hover{
+  border-color:rgba(216,185,255,.18)!important;
+  box-shadow:0 0 32px rgba(173,114,255,.08);
+}
+/* Styled floor ctrl buttons */
+.floor-btn{
+  width:2rem;height:2rem;border-radius:.625rem;
+  background:linear-gradient(135deg,#272649,#323154);
+  border:1px solid rgba(216,185,255,.15);
+  color:#d8b9ff;font-weight:700;font-size:1rem;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;transition:all .2s;
+  box-shadow:0 2px 8px rgba(0,0,0,.25);
+}
+.floor-btn:hover{
+  background:linear-gradient(135deg,#ad72ff30,#d8b9ff18);
+  border-color:rgba(216,185,255,.4);
+  box-shadow:0 0 12px rgba(173,114,255,.25);
+  transform:scale(1.08);
+}
+/* Nav shimmer */
+@keyframes nav-shimmer{0%,100%{background-position:200% center}50%{background-position:0% center}}
+.nav-bar{
+  background:linear-gradient(90deg,#100f31 0%,#1a1040 40%,#100f31 100%);
+  box-shadow:0 1px 0 rgba(216,185,255,.1),0 4px 24px rgba(120,60,220,.12);
+  position:relative;
+}
+.nav-bar::after{
+  content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(216,185,255,.25) 40%,rgba(183,210,78,.2) 60%,transparent);
+  animation:nav-shimmer 6s ease-in-out infinite;
+  background-size:200% auto;
+}
+</style>
+</head>
+<body class="bg-surface text-on-surface-variant min-h-screen flex flex-col" onload="renderAiSlots()">
+<!-- Grid corner overlay -->
+<div class="grid-corner" aria-hidden="true"></div>
+<!-- Ambient orbs -->
+<div class="orb" style="width:420px;height:420px;background:#6b21a8;top:-100px;right:-80px;animation-duration:11s;"></div>
+<div class="orb" style="width:280px;height:280px;background:#3b0764;bottom:20%;left:-60px;animation-duration:14s;animation-delay:-4s;"></div>
+<div class="orb" style="width:200px;height:200px;background:#1e1b4b;bottom:40%;right:15%;animation-duration:17s;animation-delay:-7s;"></div>
+
+<nav class="nav-bar font-['Plus_Jakarta_Sans'] top-0 sticky z-50">
+<div class="flex justify-between items-center w-full px-8 py-4 max-w-screen-2xl mx-auto">
+  <div class="flex items-center gap-12">
+    <a href="index.html" class="text-2xl font-bold tracking-tighter text-[#d8b9ff] hover:opacity-80 transition-opacity">EnvizStudio</a>
+    <div class="hidden md:flex gap-8 items-center">
+      <a class="text-[#cec2d7] hover:text-[#d8b9ff] transition-all" href="brsp.html">Spaces</a>
+      <a class="text-[#d8b9ff] font-bold border-b-2 border-[#b7d24e] pb-1" href="cost-estimator.html">Cost Estimator</a>
+    </div>
+  </div>
+  <div class="flex items-center gap-4">
+    <button onclick="window.location.href='uplsp.html'" class="bg-[#b7d24e] text-[#2a3400] px-5 py-2 rounded-lg font-bold hover:brightness-110 transition-all active:scale-95">Walk Space</button>
+  </div>
+</div>
+</nav>
+
+<main class="flex-1 max-w-screen-2xl mx-auto w-full px-8 py-14">
+
+  <div class="mb-8 fadein relative z-10">
+    <div class="flex items-center gap-3 mb-4">
+      <span class="material-symbols-outlined text-3xl text-primary">calculate</span>
+    </div>
+    <h1 class="text-4xl md:text-5xl font-['Plus_Jakarta_Sans'] font-extrabold tracking-tighter text-on-surface mb-3">Construction Cost Estimator</h1>
+    <p class="text-on-surface-variant text-lg max-w-2xl">Analyse a blueprint image with Groq AI, or enter dimensions manually for an instant calculation.</p>
+  </div>
+
+  <!-- Tabs -->
+  <div class="flex gap-2 mb-8 border-b border-outline/10 fadein relative z-10">
+    <button id="tab-ai" onclick="switchTab('ai')" class="px-6 py-3 font-['Plus_Jakarta_Sans'] font-bold text-sm border-b-2 border-primary text-primary transition-all">AI Blueprint Analysis</button>
+    <button id="tab-manual" onclick="switchTab('manual')" class="px-6 py-3 font-['Plus_Jakarta_Sans'] font-bold text-sm border-b-2 border-transparent text-on-surface-variant hover:text-on-surface transition-all">Manual Calculator</button>
+  </div>
+
+  <!-- AI Tab -->
+  <div id="panel-ai" class="fadein relative z-10">
+    <div class="bg-surface-container-low rounded-2xl p-8 border border-outline/10 mb-6 glow-card">
+      <div class="flex items-start gap-6 flex-wrap mb-6">
+        <div class="flex-1 min-w-[240px] space-y-4">
+          <div>
+            <label class="text-xs uppercase tracking-widest text-on-surface-variant font-bold block mb-2">Groq API Key</label>
+            <input id="groq-key" type="password" placeholder="gsk_…" class="bg-surface-container-lowest border border-outline/20 rounded-lg px-4 py-2.5 text-sm text-on-surface w-full max-w-sm focus:outline-none focus:border-primary/50 transition-colors">
+          </div>
+        </div>
+        <div class="bg-surface-container rounded-xl p-4 text-xs text-on-surface-variant border border-outline/10 max-w-xs">
+          <p class="font-bold text-on-surface mb-2">Get free Groq key (30 sec):</p>
+          <ol class="list-decimal list-inside space-y-1">
+            <li>Go to <a href="https://console.groq.com" target="_blank" class="text-secondary hover:underline">console.groq.com</a></li>
+            <li>Sign in with Google</li>
+            <li>API Keys → <strong class="text-on-surface">Create API Key</strong></li>
+            <li>Paste above (starts with <code class="text-primary">gsk_</code>)</li>
+          </ol>
+          <p class="text-outline mt-2">Free · No credit card · 14,400 req/day</p>
+        </div>
+      </div>
+      <div id="ai-upload-slots" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-6"></div>
+      <div class="flex items-center gap-4 flex-wrap">
+        <div class="flex items-center gap-3">
+          <label class="text-sm text-on-surface-variant">Floors:</label>
+          <button onclick="changeAiFloors(-1)" class="floor-btn"><span class="material-symbols-outlined" style="font-size:16px">remove</span></button>
+          <input id="ai-floor-count" type="number" value="1" min="1" max="10" oninput="renderAiSlots()" class="w-12 text-center bg-surface-container-highest border border-outline/20 rounded-lg py-1.5 text-on-surface font-bold focus:outline-none focus:border-primary/50 transition-colors">
+          <button onclick="changeAiFloors(1)" class="floor-btn"><span class="material-symbols-outlined" style="font-size:16px">add</span></button>
+        </div>
+        <button onclick="analyseGroq()" class="px-10 py-3.5 rounded-xl font-['Plus_Jakarta_Sans'] font-bold bg-primary text-on-primary-container hover:brightness-110 active:scale-95 transition-all flex items-center gap-2">
+          <span class="material-symbols-outlined">smart_toy</span>Analyse Blueprint
+        </button>
+      </div>
+      <div id="ai-status" class="hidden mt-4">
+        <div class="flex items-center gap-3 text-primary">
+          <span class="material-symbols-outlined spin">autorenew</span>
+          <span id="ai-status-text" class="font-medium text-sm">Sending to Groq…</span>
+        </div>
+        <div class="mt-2 h-1 bg-surface-container-highest rounded-full overflow-hidden"><div id="ai-bar" class="prog-bar" style="width:0%"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Manual Tab -->
+  <div id="panel-manual" class="hidden">
+  <!-- Config -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-10 fadein">
+    <div class="lg:col-span-2 bg-surface-container-low rounded-2xl p-8 border border-outline/10">
+      <h2 class="font-['Plus_Jakarta_Sans'] font-bold text-xl text-on-surface mb-6 flex items-center gap-3">
+        <span class="w-8 h-8 rounded-full bg-primary text-on-primary-container font-black text-sm flex items-center justify-center">1</span>
+        Project Details
+      </h2>
+
+      <!-- Floor count -->
+      <div class="flex items-center gap-6 mb-6">
+        <label class="text-sm text-on-surface-variant font-medium min-w-[130px]">Number of floors</label>
+        <div class="flex items-center gap-3">
+          <button onclick="changeFloors(-1)" class="w-9 h-9 rounded-lg bg-surface-container-highest text-primary font-bold text-lg hover:bg-surface-variant transition-all flex items-center justify-center">−</button>
+          <input id="floor-count" type="number" value="1" min="1" max="10" oninput="renderFloorInputs()" class="w-16 text-center bg-surface-container-highest border border-outline/20 rounded-lg py-2 text-on-surface font-bold text-lg focus:outline-none focus:border-primary/50">
+          <button onclick="changeFloors(1)" class="w-9 h-9 rounded-lg bg-surface-container-highest text-primary font-bold text-lg hover:bg-surface-variant transition-all flex items-center justify-center">+</button>
+        </div>
+      </div>
+
+      <!-- Floor dimension inputs -->
+      <div id="floor-inputs" class="space-y-4 mb-6"></div>
+
+      <!-- Construction grade -->
+      <div class="mb-2">
+        <label class="text-sm text-on-surface-variant font-medium block mb-3">Construction Grade</label>
+        <div class="flex flex-wrap gap-3" id="grade-btns">
+          <button onclick="setGrade('economy')" id="grade-economy" class="grade-btn px-5 py-2.5 rounded-xl text-sm font-bold border border-outline/20 bg-surface-container-highest text-on-surface-variant transition-all">Economy</button>
+          <button onclick="setGrade('standard')" id="grade-standard" class="grade-btn px-5 py-2.5 rounded-xl text-sm font-bold border border-primary bg-primary/10 text-primary transition-all">Standard ✓</button>
+          <button onclick="setGrade('premium')" id="grade-premium" class="grade-btn px-5 py-2.5 rounded-xl text-sm font-bold border border-outline/20 bg-surface-container-highest text-on-surface-variant transition-all">Premium</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Rate info -->
+    <div class="bg-surface-container rounded-xl p-6 border border-outline/10 text-sm">
+      <p class="font-['Plus_Jakarta_Sans'] font-bold text-on-surface mb-4 flex items-center gap-2">
+        <span class="material-symbols-outlined text-secondary text-base">info</span>Rate Reference (2024)
+      </p>
+      <ul class="space-y-2 text-on-surface-variant text-xs leading-relaxed" id="rate-display"></ul>
+      <p class="text-outline text-xs mt-4">Rates vary by city/contractor. These are national averages.</p>
+    </div>
+  </div>
+
+  <!-- Calculate button -->
+  <button onclick="calculate()" class="mb-10 px-14 py-4 rounded-xl font-['Plus_Jakarta_Sans'] font-bold text-lg bg-primary text-on-primary-container hover:brightness-110 active:scale-95 transition-all fadein">
+    <span class="flex items-center gap-2"><span class="material-symbols-outlined">calculate</span>Calculate Cost</span>
+  </button>
+  </div><!-- end panel-manual -->
+
+  <!-- Results -->
+  <div id="results" class="hidden fadein space-y-8">
+    <div class="flex items-center justify-between flex-wrap gap-4">
+      <h2 class="font-['Plus_Jakarta_Sans'] font-bold text-3xl text-on-surface">Estimation Results</h2>
+      <button onclick="exportExcel()" class="flex items-center gap-2 px-6 py-3 rounded-xl bg-secondary text-on-secondary font-bold text-sm hover:brightness-110 transition-all">
+        <span class="material-symbols-outlined text-base">download</span>Export to Excel
+      </button>
+    </div>
+    <div id="tables-container" class="space-y-8"></div>
+    <!-- Pie chart -->
+    <div id="chart-wrap" class="hidden bg-surface-container-low rounded-2xl p-8 border border-outline/10">
+      <h3 class="font-['Plus_Jakarta_Sans'] font-bold text-xl text-on-surface mb-6">Cost Breakdown</h3>
+      <div class="flex flex-col md:flex-row items-center gap-8">
+        <div style="max-width:340px;width:100%"><canvas id="cost-chart"></canvas></div>
+        <div id="chart-legend" class="grid grid-cols-1 gap-2 text-sm flex-1"></div>
+      </div>
+    </div>
+    <div id="grand-card" class="rounded-2xl p-8 border border-primary/30 bg-primary/10">
+      <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+        <div>
+          <p class="text-on-surface-variant text-sm uppercase tracking-widest font-bold mb-1">Total Project Cost</p>
+          <p id="grand-total" class="font-['Plus_Jakarta_Sans'] font-extrabold text-4xl text-primary"></p>
+        </div>
+        <div class="text-right text-xs text-on-surface-variant max-w-xs">
+          <p id="grade-note"></p>
+          <p class="mt-1 text-outline">Estimates ±15–20%. Get contractor quotes for final pricing.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<footer class="bg-[#0b092c] py-12 px-8 border-t border-white/5 mt-auto">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center max-w-screen-2xl mx-auto">
+  <div>
+    <span class="text-lg font-black text-[#d8b9ff] font-['Plus_Jakarta_Sans']">EnvizStudio</span>
+    <p class="text-[#cec2d7] mt-4 font-['Inter'] text-sm tracking-wide uppercase">© 2024 EnvizStudio. The Digital Atelier.</p>
+  </div>
+  <div class="flex flex-wrap gap-8 md:justify-end">
+    <a class="font-['Inter'] text-sm tracking-wide uppercase text-[#cec2d7] hover:text-[#d8b9ff] transition-colors opacity-80 hover:opacity-100" href="#">Resources</a>
+    <a class="font-['Inter'] text-sm tracking-wide uppercase text-[#cec2d7] hover:text-[#d8b9ff] transition-colors opacity-80 hover:opacity-100" href="#">Privacy</a>
+    <a class="font-['Inter'] text-sm tracking-wide uppercase text-[#cec2d7] hover:text-[#d8b9ff] transition-colors opacity-80 hover:opacity-100" href="#">Terms</a>
+    <a class="font-['Inter'] text-sm tracking-wide uppercase text-[#cec2d7] hover:text-[#d8b9ff] transition-colors opacity-80 hover:opacity-100" href="#">Help</a>
+  </div>
+</div>
+</footer>
+
+<script>
+// ── Tab switching ─────────────────────────────────────────────────────────────
+function switchTab(t){
+  document.getElementById('panel-ai').classList.toggle('hidden', t!=='ai');
+  document.getElementById('panel-manual').classList.toggle('hidden', t!=='manual');
+  ['ai','manual'].forEach(k=>{
+    const btn=document.getElementById('tab-'+k);
+    if(k===t){ btn.className='px-6 py-3 font-[\'Plus_Jakarta_Sans\'] font-bold text-sm border-b-2 border-primary text-primary transition-all'; }
+    else { btn.className='px-6 py-3 font-[\'Plus_Jakarta_Sans\'] font-bold text-sm border-b-2 border-transparent text-on-surface-variant hover:text-on-surface transition-all'; }
+  });
+}
+
+// ── AI upload slots ───────────────────────────────────────────────────────────
+const aiFileMap={};
+function changeAiFloors(d){ const i=document.getElementById('ai-floor-count'); i.value=Math.min(10,Math.max(1,parseInt(i.value||1)+d)); renderAiSlots(); }
+function renderAiSlots(){
+  const n=parseInt(document.getElementById('ai-floor-count').value)||1;
+  const c=document.getElementById('ai-upload-slots'); c.innerHTML='';
+  for(let i=0;i<n;i++){
+    const s=document.createElement('div');
+    s.className='bg-surface-container-highest rounded-xl overflow-hidden border border-outline/10 cursor-pointer hover:border-primary/40 transition-all'+(aiFileMap[i]?' border-secondary/40':'');
+    s.onclick=()=>document.getElementById('ai-inp-'+i).click();
+    s.innerHTML=aiFileMap[i]
+      ?`<img src="${URL.createObjectURL(aiFileMap[i])}" class="w-full h-32 object-cover"><div class="px-3 py-2 flex items-center justify-between"><p class="text-xs text-on-surface-variant truncate max-w-[140px]">${aiFileMap[i].name}</p><span class="material-symbols-outlined text-secondary text-base">check_circle</span></div>`
+      :`<div class="flex flex-col items-center justify-center gap-2 p-6 min-h-[130px]"><span class="material-symbols-outlined text-3xl text-primary/60">add_photo_alternate</span><p class="text-sm text-on-surface-variant font-medium">Floor ${i+1} Blueprint</p><p class="text-xs text-outline">JPG / PNG</p></div>`;
+    s.innerHTML+=`<input type="file" id="ai-inp-${i}" class="hidden" accept="image/jpeg,image/png" onchange="onAiFile(${i},this.files[0])">`;
+    c.appendChild(s);
+  }
+}
+function onAiFile(i,f){ if(!f)return; aiFileMap[i]=f; renderAiSlots(); }
+function fileToB64(f){ return new Promise((r,j)=>{ const fr=new FileReader(); fr.onload=e=>r(e.target.result.split(',')[1]); fr.onerror=j; fr.readAsDataURL(f); }); }
+
+// ── Groq API call ─────────────────────────────────────────────────────────────
+async function analyseGroq(){
+  const key=document.getElementById('groq-key').value.trim();
+  if(!key){ alert('Please enter your Groq API key (gsk_…). Get one free at console.groq.com'); return; }
+  const n=parseInt(document.getElementById('ai-floor-count').value)||1;
+  const imgs=[];
+  for(let i=0;i<n;i++) if(aiFileMap[i]) imgs.push({floor:i+1,file:aiFileMap[i]});
+  if(!imgs.length){ alert('Upload at least one blueprint image.'); return; }
+
+  const st=document.getElementById('ai-status'); st.classList.remove('hidden');
+  const bar=document.getElementById('ai-bar'); const stTxt=document.getElementById('ai-status-text');
+  bar.style.width='15%'; stTxt.textContent='Encoding images…';
+
+  const content=[];
+  for(const img of imgs){
+    const b64=await fileToB64(img.file);
+    const mime=img.file.type||'image/jpeg';
+    content.push({type:'text',text:`Floor ${img.floor} blueprint:`});
+    content.push({type:'image_url',image_url:{url:`data:${mime};base64,${b64}`}});
+  }
+  const prompt=`You are an expert Indian construction cost estimator. Analyse the floor plan blueprint image(s) provided.
+For each floor: extract all visible room dimensions and total area (in sq ft). Then calculate material quantities and 2024 Indian market costs in ₹.
+Return ONLY valid JSON, no markdown:
+{"floors":[{"floorName":"Floor 1","totalArea":"1200 sq ft","items":[{"material":"Cement","quantity":"120","unit":"bags","ratePerUnit":"380","totalCost":"45600"}],"floorSubtotal":"450000"}],"grandTotal":"900000","notes":"any assumptions"}`;
+  content.push({type:'text',text:prompt});
+
+  bar.style.width='45%'; stTxt.textContent='Sending to Groq Llama Vision…';
+  try{
+    const resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},
+      body:JSON.stringify({model:'meta-llama/llama-4-scout-17b-16e-instruct',messages:[{role:'user',content}],temperature:0.2,max_tokens:4096})
+    });
+    bar.style.width='80%'; stTxt.textContent='Parsing response…';
+    if(!resp.ok){ const e=await resp.json(); throw new Error(e.error?.message||'Groq error '+resp.status); }
+    const data=await resp.json();
+    const raw=data.choices?.[0]?.message?.content||'';
+    const start=raw.indexOf('{'); const end=raw.lastIndexOf('}');
+    if(start===-1||end===-1) throw new Error('No JSON found in response. Try again.');
+    const result=JSON.parse(raw.slice(start,end+1));
+    bar.style.width='100%'; stTxt.textContent='Done!';
+    st.classList.add('hidden');
+    renderResults({
+      floors:(result.floors||[]).map(f=>({
+        name:f.floorName||'Floor',
+        sqft:f.totalArea||'—',
+        items:(f.items||[]).map(it=>({material:it.material,qty:it.quantity,unit:it.unit,rate:parseFloat(it.ratePerUnit)||0,total:parseFloat(it.totalCost)||0})),
+        subtotal:parseFloat(f.floorSubtotal)||0
+      })),
+      grandTotal:parseFloat(result.grandTotal)||0,
+      grade:'AI Analysis',
+      notes:result.notes||''
+    });
+  }catch(err){
+    stTxt.textContent='Error: '+err.message;
+    document.getElementById('ai-bar').style.background='#ffb4ab';
+  }
+}
+
+// ── Pie chart ─────────────────────────────────────────────────────────────────
+let chartInst=null;
+const PIE_COLORS=['#d8b9ff','#b7d24e','#7ec8e3','#f4a261','#e76f51','#a8dadc','#c9b1ff','#f1fa8c','#50fa7b','#ff79c6','#8be9fd'];
+
+function drawChart(floors){
+  const totals={};
+  floors.forEach(f=>f.items.forEach(it=>{ totals[it.material]=(totals[it.material]||0)+it.total; }));
+  const labels=Object.keys(totals); const data=Object.values(totals);
+  const wrap=document.getElementById('chart-wrap'); wrap.classList.remove('hidden');
+  if(chartInst){ chartInst.destroy(); }
+  chartInst=new Chart(document.getElementById('cost-chart'),{
+    type:'doughnut',
+    data:{labels,datasets:[{data,backgroundColor:PIE_COLORS.slice(0,labels.length),borderColor:'#100f31',borderWidth:3,hoverOffset:8}]},
+    options:{plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>' ₹'+fmtCur(ctx.raw)}}},cutout:'62%'}
+  });
+  document.getElementById('chart-legend').innerHTML=labels.map((l,i)=>`
+    <div class="flex items-center justify-between gap-3 py-1 border-b border-outline/10">
+      <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full flex-shrink-0" style="background:${PIE_COLORS[i]}"></span><span class="text-on-surface-variant text-xs">${l}</span></div>
+      <span class="text-primary font-bold text-xs">₹${fmtCur(data[i])}</span>
+    </div>`).join('');
+}
+
+// ── Rates per sq ft (built-up area) by grade ─────────────────────────────────
+const GRADES = {
+  economy: {
+    label:'Economy', mult:0.85,
+    cement:0.40, sand:0.60, agg:0.44, steel:3.5, bricks:8,
+    flooring:65, plaster:28, intPaint:0.18, extPaint:0.10,
+    electrical:55, plumbing:65,
+    rates:{cement:360,sand:45,agg:55,steel:58,bricks:9,flooring:65,plaster:28,intPaint:250,extPaint:220,electrical:55,plumbing:65}
+  },
+  standard: {
+    label:'Standard', mult:1.0,
+    cement:0.45, sand:0.68, agg:0.50, steel:4.0, bricks:9,
+    flooring:90, plaster:35, intPaint:0.22, extPaint:0.12,
+    electrical:75, plumbing:85,
+    rates:{cement:380,sand:50,agg:60,steel:65,bricks:10,flooring:90,plaster:35,intPaint:280,extPaint:250,electrical:75,plumbing:85}
+  },
+  premium: {
+    label:'Premium', mult:1.3,
+    cement:0.50, sand:0.75, agg:0.55, steel:5.0, bricks:10,
+    flooring:150, plaster:45, intPaint:0.28, extPaint:0.15,
+    electrical:110, plumbing:130,
+    rates:{cement:400,sand:55,agg:65,steel:68,bricks:12,flooring:150,plaster:45,intPaint:350,extPaint:300,electrical:110,plumbing:130}
+  }
+};
+
+const RATE_LABELS = [
+  ['Cement','per bag'],['Sand','per cu.ft'],['Aggregate','per cu.ft'],
+  ['Steel/TMT','per kg'],['Bricks','per unit'],['Flooring','per sq.ft'],
+  ['Wall Plaster','per sq.ft'],['Interior Paint','per litre'],['Exterior Paint','per litre'],
+  ['Electrical','per sq.ft'],['Plumbing','per sq.ft']
+];
+const RATE_KEYS = ['cement','sand','agg','steel','bricks','flooring','plaster','intPaint','extPaint','electrical','plumbing'];
+
+let currentGrade = 'standard';
+let lastResult = null;
+
+function setGrade(g){
+  currentGrade = g;
+  ['economy','standard','premium'].forEach(k=>{
+    const btn = document.getElementById('grade-'+k);
+    if(k===g){
+      btn.className='grade-btn px-5 py-2.5 rounded-xl text-sm font-bold border border-primary bg-primary/10 text-primary transition-all';
+      btn.textContent = {economy:'Economy ✓',standard:'Standard ✓',premium:'Premium ✓'}[k];
+    } else {
+      btn.className='grade-btn px-5 py-2.5 rounded-xl text-sm font-bold border border-outline/20 bg-surface-container-highest text-on-surface-variant transition-all';
+      btn.textContent = {economy:'Economy',standard:'Standard',premium:'Premium'}[k];
+    }
+  });
+  updateRateDisplay();
+}
+
+function updateRateDisplay(){
+  const r = GRADES[currentGrade].rates;
+  const keys = RATE_KEYS;
+  document.getElementById('rate-display').innerHTML = RATE_LABELS.map((lbl,i)=>
+    `<li class="flex justify-between"><span>${lbl[0]}</span><span class="text-primary font-medium">₹${fmtCur(r[keys[i]])} <span class="text-outline">${lbl[1]}</span></span></li>`
+  ).join('');
+}
+
+function changeFloors(d){
+  const inp = document.getElementById('floor-count');
+  inp.value = Math.min(10,Math.max(1,parseInt(inp.value||1)+d));
+  renderFloorInputs();
+}
+
+function renderFloorInputs(){
+  const n = parseInt(document.getElementById('floor-count').value)||1;
+  const c = document.getElementById('floor-inputs');
+  // preserve existing values
+  const prev = {};
+  c.querySelectorAll('[data-fi]').forEach(el=>{ prev[el.dataset.fi+'_'+el.dataset.dim]=el.value; });
+  c.innerHTML='';
+  for(let i=0;i<n;i++){
+    const div=document.createElement('div');
+    div.className='grid grid-cols-1 sm:grid-cols-3 gap-4 p-5 bg-surface-container-highest rounded-xl border border-outline/10';
+    div.innerHTML=`
+      <div class="sm:col-span-3 flex items-center gap-2 mb-1">
+        <span class="material-symbols-outlined text-primary text-base">layers</span>
+        <span class="font-['Plus_Jakarta_Sans'] font-bold text-on-surface text-sm">Floor ${i+1}</span>
+      </div>
+      <div>
+        <label class="text-xs text-on-surface-variant uppercase tracking-wider block mb-1">Length (ft)</label>
+        <input data-fi="${i}" data-dim="len" type="number" min="1" placeholder="e.g. 40"
+          value="${prev[i+'_len']||''}"
+          class="w-full bg-surface-container border border-outline/20 rounded-lg px-3 py-2.5 text-on-surface focus:outline-none focus:border-primary/50 transition-colors">
+      </div>
+      <div>
+        <label class="text-xs text-on-surface-variant uppercase tracking-wider block mb-1">Width (ft)</label>
+        <input data-fi="${i}" data-dim="wid" type="number" min="1" placeholder="e.g. 30"
+          value="${prev[i+'_wid']||''}"
+          class="w-full bg-surface-container border border-outline/20 rounded-lg px-3 py-2.5 text-on-surface focus:outline-none focus:border-primary/50 transition-colors">
+      </div>
+      <div>
+        <label class="text-xs text-on-surface-variant uppercase tracking-wider block mb-1">Or enter Area (sq ft)</label>
+        <input data-fi="${i}" data-dim="area" type="number" min="1" placeholder="e.g. 1200"
+          value="${prev[i+'_area']||''}"
+          class="w-full bg-surface-container border border-outline/20 rounded-lg px-3 py-2.5 text-on-surface focus:outline-none focus:border-primary/50 transition-colors">
+      </div>
+    `;
+    c.appendChild(div);
+  }
+}
+
+function getFloorArea(i){
+  const len = parseFloat(document.querySelector(`[data-fi="${i}"][data-dim="len"]`)?.value||0);
+  const wid = parseFloat(document.querySelector(`[data-fi="${i}"][data-dim="wid"]`)?.value||0);
+  const area= parseFloat(document.querySelector(`[data-fi="${i}"][data-dim="area"]`)?.value||0);
+  if(area>0) return area;
+  if(len>0&&wid>0) return len*wid;
+  return 0;
+}
+
+function calculate(){
+  const n = parseInt(document.getElementById('floor-count').value)||1;
+  const g = GRADES[currentGrade];
+  const floors=[];
+  let grandTotal=0;
+
+  for(let i=0;i<n;i++){
+    const sqft = getFloorArea(i);
+    if(sqft<=0){ alert(`Please enter dimensions for Floor ${i+1}.`); return; }
+    const r=g.rates;
+
+    const items=[
+      {material:'Cement',          qty:+(sqft*g.cement).toFixed(0),  unit:'bags',     rate:r.cement,     total:+(sqft*g.cement*r.cement).toFixed(0)},
+      {material:'Sand',            qty:+(sqft*g.sand).toFixed(1),    unit:'cu.ft',    rate:r.sand,       total:+(sqft*g.sand*r.sand).toFixed(0)},
+      {material:'Aggregate/Gravel',qty:+(sqft*g.agg).toFixed(1),     unit:'cu.ft',    rate:r.agg,        total:+(sqft*g.agg*r.agg).toFixed(0)},
+      {material:'Steel / TMT Bars',qty:+(sqft*g.steel).toFixed(0),   unit:'kg',       rate:r.steel,      total:+(sqft*g.steel*r.steel).toFixed(0)},
+      {material:'Bricks',          qty:+(sqft*g.bricks).toFixed(0),  unit:'units',    rate:r.bricks,     total:+(sqft*g.bricks*r.bricks).toFixed(0)},
+      {material:'Flooring Tiles',  qty:+sqft.toFixed(0),             unit:'sq.ft',    rate:r.flooring,   total:+(sqft*r.flooring).toFixed(0)},
+      {material:'Wall Plaster',    qty:+sqft.toFixed(0),             unit:'sq.ft',    rate:r.plaster,    total:+(sqft*r.plaster).toFixed(0)},
+      {material:'Interior Paint',  qty:+(sqft*g.intPaint).toFixed(1),unit:'litres',   rate:r.intPaint,   total:+(sqft*g.intPaint*r.intPaint).toFixed(0)},
+      {material:'Exterior Paint',  qty:+(sqft*g.extPaint).toFixed(1),unit:'litres',   rate:r.extPaint,   total:+(sqft*g.extPaint*r.extPaint).toFixed(0)},
+      {material:'Electrical Wiring',qty:+sqft.toFixed(0),            unit:'sq.ft',    rate:r.electrical, total:+(sqft*r.electrical).toFixed(0)},
+      {material:'Plumbing',        qty:+sqft.toFixed(0),             unit:'sq.ft',    rate:r.plumbing,   total:+(sqft*r.plumbing).toFixed(0)},
+    ];
+    const subtotal = items.reduce((s,x)=>s+x.total,0);
+    grandTotal+=subtotal;
+    floors.push({name:'Floor '+(i+1), sqft, items, subtotal});
+  }
+
+  lastResult={floors,grandTotal,grade:g.label};
+  renderResults(lastResult);
+}
+
+function renderResults(res){
+  const cont=document.getElementById('tables-container');
+  cont.innerHTML='';
+  res.floors.forEach((floor,fi)=>{
+    const rows=floor.items.map((it,i)=>`
+      <tr class="${i%2===0?'row-even':'row-odd'}">
+        <td class="px-5 py-3 text-on-surface font-medium text-sm">${it.material}</td>
+        <td class="px-5 py-3 text-on-surface-variant text-sm text-right">${fmtCur(it.qty)}</td>
+        <td class="px-5 py-3 text-on-surface-variant text-sm">${it.unit}</td>
+        <td class="px-5 py-3 text-on-surface-variant text-sm text-right">₹${fmtCur(it.rate)}</td>
+        <td class="px-5 py-3 text-primary font-bold text-sm text-right">₹${fmtCur(it.total)}</td>
+      </tr>`).join('');
+    const card=document.createElement('div');
+    card.className='bg-surface-container-low rounded-2xl overflow-hidden border border-outline/10 fadein';
+    card.innerHTML=`
+      <div class="px-6 py-5 border-b border-outline/10 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+        <div>
+          <h3 class="font-['Plus_Jakarta_Sans'] font-bold text-xl text-on-surface">${floor.name}</h3>
+          <p class="text-on-surface-variant text-sm">Built-up area: <span class="text-primary font-semibold">${fmtCur(floor.sqft)} sq.ft</span> · ${res.grade} grade</p>
+        </div>
+        <span class="text-secondary font-['Plus_Jakarta_Sans'] font-bold text-lg">Subtotal: ₹${fmtCur(floor.subtotal)}</span>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full border-collapse text-left">
+          <thead><tr class="bg-surface-container-highest text-on-surface-variant text-xs uppercase tracking-widest">
+            <th class="px-5 py-3 font-bold">Material</th>
+            <th class="px-5 py-3 font-bold text-right">Qty</th>
+            <th class="px-5 py-3 font-bold">Unit</th>
+            <th class="px-5 py-3 font-bold text-right">Rate (₹)</th>
+            <th class="px-5 py-3 font-bold text-right">Total (₹)</th>
+          </tr></thead>
+          <tbody>${rows}</tbody>
+          <tfoot><tr class="bg-surface-container-highest border-t border-outline/20">
+            <td class="px-5 py-4 font-['Plus_Jakarta_Sans'] font-black text-on-surface" colspan="4">Floor Subtotal</td>
+            <td class="px-5 py-4 font-['Plus_Jakarta_Sans'] font-black text-primary text-right">₹${fmtCur(floor.subtotal)}</td>
+          </tr></tfoot>
+        </table>
+      </div>`;
+    cont.appendChild(card);
+  });
+  document.getElementById('grand-total').textContent='₹'+fmtCur(res.grandTotal);
+  document.getElementById('grade-note').textContent=`${res.grade} · ${res.floors.length} floor(s)`;
+  document.getElementById('results').classList.remove('hidden');
+  document.getElementById('results').scrollIntoView({behavior:'smooth',block:'start'});
+  drawChart(res.floors);
+}
+
+function fmtCur(v){
+  const n=parseFloat(String(v).replace(/,/g,''));
+  if(isNaN(n)) return String(v);
+  return n.toLocaleString('en-IN');
+}
+
+function exportExcel(){
+  if(!lastResult) return;
+  const wb=XLSX.utils.book_new();
+  lastResult.floors.forEach(floor=>{
+    const rows=[['Material','Quantity','Unit','Rate (₹)','Total (₹)']];
+    floor.items.forEach(it=>rows.push([it.material,it.qty,it.unit,it.rate,it.total]));
+    rows.push(['']);
+    rows.push(['Floor Subtotal','','','',floor.subtotal]);
+    const ws=XLSX.utils.aoa_to_sheet(rows);
+    ws['!cols']=[{wch:28},{wch:12},{wch:12},{wch:14},{wch:16}];
+    XLSX.utils.book_append_sheet(wb,ws,floor.name);
+  });
+  const sum=[['Floor','Area (sq.ft)','Grade','Subtotal (₹)']];
+  lastResult.floors.forEach(f=>sum.push([f.name,f.sqft,lastResult.grade,f.subtotal]));
+  sum.push(['']);
+  sum.push(['Grand Total','','',lastResult.grandTotal]);
+  const ws2=XLSX.utils.aoa_to_sheet(sum);
+  XLSX.utils.book_append_sheet(wb,ws2,'Summary');
+  XLSX.writeFile(wb,'EnvizStudio_Cost_Estimate.xlsx');
+}
+
+// Init
+setGrade('standard');
+renderFloorInputs();
+renderAiSlots();
+</script>
+</body>
+</html>

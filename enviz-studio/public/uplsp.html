@@ -1,232 +1,674 @@
 <!DOCTYPE html>
 <html lang="en" class="dark">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Upload Space | EnvizStudio</title>
-    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
-    <script id="tailwind-config">
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    colors: {
-                        primary: "#d8b9ff", "on-primary-container": "#3c0077",
-                        secondary: "#b7d24e", "on-secondary": "#2a3400",
-                        background: "#100f31", "on-background": "#e2dfff",
-                        surface: "#100f31", "on-surface": "#e2dfff",
-                        "surface-container-lowest": "#0a092c",
-                        "surface-container-low": "#181739",
-                        "surface-container": "#1c1c3e",
-                        "surface-container-high": "#272649",
-                        "surface-container-highest": "#323154",
-                        "on-surface-variant": "#cec2d7", outline: "#978da0", error: "#ffb4ab"
-                    },
-                    fontFamily: { headline: ["Plus Jakarta Sans"], body: ["Inter"] }
-                }
-            }
-        };
-    </script>
-    <style>
-        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
-        .spinner { animation: spin 1s linear infinite; display: inline-block; width: 1em; height: 1em; border: 2px solid currentcolor; border-top-color: transparent; border-radius: 50%; }
-        @keyframes spin { 100% { transform: rotate(360deg); } }
-        .shake { animation: shake 0.5s; }
-        @keyframes shake { 0%, 100% {transform: translateX(0);} 10%, 30%, 50%, 70%, 90% {transform: translateX(-5px);} 20%, 40%, 60%, 80% {transform: translateX(5px);} }
-        #toast-container { position: fixed; top: 20px; right: 20px; z-index: 100; display: flex; flex-direction: column; gap: 10px; }
-        .toast { padding: 12px 20px; border-radius: 8px; display: flex; align-items: center; gap: 8px; color: white; font-weight: bold; animation: slideIn 0.3s; }
-        .toast.success { background-color: #4ade80; color: #064e3b; }
-        .toast.error { background-color: #ef4444; }
-        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-    </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>3D Model Viewer | EnvizStudio</title>
+<meta name="description" content="Upload a GLB or GLTF 3D model and walk through it in first-person. WASD to move, mouse to look."/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+<script id="tailwind-config">
+tailwind.config={darkMode:"class",theme:{extend:{colors:{primary:"#d8b9ff","on-primary-container":"#3c0077",secondary:"#b7d24e","on-secondary":"#2a3400",background:"#100f31","on-background":"#e2dfff",surface:"#100f31","on-surface":"#e2dfff","surface-container-lowest":"#0a092c","surface-container-low":"#181739","surface-container":"#1c1c3e","surface-container-high":"#272649","surface-container-highest":"#323154","on-surface-variant":"#cec2d7",outline:"#978da0","primary-container":"#ad72ff","surface-variant":"#323154"},fontFamily:{headline:["Plus Jakarta Sans"],body:["Inter"]}}}};
+</script>
+<style>
+*{box-sizing:border-box;}
+body{font-family:'Inter',sans-serif;background:#100f31;color:#e2dfff;margin:0;}
+.material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;}
+#viewer-canvas{display:block;width:100%;height:100%;}
+#crosshair{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:8px;height:8px;border-radius:50%;background:#d8b9ff;box-shadow:0 0 6px #d8b9ff;pointer-events:none;z-index:10;}
+.glass{backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);background:rgba(28,28,62,0.75);}
+.drop-zone-active{border-color:#d8b9ff!important;background:rgba(216,185,255,0.05)!important;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.spin{animation:spin 1s linear infinite;}
+@keyframes fadein{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.fadein{animation:fadein 0.4s ease forwards;}
+/* Triangle low-poly breathing overlay */
+@keyframes poly-breathe{
+  0%,100%{ -webkit-mask-size:48% 48%; mask-size:48% 48%; opacity:.7; }
+  50%{     -webkit-mask-size:122% 122%; mask-size:122% 122%; opacity:1; }
+}
+.poly-corner{
+  position:fixed;top:0;right:0;width:100vw;height:100vh;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='260'%3E%3Cpolygon points='0,0 133,0 67,130' fill='%230c1835'/%3E%3Cpolygon points='133,0 267,0 200,130' fill='%23193880'/%3E%3Cpolygon points='267,0 400,0 333,130' fill='%232e58b5'/%3E%3Cpolygon points='333,130 400,0 400,130' fill='%233870d0'/%3E%3Cpolygon points='400,130 400,260 333,130' fill='%23214a98'/%3E%3Cpolygon points='0,0 67,130 0,260' fill='%230a1428'/%3E%3Cpolygon points='67,130 133,0 200,130' fill='%23122a60'/%3E%3Cpolygon points='200,130 267,0 333,130' fill='%23214a98'/%3E%3Cpolygon points='0,260 133,260 67,130' fill='%230b1630'/%3E%3Cpolygon points='67,130 200,130 133,260' fill='%230e1e40'/%3E%3Cpolygon points='133,260 200,130 267,260' fill='%230c1a38'/%3E%3Cpolygon points='200,130 333,130 267,260' fill='%23142a58'/%3E%3Cpolygon points='267,260 333,130 400,260' fill='%231a3068'/%3E%3Cpolygon points='333,130 400,260 400,130' fill='%231e3870'/%3E%3C%2Fsvg%3E");
+  background-size:400px 260px;
+  -webkit-mask:radial-gradient(ellipse at 100% 0%,#000 0%,transparent 70%) no-repeat;
+  mask:radial-gradient(ellipse at 100% 0%,#000 0%,transparent 70%) no-repeat;
+  -webkit-mask-size:48% 48%;mask-size:48% 48%;
+  -webkit-mask-position:top right;mask-position:top right;
+  pointer-events:none;z-index:0;
+  animation:poly-breathe 18s ease-in-out infinite;
+}
+/* Sunlight burst */
+@keyframes light-breathe{
+  0%,100%{ opacity:.15; transform:scale(.55); }
+  50%{     opacity:1;   transform:scale(1.8); }
+}
+.poly-light{
+  position:fixed;top:0;right:0;width:100vw;height:100vh;
+  background:radial-gradient(ellipse 55% 60% at 100% 0%,rgba(140,200,255,.45) 0%,rgba(70,140,255,.18) 30%,transparent 62%);
+  pointer-events:none;z-index:0;
+  transform-origin:top right;
+  animation:light-breathe 18s ease-in-out infinite;
+}
+/* Nav shimmer */
+@keyframes nav-shimmer{0%,100%{background-position:200% center}50%{background-position:0% center}}
+.nav-bar{
+  background:linear-gradient(90deg,#100f31 0%,#1a1040 40%,#100f31 100%);
+  box-shadow:0 1px 0 rgba(216,185,255,.1),0 4px 24px rgba(120,60,220,.12);
+  position:relative;
+}
+.nav-bar::after{
+  content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(216,185,255,.25) 40%,rgba(183,210,78,.2) 60%,transparent);
+  animation:nav-shimmer 6s ease-in-out infinite;
+  background-size:200% auto;
+}
+</style>
 </head>
-<body class="bg-background text-on-background font-body selection:bg-primary selection:text-on-primary">
-    <div id="toast-container"></div>
-    
-    <nav class="bg-[#100f31] backdrop-blur-xl bg-opacity-60 font-['Plus_Jakarta_Sans'] docked full-width top-0 sticky z-50">
-        <div class="flex justify-between items-center w-full px-8 py-4 max-w-screen-2xl mx-auto">
-            <div class="flex items-center gap-12">
-                <a href="/" class="text-2xl font-bold tracking-tighter text-[#d8b9ff] hover:opacity-80 transition-opacity">EnvizStudio</a>
-                <div class="hidden md:flex gap-8">
-                    <a class="text-[#cec2d7] hover:text-[#d8b9ff] transition-all duration-300" href="/">Spaces</a>
-                </div>
-            </div>
-            <div class="flex items-center gap-6">
-                <button class="bg-secondary text-on-secondary px-6 py-2 rounded-full font-bold opacity-50 cursor-default">Upload</button>
-            </div>
-        </div>
-    </nav>
-    
-    <main class="max-w-screen-2xl mx-auto px-8 py-12">
-        <header class="mb-12">
-            <h1 class="text-4xl md:text-5xl font-headline font-extrabold tracking-tighter text-on-surface">Upload Space</h1>
-        </header>
+<body class="bg-surface text-on-surface min-h-screen flex flex-col">
+<!-- Polygon breathing overlay -->
+<div class="poly-corner" aria-hidden="true"></div>
+<div class="poly-light"  aria-hidden="true"></div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 mb-24">
-            <form id="space-form" class="lg:col-span-8 space-y-12" onsubmit="event.preventDefault(); saveSpace();">
-                <section class="space-y-6">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="space-y-2">
-                            <label class="font-label text-xs uppercase text-on-surface-variant">Space Title</label>
-                            <input id="title" required class="w-full bg-surface-container-lowest border border-outline/20 rounded-lg p-4 text-on-surface" type="text" placeholder="Modern Villa" />
-                        </div>
-                        <div class="space-y-2">
-                            <label class="font-label text-xs uppercase text-on-surface-variant">URL Slug</label>
-                            <input id="slug" required class="w-full bg-surface-container-lowest border border-outline/20 rounded-lg p-4 text-on-surface" type="text" placeholder="modern-villa" />
-                        </div>
-                    </div>
-                </section>
+<!-- Nav -->
+<nav class="nav-bar font-['Plus_Jakarta_Sans'] tracking-tight top-0 sticky z-50">
+<div class="flex justify-between items-center w-full px-8 py-4 max-w-screen-2xl mx-auto">
+  <div class="flex items-center gap-12">
+    <a href="index.html" class="text-2xl font-bold tracking-tighter text-[#d8b9ff] hover:opacity-80 transition-opacity">EnvizStudio</a>
+    <div class="hidden md:flex gap-8 items-center">
+      <a class="text-[#d8b9ff] font-bold border-b-2 border-[#b7d24e] pb-1 transition-all duration-300" href="brsp.html">Spaces</a>
+      <a class="text-[#cec2d7] hover:text-[#d8b9ff] transition-all duration-300" href="cost-estimator.html">Cost Estimator</a>
+    </div>
+  </div>
+  <div class="flex items-center gap-4">
+  </div>
+</div>
+</nav>
 
-                <section class="space-y-4">
-                    <h3 class="text-xl font-headline font-bold text-on-surface">Space Deployment</h3>
-                    <div class="relative group">
-                        <div class="w-full h-64 border-2 border-dashed border-outline/30 rounded-xl bg-surface-container-low flex flex-col items-center justify-center gap-4 transition-all">
-                            <div class="w-16 h-16 rounded-full bg-surface-container-highest flex items-center justify-center text-primary">
-                                <span class="material-symbols-outlined text-4xl">cloud_upload</span>
-                            </div>
-                            <div class="text-center">
-                                <p class="text-on-surface font-medium">Select Unity WebGL Build ZIP</p>
-                                <p class="text-on-surface-variant text-sm mt-1" id="file-name-display">Max 500MB</p>
-                            </div>
-                            <input type="file" id="build-file" class="hidden" accept=".zip" onchange="document.getElementById('file-name-display').innerText = this.files[0] ? this.files[0].name : 'Max 500MB'" />
-                            <button onclick="document.getElementById('build-file').click()" type="button" class="mt-2 bg-surface-container-highest text-primary px-6 py-2 rounded-lg font-bold">Select Archive</button>
-                        </div>
-                    </div>
-                </section>
-            </form>
-            
-            <aside class="lg:col-span-4 space-y-8">
-                <!-- Submission Info Box -->
-                <div class="p-6 rounded-2xl bg-surface-container-highest border border-primary/20">
-                    <div class="flex items-center gap-3 mb-4">
-                        <span class="material-symbols-outlined text-secondary">verified</span>
-                        <span class="font-bold text-on-surface">Upload Status</span>
-                    </div>
-                    <ul class="space-y-3" id="status-list">
-                        <li class="flex items-center gap-3 text-sm text-on-surface-variant">
-                            <span class="material-symbols-outlined text-base" id="status-metadata">circle</span> Metadata Saved
-                        </li>
-                        <li class="flex items-center gap-3 text-sm text-on-surface-variant">
-                            <span class="material-symbols-outlined text-base" id="status-build">circle</span> Build Uploaded
-                        </li>
-                    </ul>
-                </div>
-            </aside>
-        </div>
-    </main>
+<!-- Upload UI -->
+<main id="upload-ui" class="flex-1 max-w-screen-2xl mx-auto w-full px-8 py-16">
+  <div class="mb-12 fadein">
+    <h1 class="text-4xl md:text-5xl font-['Plus_Jakarta_Sans'] font-extrabold tracking-tighter text-on-surface mb-3">3D Model Walkthrough</h1>
+    <p class="text-on-surface-variant text-lg max-w-2xl">Upload a GLB or GLTF model from Blender, SketchUp, or Sketchfab and explore it in first-person — no plugins, no downloads.</p>
 
-    <div class="fixed bottom-0 left-0 right-0 bg-surface-container/80 border-t border-outline/10 z-40">
-        <div class="max-w-screen-2xl mx-auto px-8 py-6 flex justify-between items-center">
-            <div class="flex items-center gap-4">
-                <div class="w-2 h-2 rounded-full bg-secondary" id="save-indicator"></div>
-                <span class="text-sm font-medium text-on-surface-variant" id="last-saved-text">Not saved yet</span>
-            </div>
-            <div class="flex items-center gap-6">
-                <a id="view-page-link" class="text-on-surface-variant font-bold hover:text-primary transition-colors flex items-center gap-2 hidden" href="#">
-                    <span class="material-symbols-outlined text-xl">visibility</span> View Page
-                </a>
-                <button id="save-button" onclick="saveSpace()" class="bg-secondary text-on-secondary px-10 py-3 rounded-xl font-bold text-lg hover:brightness-110 active:scale-95 transition-all">
-                    Save Space
-                </button>
-            </div>
+<!-- Space Metadata -->
+<div class="mb-8 fadein">
+  <div class="backdrop-blur-md bg-white/5 border border-white/10 rounded-2xl p-6">
+    <h2 class="font-['Plus_Jakarta_Sans'] font-bold text-on-surface text-lg mb-5">Space Details <span class="text-outline text-sm font-normal">(saved to your library)</span></h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+      <div>
+        <label class="text-on-surface-variant text-sm font-medium mb-2 block">Space Name</label>
+        <input id="space-name" type="text" placeholder="e.g. My Modern Apartment" class="w-full bg-surface-container-lowest border border-outline/20 rounded-xl px-4 py-3 text-on-surface placeholder:text-outline focus:outline-none focus:ring-1 focus:ring-primary transition-all"/>
+      </div>
+      <div>
+        <label class="text-on-surface-variant text-sm font-medium mb-2 block">Cover Photo</label>
+        <div id="photo-drop" onclick="document.getElementById('cover-photo-input').click()" class="cursor-pointer border border-dashed border-outline/30 rounded-xl px-4 py-3 flex items-center gap-3 hover:border-primary/50 transition-all bg-surface-container-lowest">
+          <span class="material-symbols-outlined text-primary/60">add_photo_alternate</span>
+          <span id="photo-label" class="text-outline text-sm">Click to upload cover image</span>
         </div>
+        <input id="cover-photo-input" type="file" accept="image/*" class="hidden" onchange="previewPhoto(this)"/>
+        <img id="photo-preview" class="hidden mt-2 w-full h-24 object-cover rounded-lg border border-white/10"/>
+      </div>
+    </div>
+    <div class="mt-5">
+      <label class="text-on-surface-variant text-sm font-medium mb-2 block">Description</label>
+      <textarea id="space-desc" rows="2" placeholder="Briefly describe this space..." class="w-full bg-surface-container-lowest border border-outline/20 rounded-xl px-4 py-3 text-on-surface placeholder:text-outline focus:outline-none focus:ring-1 focus:ring-primary transition-all resize-none"></textarea>
+    </div>
+  </div>
+</div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
+    <!-- Drop zone -->
+    <div class="lg:col-span-2">
+      <div id="drop-zone" class="border-2 border-dashed border-white/15 rounded-2xl backdrop-blur-md bg-white/5 flex flex-col items-center justify-center gap-6 p-16 cursor-pointer transition-all duration-300 min-h-[380px] hover:border-primary/40 hover:bg-white/8"
+        onclick="document.getElementById('model-file').click()"
+        ondragover="event.preventDefault();this.classList.add('drop-zone-active')"
+        ondragleave="this.classList.remove('drop-zone-active')"
+        ondrop="handleDrop(event)">
+        <div class="w-20 h-20 rounded-2xl bg-white/10 border border-white/10 flex items-center justify-center">
+          <span class="material-symbols-outlined text-5xl text-primary">view_in_ar</span>
+        </div>
+        <div class="text-center">
+          <p class="text-on-surface font-semibold text-xl font-['Plus_Jakarta_Sans']">Drop your GLB or GLTF model here</p>
+          <p class="text-on-surface-variant text-sm mt-2">or click to browse — Up to 200MB supported</p>
+          <p id="file-name-display" class="text-primary text-sm mt-3 font-medium"></p>
+        </div>
+        <input type="file" id="model-file" class="hidden" accept=".glb,.gltf" onchange="onFileSelected(this.files[0])">
+        <button type="button" onclick="event.stopPropagation();document.getElementById('model-file').click()" class="mt-2 bg-white/10 border border-white/15 text-primary px-8 py-3 rounded-xl font-bold hover:bg-white/15 transition-all text-sm">
+          Select 3D Model File
+        </button>
+      </div>
+
+      <!-- Load button -->
+      <button id="load-btn" onclick="loadModel()" disabled class="mt-6 w-full py-4 rounded-xl font-bold text-lg font-['Plus_Jakarta_Sans'] bg-primary/20 text-primary/40 cursor-not-allowed transition-all duration-300">
+        Load Model &amp; Enter Viewer
+      </button>
+      <div id="load-progress" class="hidden mt-4">
+        <div class="flex items-center gap-3 text-primary">
+          <span class="material-symbols-outlined spin text-2xl">autorenew</span>
+          <span class="font-medium" id="progress-text">Loading model…</span>
+        </div>
+        <div class="mt-3 h-1 bg-surface-container-highest rounded-full overflow-hidden">
+          <div id="progress-bar" class="h-full bg-primary rounded-full transition-all duration-300" style="width:0%"></div>
+        </div>
+      </div>
     </div>
 
-    <script>
-        let currentSpaceId = null;
+    <!-- Info panel -->
+    <div class="space-y-6">
+      <div class="bg-surface-container rounded-xl p-6 border border-outline/10">
+        <div class="flex items-center gap-3 mb-4">
+          <span class="material-symbols-outlined text-secondary">info</span>
+          <span class="font-['Plus_Jakarta_Sans'] font-bold text-on-surface">Supported Formats</span>
+        </div>
+        <ul class="space-y-3 text-sm text-on-surface-variant">
+          <li class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-primary"></span>GLB — Binary GLTF (recommended)</li>
+          <li class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-primary"></span>GLTF — Text-based with external assets</li>
+          <li class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-secondary"></span>Exported from Blender, SketchUp, Revit</li>
+        </ul>
+      </div>
+      <div class="bg-surface-container rounded-xl p-6 border border-outline/10">
+        <div class="flex items-center gap-3 mb-4">
+          <span class="material-symbols-outlined text-primary">gamepad</span>
+          <span class="font-['Plus_Jakarta_Sans'] font-bold text-on-surface">Controls</span>
+        </div>
+        <ul class="space-y-2 text-sm text-on-surface-variant">
+          <li><span class="text-primary font-bold">WASD</span> — Walk / strafe</li>
+          <li><span class="text-[#b7d24e] font-bold">W×2 / Ctrl</span> — Sprint (resets on release)</li>
+          <li><span class="text-primary font-bold">Mouse</span> — Look around</li>
+          <li><span class="text-primary font-bold">Space</span> — Jump</li>
+          <li><span class="text-primary font-bold">Space Space</span> — Toggle fly mode</li>
+          <li><span class="text-primary font-bold">Space / Shift</span> — Rise / descend (fly)</li>
+          <li><span class="text-primary font-bold">P</span> — Phase-through walls (fly only)</li>
+          <li><span class="text-primary font-bold">I / O</span> — Increase / decrease height</li>
+          <li><span class="text-primary font-bold">Click canvas</span> — Capture cursor</li>
+          <li><span class="text-primary font-bold">ESC</span> — Release cursor</li>
+        </ul>
+      </div>
+      <div class="bg-surface-container rounded-xl p-6 border border-secondary/20">
+        <div class="flex items-center gap-3 mb-3">
+          <span class="material-symbols-outlined text-secondary">cloud_download</span>
+          <span class="font-['Plus_Jakarta_Sans'] font-bold text-on-surface">Get Free Models</span>
+        </div>
+        <p class="text-sm text-on-surface-variant leading-relaxed">Get free 3D home models from <a href="https://sketchfab.com" target="_blank" class="text-secondary hover:underline font-medium">Sketchfab.com</a> — filter by <em>'architecture'</em> or <em>'interior'</em> and download as GLB.</p>
+      </div>
+    </div>
+  </div>
+</main>
 
-        function showToast(message, type = 'success') {
-            const container = document.getElementById('toast-container');
-            const toast = document.createElement('div');
-            toast.className = `toast ${type}`;
-            toast.innerHTML = `<span class="material-symbols-outlined">${type === 'success' ? 'check_circle' : 'error'}</span> ${message}`;
-            container.appendChild(toast);
-            setTimeout(() => toast.remove(), 3000);
-        }
+<!-- Viewer (hidden until model loads) -->
+<div id="viewer-ui" class="hidden fixed inset-0 bg-black z-40 flex flex-col">
+  <!-- Three.js canvas container -->
+  <div id="canvas-container" class="relative flex-1 overflow-hidden">
+    <canvas id="viewer-canvas"></canvas>
+    <div id="crosshair"></div>
 
-        async function saveSpace() {
-            const saveBtn = document.getElementById('save-button');
-            const title = document.getElementById('title').value;
-            const slug = document.getElementById('slug').value;
-            const fileInput = document.getElementById('build-file');
+    <!-- Top-left HUD -->
+    <div class="absolute top-4 left-4 glass rounded-xl px-4 py-2 flex items-center gap-3 fadein">
+      <span class="material-symbols-outlined text-primary text-lg">view_in_ar</span>
+      <div>
+        <p id="model-name-badge" class="text-on-surface font-bold text-sm font-['Plus_Jakarta_Sans']">Model</p>
+        <p id="model-size-badge" class="text-on-surface-variant text-xs"></p>
+      </div>
+    </div>
 
-            if (!title || !slug) {
-                saveBtn.classList.add('shake');
-                showToast('Please fill out Title and Slug.', 'error');
-                setTimeout(() => saveBtn.classList.remove('shake'), 500);
-                return;
-            }
+    <!-- Top-right controls legend -->
+    <div class="absolute top-4 right-4 glass rounded-xl px-4 py-2 text-xs text-on-surface-variant fadein">
+      <span class="text-primary font-bold">WASD</span> walk &nbsp;·&nbsp;
+      <span class="text-[#b7d24e] font-bold">W×2/Ctrl</span> sprint &nbsp;·&nbsp;
+      <span class="text-primary font-bold">Space</span> jump/2×fly &nbsp;·&nbsp;
+      <span class="text-primary font-bold">Shift</span> descend &nbsp;·&nbsp;
+      <span class="text-primary font-bold">ESC</span> exit
+    </div>
+    <!-- Fly mode indicator + no-clip toggle -->
+    <div id="sprint-badge" style="display:none" class="absolute top-16 left-4 glass rounded-lg px-3 py-1.5 text-xs font-bold text-[#b7d24e] border border-[#b7d24e]/40">⚡ SPRINT</div>
+    <div id="fly-badge" class="hidden absolute top-16 right-4 flex flex-col gap-2 items-end">
+      <div class="glass rounded-lg px-3 py-1 text-xs font-bold text-secondary border border-secondary/30">✈ FLY MODE</div>
+      <button id="noclip-btn" onclick="toggleNoClip()" class="glass rounded-lg px-3 py-1 text-xs font-bold text-on-surface-variant border border-outline/30 hover:border-primary/50 transition-all">⬡ Phase-Through: OFF</button>
+    </div>
 
-            saveBtn.disabled = true;
-            saveBtn.innerHTML = 'Saving... <span class="spinner"></span>';
+    <!-- Click-to-start overlay -->
+    <div id="click-overlay" class="absolute inset-0 flex flex-col items-center justify-center bg-black/60 cursor-pointer z-20" onclick="startPointerLock()">
+      <div class="glass rounded-2xl px-10 py-8 text-center max-w-sm fadein">
+        <span class="material-symbols-outlined text-5xl text-primary mb-4 block">mouse</span>
+        <h2 class="font-['Plus_Jakarta_Sans'] font-bold text-2xl text-on-surface mb-2">Click to Enter</h2>
+        <p class="text-on-surface-variant text-sm">Click anywhere to capture your mouse and start walking through the space.</p>
+      </div>
+    </div>
 
-            try {
-                // 1. Save Metadata
-                const metaRes = await fetch('/api/spaces', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ title, slug })
-                });
-                const metaData = await metaRes.json();
-                
-                if (!metaData.success) {
-                    throw new Error(metaData.error);
-                }
-                
-                currentSpaceId = metaData.id;
-                document.getElementById('status-metadata').innerText = 'check_circle';
-                document.getElementById('status-metadata').classList.add('text-secondary');
+    <!-- Bottom branding bar -->
+    <div class="absolute bottom-0 left-0 right-0 glass border-t border-white/5 px-6 py-2 flex justify-between items-center">
+      <span class="text-[#d8b9ff] font-['Plus_Jakarta_Sans'] font-bold text-sm">EnvizStudio</span>
+      <span class="text-on-surface-variant text-xs">3D Walkthrough Mode</span>
+      <button onclick="exitViewer()" class="text-xs text-on-surface-variant hover:text-primary transition-colors flex items-center gap-1">
+        <span class="material-symbols-outlined text-sm">close</span> Exit Viewer
+      </button>
+    </div>
+  </div>
+</div>
 
-                // 2. Upload File if selected
-                if (fileInput.files.length > 0) {
-                    saveBtn.innerHTML = 'Uploading... <span class="spinner"></span>';
-                    const formData = new FormData();
-                    formData.append('build', fileInput.files[0]);
-                    formData.append('spaceId', currentSpaceId);
+<!-- Footer -->
+<footer class="bg-[#0b092c] py-12 px-8 border-t border-white/5">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center max-w-screen-2xl mx-auto">
+  <div>
+    <span class="text-lg font-black text-[#d8b9ff] font-['Plus_Jakarta_Sans']">EnvizStudio</span>
+    <p class="text-[#cec2d7] mt-4 font-['Inter'] text-sm tracking-wide uppercase">© 2024 EnvizStudio. The Digital Atelier.</p>
+  </div>
+  <div class="flex flex-wrap gap-8 md:justify-end">
+    <a class="font-['Inter'] text-sm tracking-wide uppercase text-[#cec2d7] hover:text-[#d8b9ff] transition-colors opacity-80 hover:opacity-100" href="#">Resources</a>
+    <a class="font-['Inter'] text-sm tracking-wide uppercase text-[#cec2d7] hover:text-[#d8b9ff] transition-colors opacity-80 hover:opacity-100" href="#">Privacy Policy</a>
+    <a class="font-['Inter'] text-sm tracking-wide uppercase text-[#cec2d7] hover:text-[#d8b9ff] transition-colors opacity-80 hover:opacity-100" href="#">Terms of Service</a>
+    <a class="font-['Inter'] text-sm tracking-wide uppercase text-[#cec2d7] hover:text-[#d8b9ff] transition-colors opacity-80 hover:opacity-100" href="#">Help Center</a>
+  </div>
+</div>
+</footer>
 
-                    const uploadRes = await fetch('/api/upload/space-build', {
-                        method: 'POST',
-                        body: formData
-                    });
-                    const uploadData = await uploadRes.json();
-                    
-                    if (!uploadData.success) {
-                        throw new Error(uploadData.error);
-                    }
-                    
-                    document.getElementById('status-build').innerText = 'check_circle';
-                    document.getElementById('status-build').classList.add('text-secondary');
-                }
+<!-- Three.js from CDN -->
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.165.0/examples/jsm/"
+  }
+}
+</script>
 
-                // Success UI Updates
-                saveBtn.classList.remove('bg-secondary');
-                saveBtn.classList.add('bg-[#4ade80]');
-                saveBtn.innerHTML = 'Saved <span class="material-symbols-outlined text-sm align-middle">check</span>';
-                document.getElementById('last-saved-text').innerText = 'Last saved: Just now';
-                showToast('Space saved successfully!', 'success');
-                
-                const viewLink = document.getElementById('view-page-link');
-                viewLink.href = '/provie.html?slug=' + metaData.slug;
-                viewLink.classList.remove('hidden');
+<script type="module">
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
-                setTimeout(() => {
-                    saveBtn.disabled = false;
-                    saveBtn.classList.add('bg-secondary');
-                    saveBtn.classList.remove('bg-[#4ade80]');
-                    saveBtn.innerHTML = 'Save Space';
-                }, 3000);
+// ── State ─────────────────────────────────────────────────────────────────────
+let scene, camera, renderer, yawObj, animFrameId;
+let selectedFile=null;
+let modelMeshes=[];
+const keys={};
+let isLocked=false;
+let yaw=0, pitch=0;
+const MOVE_SPEED=3.5, FLY_SPEED=5, WALL_DIST=0.38;
+const SPRINT_SPEED=7.0, SPRINT_FLY=9.5;
+const PITCH_LIMIT=Math.PI/2-0.01;
+const BASE_HEIGHT=1.7, HEIGHT_STEP=0.1, MIN_HEIGHT=0.5, MAX_HEIGHT=3.5;
+const GRAVITY=-12, JUMP_VEL=6, TERM_VEL=-25, STEP_HEIGHT=0.45;
+// Physics state
+let playerHeight=BASE_HEIGHT;
+let velY=0, onGround=false, isFlying=false, lastSpaceMs=0;
+let isSprinting=false, sprintLocked=false, lastWTapMs=0;
+let bobYawOff=0, bobPitchOff=0;
+// no-clip (phase through) — only active in fly mode
+let noClip=false;
+// on-screen button flags
+let btnUp=false, btnDown=false;
+// head bob
+let bobTime=0, bobVel=0;
 
-            } catch (err) {
-                console.error(err);
-                saveBtn.classList.add('shake');
-                saveBtn.disabled = false;
-                saveBtn.innerHTML = 'Save Space';
-                showToast(err.message || 'Save failed. Please try again.', 'error');
-                setTimeout(() => saveBtn.classList.remove('shake'), 500);
-            }
-        }
-    </script>
+// ── File handling ─────────────────────────────────────────────────────────────
+window.onFileSelected=function(file){
+  if(!file) return;
+  selectedFile=file;
+  document.getElementById('file-name-display').textContent=file.name;
+  const btn=document.getElementById('load-btn');
+  btn.disabled=false;
+  btn.className="mt-6 w-full py-4 rounded-xl font-bold text-lg font-['Plus_Jakarta_Sans'] bg-primary text-on-primary-container cursor-pointer transition-all duration-300 hover:brightness-110 active:scale-95";
+};
+window.handleDrop=function(e){
+  e.preventDefault();
+  document.getElementById('drop-zone').classList.remove('drop-zone-active');
+  const file=e.dataTransfer.files[0];
+  if(file&&(file.name.endsWith('.glb')||file.name.endsWith('.gltf'))) window.onFileSelected(file);
+};
+
+window.previewPhoto=function(input){
+  const file=input.files[0];
+  if(!file) return;
+  const preview=document.getElementById('photo-preview');
+  preview.src=URL.createObjectURL(file);
+  preview.classList.remove('hidden');
+  document.getElementById('photo-label').textContent=file.name;
+};
+
+window.loadModel=function(){
+  if(!selectedFile) return;
+  // Save metadata to localStorage
+  const _name=(document.getElementById('space-name').value.trim())||selectedFile.name.replace(/\.(glb|gltf)$/i,'');
+  const _desc=document.getElementById('space-desc').value.trim();
+  const _photoInput=document.getElementById('cover-photo-input');
+  const _persist=(b64)=>{
+    const sp=JSON.parse(localStorage.getItem('enviz_spaces')||'[]');
+    sp.unshift({id:Date.now().toString(),name:_name,description:_desc,photo:b64||'',modelFileName:selectedFile.name,createdAt:new Date().toISOString()});
+    localStorage.setItem('enviz_spaces',JSON.stringify(sp.slice(0,50)));
+  };
+  if(_photoInput.files[0]){
+    const _fr=new FileReader();
+    _fr.onload=ev=>_persist(ev.target.result);
+    _fr.readAsDataURL(_photoInput.files[0]);
+  } else { _persist(''); }
+  document.getElementById('load-progress').classList.remove('hidden');
+  document.getElementById('load-btn').disabled=true;
+  setProgress(10,'Reading file…');
+  const reader=new FileReader();
+  reader.onload=function(e){
+    setProgress(40,'Initialising 3D engine…');
+    initThree();
+    setProgress(60,'Loading model…');
+    const loader=new GLTFLoader();
+    loader.parse(e.target.result,'',function(gltf){
+      setProgress(90,'Finalising…');
+      scene.add(gltf.scene);
+      // Collect meshes for collision
+      modelMeshes=[];
+      gltf.scene.traverse(o=>{ if(o.isMesh) modelMeshes.push(o); });
+      // Compute bounding box and spawn above centre
+      const box=new THREE.Box3().setFromObject(gltf.scene);
+      const size=box.getSize(new THREE.Vector3());
+      const center=box.getCenter(new THREE.Vector3());
+      // Spawn at 1/4 height above floor, at model centre XZ
+      const spawnY=box.min.y+Math.max(size.y*0.25, 1.7);
+      yawObj.position.set(center.x, spawnY, center.z);
+      yaw=0; pitch=0;
+      yawObj.rotation.y=0;
+      camera.rotation.x=0;
+      document.getElementById('model-name-badge').textContent=selectedFile.name;
+      document.getElementById('model-size-badge').textContent=formatBytes(selectedFile.size);
+      setProgress(100,'Done!');
+      setTimeout(()=>{
+        document.getElementById('upload-ui').classList.add('hidden');
+        document.getElementById('viewer-ui').classList.remove('hidden');
+        document.querySelector('footer').classList.add('hidden');
+        resizeRenderer();
+        animate();
+      },300);
+    },function(err){
+      document.getElementById('progress-text').textContent='Error: '+err.message;
+      document.getElementById('progress-text').style.color='#ffb4ab';
+    });
+  };
+  reader.readAsArrayBuffer(selectedFile);
+};
+
+function setProgress(pct,txt){
+  document.getElementById('progress-bar').style.width=pct+'%';
+  document.getElementById('progress-text').textContent=txt;
+}
+function formatBytes(b){ return b<1048576?(b/1024).toFixed(1)+' KB':(b/1048576).toFixed(1)+' MB'; }
+
+// ── Three.js init ─────────────────────────────────────────────────────────────
+function initThree(){
+  scene=new THREE.Scene();
+  scene.background=new THREE.Color(0x100f31);
+  scene.fog=new THREE.Fog(0xf0eaff,40,120);
+
+  camera=new THREE.PerspectiveCamera(75,1,0.05,300);
+  // yawObj handles horizontal (Y) rotation; camera handles pitch (X)
+  yawObj=new THREE.Object3D();
+  yawObj.add(camera);
+  scene.add(yawObj);
+
+  const canvas=document.getElementById('viewer-canvas');
+  renderer=new THREE.WebGLRenderer({canvas,antialias:true});
+  renderer.shadowMap.enabled=true;
+  renderer.outputColorSpace=THREE.SRGBColorSpace;
+  renderer.toneMapping=THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure=1.2;
+
+  const ambient=new THREE.AmbientLight(0xd8b9ff,0.7);
+  scene.add(ambient);
+  const sun=new THREE.DirectionalLight(0xffffff,1.5);
+  sun.position.set(10,20,10); sun.castShadow=true;
+  scene.add(sun);
+  const fill=new THREE.DirectionalLight(0xb7d24e,0.3);
+  fill.position.set(-10,5,-10); scene.add(fill);
+
+  // Pointer lock via raw API (no PointerLockControls)
+  canvas.addEventListener('click',()=>{ if(!isLocked) canvas.requestPointerLock(); });
+  document.addEventListener('pointerlockchange',()=>{
+    isLocked=document.pointerLockElement===canvas;
+    document.getElementById('click-overlay').style.display=isLocked?'none':'flex';
+  });
+  document.addEventListener('mousemove',onMouseMove);
+
+  // Keydown — double-tap Space fly toggle + P/I/O shortcuts
+  document.addEventListener('keydown',e=>{
+    if(e.code==='Space'&&!e.repeat){
+      const now=performance.now();
+      if(now-lastSpaceMs<300){
+        isFlying=!isFlying;
+        if(!isFlying){ velY=0; }
+        document.getElementById('fly-badge').classList.toggle('hidden',!isFlying);
+      } else {
+        if(!isFlying&&onGround){ velY=JUMP_VEL; onGround=false; }
+      }
+      lastSpaceMs=now;
+    }
+    // P = phase-through toggle (fly only)
+    if(e.code==='KeyP'&&isFlying&&!e.repeat) window.toggleNoClip();
+    // I = taller, O = shorter
+    if(e.code==='KeyI'&&!e.repeat){
+      playerHeight=Math.min(MAX_HEIGHT, +(playerHeight+HEIGHT_STEP).toFixed(2));
+      showHeightBadge();
+    }
+    if(e.code==='KeyO'&&!e.repeat){
+      playerHeight=Math.max(MIN_HEIGHT, +(playerHeight-HEIGHT_STEP).toFixed(2));
+      showHeightBadge();
+    }
+    // Double-tap W → sprint lock
+    if(e.code==='KeyW'&&!e.repeat){
+      const now=performance.now();
+      if(now-lastWTapMs<300) sprintLocked=true;
+      lastWTapMs=now;
+    }
+    // Ctrl → lock sprint (stays until movement stops)
+    if((e.code==='ControlLeft'||e.code==='ControlRight')&&!e.repeat) sprintLocked=true;
+    keys[e.code]=true;
+  });
+  document.addEventListener('keyup',e=>{ keys[e.code]=false; });
+
+  // On-screen up/down buttons
+  const addHold=(id)=>{
+    const el=document.getElementById(id);
+    if(!el) return;
+    const set=(v)=>{ if(id==='btn-up') btnUp=v; else btnDown=v; };
+    el.addEventListener('mousedown',e=>{e.preventDefault();set(true);});
+    el.addEventListener('mouseup',()=>set(false));
+    el.addEventListener('mouseleave',()=>set(false));
+    el.addEventListener('touchstart',e=>{e.preventDefault();set(true);},{passive:false});
+    el.addEventListener('touchend',()=>set(false));
+  };
+  addHold('btn-up'); addHold('btn-down');
+
+  window.addEventListener('resize',resizeRenderer);
+  resizeRenderer();
+}
+
+// Height badge flash
+let heightBadgeTimer=null;
+function showHeightBadge(){
+  let el=document.getElementById('height-badge');
+  if(!el){
+    el=document.createElement('div');
+    el.id='height-badge';
+    el.className='absolute top-28 right-4 glass rounded-lg px-3 py-1 text-xs font-bold text-primary border border-primary/30';
+    document.getElementById('canvas-container').appendChild(el);
+  }
+  el.textContent=`↕ Height: ${playerHeight.toFixed(1)}m`;
+  el.style.opacity='1';
+  clearTimeout(heightBadgeTimer);
+  heightBadgeTimer=setTimeout(()=>{ el.style.opacity='0'; el.style.transition='opacity 0.5s'; },1500);
+}
+
+function onMouseMove(e){
+  if(!isLocked) return;
+  // Sensitivity
+  yaw   -= e.movementX*0.0022;
+  pitch -= e.movementY*0.0022;
+  // Clamp pitch so camera NEVER flips
+  pitch=Math.max(-PITCH_LIMIT, Math.min(PITCH_LIMIT, pitch));
+  // rotations applied each frame in animate loop
+}
+
+function resizeRenderer(){
+  if(!renderer) return;
+  const c=document.getElementById('canvas-container');
+  renderer.setSize(c.clientWidth,c.clientHeight,false);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+  if(camera){camera.aspect=c.clientWidth/c.clientHeight;camera.updateProjectionMatrix();}
+}
+
+// ── Collision helpers ─────────────────────────────────────────────────────────
+const _rc=new THREE.Raycaster();
+function castRay(origin,dir,far){
+  if(!modelMeshes.length) return [];
+  _rc.set(origin,dir);
+  _rc.far=far;
+  return _rc.intersectObjects(modelMeshes,false);
+}
+function wallBlocked(pos,dir){ return castRay(pos,dir,WALL_DIST).length>0; }
+function groundBelow(pos){
+  const hits=castRay(pos,new THREE.Vector3(0,-1,0),playerHeight+1.2);
+  return hits.length?hits[0]:null;
+}
+// Try to move horizontally — if blocked try stepping over low obstacle (stairs)
+function tryMoveHoriz(pos,dir,amount){
+  if(noClip&&isFlying){ pos.addScaledVector(dir,amount); return; }
+  const n=dir.clone().normalize();
+  if(!wallBlocked(pos,n)){
+    pos.addScaledVector(dir,amount);
+  } else if(onGround){
+    // step-up: probe from STEP_HEIGHT above
+    const test=pos.clone(); test.y+=STEP_HEIGHT;
+    if(!wallBlocked(test,n)){
+      pos.addScaledVector(dir,amount);
+      pos.y+=STEP_HEIGHT*0.9; // push up; ground clamp corrects
+    }
+  }
+}
+// no-clip toggle (called by button)
+window.toggleNoClip=function(){
+  noClip=!noClip;
+  const btn=document.getElementById('noclip-btn');
+  if(btn){
+    btn.textContent=noClip?'⧆ Phase-Through: ON':'⧆ Phase-Through: OFF';
+    btn.className=noClip
+      ?'glass rounded-lg px-3 py-1 text-xs font-bold text-secondary border border-secondary/40 hover:border-primary/50 transition-all'
+      :'glass rounded-lg px-3 py-1 text-xs font-bold text-on-surface-variant border border-outline/30 hover:border-primary/50 transition-all';
+  }
+};
+
+// ── Animation loop ────────────────────────────────────────────────────────────
+let lastTime=performance.now();
+function animate(){
+  animFrameId=requestAnimationFrame(animate);
+  const now=performance.now();
+  const dt=Math.min((now-lastTime)/1000,0.1);
+  lastTime=now;
+
+  const pos=yawObj.position;
+  const fwd=new THREE.Vector3(-Math.sin(yaw),0,-Math.cos(yaw));
+  const rgt=new THREE.Vector3(Math.cos(yaw),0,-Math.sin(yaw));
+
+  // Sprint state: double-tap-W lock OR Ctrl held
+  const anyMove=keys['KeyW']||keys['KeyS']||keys['KeyA']||keys['KeyD']||
+                keys['ArrowUp']||keys['ArrowDown']||keys['ArrowLeft']||keys['ArrowRight'];
+  if(!anyMove) sprintLocked=false; // sprint resets only when stopped
+  isSprinting=sprintLocked&&anyMove;
+  const sb=document.getElementById('sprint-badge');
+  if(sb) sb.style.display=isSprinting&&isLocked?'block':'none';
+
+  // Horizontal movement
+  if(isLocked){
+    let mx=0,mz=0;
+    if(keys['KeyW']||keys['ArrowUp'])    mz+=1;
+    if(keys['KeyS']||keys['ArrowDown'])  mz-=1;
+    if(keys['KeyD']||keys['ArrowRight']) mx+=1;
+    if(keys['KeyA']||keys['ArrowLeft'])  mx-=1;
+    const curSpd=isSprinting?SPRINT_SPEED:MOVE_SPEED;
+    if(mz!==0) tryMoveHoriz(pos,fwd.clone().multiplyScalar(mz),curSpd*dt);
+    if(mx!==0) tryMoveHoriz(pos,rgt.clone().multiplyScalar(mx),curSpd*dt);
+  }
+
+  if(isFlying){
+    // FLY MODE: up/down free, no gravity
+    if(isLocked||btnUp||btnDown){
+      let vy=0;
+      const flySpd=isSprinting?SPRINT_FLY:FLY_SPEED;
+      if(keys['Space']||btnUp) vy=flySpd;
+      if(keys['ShiftLeft']||keys['ShiftRight']||btnDown) vy=-flySpd;
+      if(vy>0&&!wallBlocked(pos,new THREE.Vector3(0,1,0))) pos.y+=vy*dt;
+      if(vy<0&&!wallBlocked(pos,new THREE.Vector3(0,-1,0))) pos.y+=vy*dt;
+    }
+  } else {
+    // WALK MODE: gravity + floor collision
+    velY+=GRAVITY*dt;
+    velY=Math.max(velY,TERM_VEL);
+    const groundHit=groundBelow(pos);
+    const floorY=groundHit?pos.y-groundHit.distance+playerHeight:null;
+    if(floorY!==null&&pos.y+velY*dt<=floorY){
+      pos.y=floorY;
+      velY=0;
+      onGround=true;
+    } else {
+      // ceiling check
+      if(velY>0&&wallBlocked(pos,new THREE.Vector3(0,1,0))) velY=0;
+      pos.y+=velY*dt;
+      onGround=false;
+    }
+    // Land detection: if flying was just turned off mid-air, fall naturally ^
+    // If player lands, auto-exit fly (already off here)
+    if(onGround&&isFlying){ isFlying=false; document.getElementById('fly-badge').classList.add('hidden'); noClip=false; window.toggleNoClip&&window.toggleNoClip(); noClip=false; document.getElementById('noclip-btn')&&(document.getElementById('noclip-btn').textContent='⧆ Phase-Through: OFF'); }
+
+    // ── Head bob — rotation-based (fixes far-object parallax) ───────
+    const isMoving=keys['KeyW']||keys['KeyS']||keys['KeyA']||keys['KeyD']||
+                   keys['ArrowUp']||keys['ArrowDown']||keys['ArrowLeft']||keys['ArrowRight'];
+    if(onGround&&isMoving&&isLocked&&!isFlying){
+      bobTime+=dt*(isSprinting?11.0:7.5);
+      const t=bobTime;
+      // Pitch dip at each footfall (rotation — same angle for near & far)
+      const tPitch=-Math.abs(Math.sin(t))*(isSprinting?0.024:0.015);
+      // Yaw swing L/R (rotation — no parallax on far objects)
+      const tYaw=Math.sin(t)*(isSprinting?0.020:0.012);
+      // Subtle physical height for grounded feel
+      const tY=-Math.abs(Math.sin(t))*(isSprinting?0.050:0.030);
+      const baseFov=isSprinting?79:75;
+      bobPitchOff+=(tPitch-bobPitchOff)*0.38;
+      bobYawOff+=(tYaw-bobYawOff)*0.38;
+      camera.position.y+=(tY-camera.position.y)*0.38;
+      camera.fov=baseFov+Math.abs(Math.sin(t))*(isSprinting?3.2:1.8);
+      camera.updateProjectionMatrix();
+    } else {
+      bobTime*=0.90;
+      bobPitchOff+=(0-bobPitchOff)*0.10;
+      bobYawOff+=(0-bobYawOff)*0.10;
+      camera.position.y+=(0-camera.position.y)*0.10;
+      camera.position.x+=(0-camera.position.x)*0.10;
+      camera.fov+=(75-camera.fov)*0.12; camera.updateProjectionMatrix();
+    }
+  }
+
+  // Apply look + bob rotations every frame (works in both walk & fly)
+  yawObj.rotation.y=yaw+bobYawOff;
+  camera.rotation.x=pitch+bobPitchOff;
+  renderer.render(scene,camera);
+}
+
+window.startPointerLock=function(){
+  document.getElementById('viewer-canvas').requestPointerLock();
+};
+
+window.exitViewer=function(){
+  document.exitPointerLock();
+  if(animFrameId) cancelAnimationFrame(animFrameId);
+  document.removeEventListener('mousemove',onMouseMove);
+  if(renderer){renderer.dispose();renderer=null;}
+  scene=null;camera=null;yawObj=null;modelMeshes=[];
+  selectedFile=null;
+  document.getElementById('viewer-ui').classList.add('hidden');
+  document.getElementById('upload-ui').classList.remove('hidden');
+  document.querySelector('footer').classList.remove('hidden');
+  document.getElementById('load-btn').disabled=true;
+  document.getElementById('load-btn').className="mt-6 w-full py-4 rounded-xl font-bold text-lg font-['Plus_Jakarta_Sans'] bg-primary/20 text-primary/40 cursor-not-allowed transition-all duration-300";
+  document.getElementById('file-name-display').textContent='';
+  document.getElementById('load-progress').classList.add('hidden');
+};
+</script>
 </body>
 </html>

@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BuildCalc — Construction Cost Estimator</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0C0C1D;
+    --surface: #13132A;
+    --surface-2: #1A1A38;
+    --border: rgba(255,255,255,0.07);
+    --border-hover: rgba(255,255,255,0.14);
+    --accent: #C5FF47;
+    --accent-dim: rgba(197,255,71,0.12);
+    --purple: #7055F5;
+    --purple-dim: rgba(112,85,245,0.15);
+    --text: #F0EFFB;
+    --text-2: #8887AA;
+    --text-3: #4E4D6E;
+    --radius: 3px;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* NAV */
+  nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 2.5rem;
+    height: 64px;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    background: var(--bg);
+    z-index: 100;
+  }
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text);
+    text-decoration: none;
+  }
+  .logo-mark {
+    width: 28px;
+    height: 28px;
+    background: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .logo-mark span {
+    font-size: 13px;
+    font-weight: 800;
+    color: #0C0C1D;
+    font-family: 'DM Mono', monospace;
+  }
+  .nav-badge {
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+    color: var(--text-2);
+    letter-spacing: 0.05em;
+    border: 1px solid var(--border);
+    padding: 4px 10px;
+  }
+
+  /* HERO */
+  .hero {
+    padding: 5rem 2.5rem 3rem;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+  .hero-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+    color: var(--accent);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+  }
+  .hero-tag::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    background: var(--accent);
+    display: block;
+  }
+  h1 {
+    font-size: clamp(2.4rem, 5vw, 4rem);
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    margin-bottom: 1rem;
+  }
+  h1 em {
+    font-style: normal;
+    color: var(--accent);
+  }
+  .hero-sub {
+    color: var(--text-2);
+    font-size: 1rem;
+    font-weight: 400;
+    max-width: 500px;
+    line-height: 1.65;
+  }
+
+  /* MAIN GRID */
+  .main {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 2.5rem 5rem;
+    display: grid;
+    grid-template-columns: 1fr 360px;
+    gap: 2px;
+    align-items: start;
+  }
+
+  /* LEFT: FORM */
+  .form-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .section-label {
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-2);
+  }
+  .step-num {
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+    color: var(--text-3);
+  }
+
+  .form-body {
+    padding: 1.5rem;
+  }
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+  .form-row.full { grid-template-columns: 1fr; }
+
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+  }
+  label {
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+    letter-spacing: 0.08em;
+    color: var(--text-2);
+    text-transform: uppercase;
+  }
+
+  input[type="number"], select {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.95rem;
+    padding: 0.6rem 0.8rem;
+    width: 100%;
+    outline: none;
+    transition: border-color 0.15s;
+    border-radius: 0;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+  input[type="number"]:focus, select:focus {
+    border-color: var(--purple);
+  }
+  input[type="number"]::placeholder { color: var(--text-3); }
+
+  .select-wrap {
+    position: relative;
+  }
+  .select-wrap::after {
+    content: '▾';
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-3);
+    font-size: 12px;
+    pointer-events: none;
+  }
+  select option { background: #1A1A38; }
+
+  /* Quality picker */
+  .quality-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2px;
+  }
+  .q-btn {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text-2);
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 0.7rem 0.4rem;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.12s;
+    border-radius: 0;
+  }
+  .q-btn:hover { border-color: var(--border-hover); color: var(--text); }
+  .q-btn.active {
+    background: var(--purple-dim);
+    border-color: var(--purple);
+    color: var(--text);
+  }
+  .q-btn .rate {
+    display: block;
+    font-size: 9.5px;
+    color: var(--text-3);
+    margin-top: 3px;
+    letter-spacing: 0;
+  }
+  .q-btn.active .rate { color: var(--purple); }
+
+  /* Divider */
+  .form-divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 1.25rem 0;
+  }
+
+  /* CTA */
+  .calc-btn {
+    width: 100%;
+    background: var(--accent);
+    color: #0C0C1D;
+    border: none;
+    font-family: 'Syne', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 1rem;
+    cursor: pointer;
+    transition: opacity 0.15s, transform 0.1s;
+    border-radius: 0;
+  }
+  .calc-btn:hover { opacity: 0.9; }
+  .calc-btn:active { transform: scale(0.99); }
+
+  /* RIGHT: RESULTS */
+  .results-panel {
+    position: sticky;
+    top: 80px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .result-total {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 1.5rem;
+  }
+  .result-label {
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+    letter-spacing: 0.1em;
+    color: var(--text-2);
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+  }
+  .result-value {
+    font-size: 2.4rem;
+    font-family: 'DM Mono', monospace;
+    font-weight: 500;
+    color: var(--accent);
+    letter-spacing: -0.02em;
+    line-height: 1;
+  }
+  .result-sub {
+    font-size: 12px;
+    font-family: 'DM Mono', monospace;
+    color: var(--text-2);
+    margin-top: 0.4rem;
+  }
+  .result-range {
+    display: flex;
+    gap: 2px;
+    margin-top: 1rem;
+  }
+  .range-item {
+    flex: 1;
+    background: var(--surface-2);
+    padding: 0.65rem 0.75rem;
+  }
+  .range-item .ri-label {
+    font-size: 9px;
+    font-family: 'DM Mono', monospace;
+    letter-spacing: 0.1em;
+    color: var(--text-3);
+    text-transform: uppercase;
+  }
+  .range-item .ri-val {
+    font-size: 13px;
+    font-family: 'DM Mono', monospace;
+    color: var(--text);
+    margin-top: 3px;
+  }
+
+  /* Breakdown */
+  .breakdown-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 1.25rem 1.5rem;
+  }
+  .breakdown-title {
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+    letter-spacing: 0.1em;
+    color: var(--text-2);
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .breakdown-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.65rem;
+    gap: 10px;
+  }
+  .breakdown-item:last-child { margin-bottom: 0; }
+  .bi-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    min-width: 0;
+  }
+  .bi-dot {
+    width: 8px;
+    height: 8px;
+    flex-shrink: 0;
+  }
+  .bi-name {
+    font-size: 12px;
+    font-family: 'DM Mono', monospace;
+    color: var(--text-2);
+    white-space: nowrap;
+  }
+  .bi-bar-wrap {
+    flex: 1;
+    height: 2px;
+    background: var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+  .bi-bar {
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    transition: width 0.4s ease;
+  }
+  .bi-amount {
+    font-size: 12px;
+    font-family: 'DM Mono', monospace;
+    color: var(--text);
+    white-space: nowrap;
+  }
+
+  /* Materials */
+  .materials-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 1.25rem 1.5rem;
+  }
+  .mat-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px;
+    margin-top: 0.75rem;
+  }
+  .mat-item {
+    background: var(--bg);
+    padding: 0.65rem 0.75rem;
+  }
+  .mat-val {
+    font-family: 'DM Mono', monospace;
+    font-size: 15px;
+    color: var(--text);
+    font-weight: 500;
+  }
+  .mat-name {
+    font-family: 'DM Mono', monospace;
+    font-size: 9.5px;
+    letter-spacing: 0.08em;
+    color: var(--text-3);
+    text-transform: uppercase;
+    margin-top: 3px;
+  }
+
+  /* Disclaimer */
+  .disclaimer {
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+    color: var(--text-3);
+    line-height: 1.6;
+    padding: 1rem 1.5rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+  }
+
+  /* Placeholder state */
+  .placeholder-state {
+    text-align: center;
+    padding: 3rem 1.5rem;
+    color: var(--text-3);
+  }
+  .placeholder-icon {
+    font-size: 2rem;
+    margin-bottom: 0.75rem;
+    opacity: 0.4;
+  }
+  .placeholder-state p {
+    font-size: 12px;
+    font-family: 'DM Mono', monospace;
+    letter-spacing: 0.06em;
+    line-height: 1.6;
+  }
+
+  /* FOOTER */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 1.5rem 2.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+  footer p {
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+    color: var(--text-3);
+  }
+
+  /* Hidden results */
+  .results-content { display: none; }
+  .results-content.visible { display: flex; flex-direction: column; gap: 2px; }
+
+  @media (max-width: 860px) {
+    .main { grid-template-columns: 1fr; }
+    .results-panel { position: static; }
+    .quality-grid { grid-template-columns: 1fr 1fr; }
+    .form-row { grid-template-columns: 1fr; }
+    h1 { font-size: 2.2rem; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="#" class="logo">
+    <div class="logo-mark"><span>BC</span></div>
+    BuildCalc
+  </a>
+  <span class="nav-badge">India Construction Estimator</span>
+</nav>
+
+<div class="hero">
+  <div class="hero-tag">Free Estimation Tool</div>
+  <h1>Estimate your<br><em>construction cost</em><br>in seconds.</h1>
+  <p class="hero-sub">Input your project specifications and get an instant cost breakdown — materials, labour, MEP, finishes and more.</p>
+</div>
+
+<div class="main">
+
+  <!-- FORM -->
+  <div class="form-panel">
+
+    <div class="section-header">
+      <span class="section-label">Project Details</span>
+      <span class="step-num">Step 01 — 03</span>
+    </div>
+
+    <div class="form-body">
+
+      <div class="form-row">
+        <div class="field">
+          <label>Built-up Area (sq ft)</label>
+          <input type="number" id="area" placeholder="e.g. 1200" min="100" max="100000">
+        </div>
+        <div class="field">
+          <label>Number of Floors</label>
+          <div class="select-wrap">
+            <select id="floors">
+              <option value="1">Ground Floor (G)</option>
+              <option value="2">G + 1</option>
+              <option value="3">G + 2</option>
+              <option value="4">G + 3</option>
+              <option value="5">G + 4</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="field">
+          <label>City / Location Tier</label>
+          <div class="select-wrap">
+            <select id="city">
+              <option value="1.35">Metro — Mumbai, Delhi, NCR</option>
+              <option value="1.25">Tier 1 — Bangalore, Hyderabad</option>
+              <option value="1.2">Tier 1 — Chennai, Pune, Kolkata</option>
+              <option value="1.0" selected>Tier 2 — Jaipur, Surat, Lucknow</option>
+              <option value="0.9">Tier 2 — Coimbatore, Nagpur, Indore</option>
+              <option value="0.8">Tier 3 — Smaller Cities &amp; Towns</option>
+            </select>
+          </div>
+        </div>
+        <div class="field">
+          <label>Construction Type</label>
+          <div class="select-wrap">
+            <select id="type">
+              <option value="1.0">Residential</option>
+              <option value="1.2">Commercial</option>
+              <option value="1.15">Mixed Use</option>
+              <option value="0.9">Industrial / Warehouse</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <hr class="form-divider">
+      <div class="section-label" style="margin-bottom:0.75rem;">Quality Grade</div>
+
+      <div class="quality-grid">
+        <button class="q-btn" data-quality="budget" onclick="setQuality(this, 1400, 1800)">
+          Budget<span class="rate">₹1,400–1,800/sqft</span>
+        </button>
+        <button class="q-btn active" data-quality="standard" onclick="setQuality(this, 1800, 2500)">
+          Standard<span class="rate">₹1,800–2,500/sqft</span>
+        </button>
+        <button class="q-btn" data-quality="premium" onclick="setQuality(this, 2500, 3500)">
+          Premium<span class="rate">₹2,500–3,500/sqft</span>
+        </button>
+        <button class="q-btn" data-quality="luxury" onclick="setQuality(this, 3500, 5000)">
+          Luxury<span class="rate">₹3,500–5,000/sqft</span>
+        </button>
+      </div>
+
+      <hr class="form-divider">
+      <div class="section-label" style="margin-bottom:0.75rem;">Materials &amp; Finishes</div>
+
+      <div class="form-row">
+        <div class="field">
+          <label>Wall Material</label>
+          <div class="select-wrap">
+            <select id="wall">
+              <option value="1.0">Bricks (Standard)</option>
+              <option value="0.95">Cement Blocks 6"</option>
+              <option value="0.92">Cement Blocks 8"</option>
+              <option value="1.08">AAC / Aerated Blocks</option>
+            </select>
+          </div>
+        </div>
+        <div class="field">
+          <label>Flooring Type</label>
+          <div class="select-wrap">
+            <select id="floor">
+              <option value="1.0">Vitrified Tiles</option>
+              <option value="1.15">Granite</option>
+              <option value="1.3">Marble + Wood</option>
+              <option value="0.9">Basic Ceramic</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="field">
+          <label>Door Type</label>
+          <div class="select-wrap">
+            <select id="door">
+              <option value="1.0">OST Doors (Basic)</option>
+              <option value="1.12">Sal Wood</option>
+              <option value="1.22">Honne Wood</option>
+              <option value="1.38">Teak Wood (Premium)</option>
+            </select>
+          </div>
+        </div>
+        <div class="field">
+          <label>Soil / Foundation Type</label>
+          <div class="select-wrap">
+            <select id="soil">
+              <option value="1.0">Normal / Hard Soil</option>
+              <option value="1.1">Soft / Sandy Soil</option>
+              <option value="1.15">Rocky Terrain</option>
+              <option value="1.2">Hilly / Retaining Wall</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <hr class="form-divider">
+
+      <button class="calc-btn" onclick="calculate()">Calculate Estimate →</button>
+    </div>
+  </div>
+
+  <!-- RESULTS -->
+  <div class="results-panel">
+
+    <div id="placeholder" class="result-total">
+      <div class="placeholder-state">
+        <div class="placeholder-icon">◫</div>
+        <p>Fill in your project<br>details and click<br>Calculate to see results.</p>
+      </div>
+    </div>
+
+    <div id="results" class="results-content">
+
+      <div class="result-total">
+        <div class="result-label">Estimated Total Cost</div>
+        <div class="result-value" id="total-cost">—</div>
+        <div class="result-sub" id="cost-per-sqft">— per sq ft · — sq ft</div>
+        <div class="result-range">
+          <div class="range-item">
+            <div class="ri-label">Low Estimate</div>
+            <div class="ri-val" id="range-low">—</div>
+          </div>
+          <div class="range-item">
+            <div class="ri-label">High Estimate</div>
+            <div class="ri-val" id="range-high">—</div>
+          </div>
+          <div class="range-item">
+            <div class="ri-label">Floors</div>
+            <div class="ri-val" id="floors-val">—</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="breakdown-card">
+        <div class="breakdown-title">Cost Breakdown</div>
+        <div id="breakdown-list"></div>
+      </div>
+
+      <div class="materials-card">
+        <div class="breakdown-title" style="margin-bottom:0;">Approx. Material Quantities</div>
+        <div class="mat-grid" id="mat-grid"></div>
+      </div>
+
+      <div class="disclaimer">
+        ∗ Estimates are based on industry thumb-rules and do not include land cost, modular kitchens, premium furniture, landscaping, or permit fees. Actual costs may vary by ±15%. Consult a certified architect or contractor for a detailed BOQ.
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  <p>© 2024 BuildCalc. Estimates only. Not a substitute for professional advice.</p>
+  <p>Data based on India construction standards 2024–25.</p>
+</footer>
+
+<script>
+  let qualityLow = 1800, qualityHigh = 2500;
+
+  function setQuality(btn, low, high) {
+    document.querySelectorAll('.q-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    qualityLow = low;
+    qualityHigh = high;
+  }
+
+  function fmt(n) {
+    if (n >= 10000000) return '₹' + (n / 10000000).toFixed(2) + ' Cr';
+    if (n >= 100000) return '₹' + (n / 100000).toFixed(2) + ' L';
+    return '₹' + Math.round(n).toLocaleString('en-IN');
+  }
+
+  function calculate() {
+    const area = parseFloat(document.getElementById('area').value);
+    if (!area || area < 100) {
+      document.getElementById('area').focus();
+      document.getElementById('area').style.borderColor = '#FF5566';
+      setTimeout(() => document.getElementById('area').style.borderColor = '', 1500);
+      return;
+    }
+
+    const floors = parseFloat(document.getElementById('floors').value);
+    const cityMult = parseFloat(document.getElementById('city').value);
+    const typeMult = parseFloat(document.getElementById('type').value);
+    const wallMult = parseFloat(document.getElementById('wall').value);
+    const floorMult = parseFloat(document.getElementById('floor').value);
+    const doorMult = parseFloat(document.getElementById('door').value);
+    const soilMult = parseFloat(document.getElementById('soil').value);
+
+    const totalArea = area * floors;
+    const matMult = (wallMult * 0.3 + floorMult * 0.4 + doorMult * 0.3);
+    const combined = cityMult * typeMult * matMult * soilMult;
+
+    const rateAvg = (qualityLow + qualityHigh) / 2;
+    const rateLow = qualityLow;
+    const rateHigh = qualityHigh;
+
+    const totalLow = Math.round(totalArea * rateLow * combined);
+    const totalHigh = Math.round(totalArea * rateHigh * combined);
+    const totalMid = Math.round(totalArea * rateAvg * combined);
+    const perSqft = Math.round(rateAvg * combined);
+
+    // Show results
+    document.getElementById('placeholder').style.display = 'none';
+    document.getElementById('results').classList.add('visible');
+
+    document.getElementById('total-cost').textContent = fmt(totalMid);
+    document.getElementById('cost-per-sqft').textContent =
+      '₹' + perSqft.toLocaleString('en-IN') + ' per sq ft · ' + Math.round(totalArea).toLocaleString('en-IN') + ' sq ft total';
+    document.getElementById('range-low').textContent = fmt(totalLow);
+    document.getElementById('range-high').textContent = fmt(totalHigh);
+    document.getElementById('floors-val').textContent = floors + (floors === 1 ? ' floor' : ' floors');
+
+    // Breakdown
+    const breakdown = [
+      { name: 'Structure / RCC', pct: 0.40, color: '#7055F5' },
+      { name: 'Finishing', pct: 0.25, color: '#C5FF47' },
+      { name: 'MEP (Elec + Plumbing)', pct: 0.15, color: '#44AAFF' },
+      { name: 'Interior Works', pct: 0.12, color: '#FF8844' },
+      { name: 'Miscellaneous', pct: 0.08, color: '#888' },
+    ];
+
+    const bList = document.getElementById('breakdown-list');
+    bList.innerHTML = breakdown.map(b => {
+      const amt = Math.round(totalMid * b.pct);
+      return `<div class="breakdown-item">
+        <div class="bi-left">
+          <div class="bi-dot" style="background:${b.color}"></div>
+          <span class="bi-name">${b.name}</span>
+          <div class="bi-bar-wrap">
+            <div class="bi-bar" style="width:${b.pct * 100}%; background:${b.color}; opacity:0.5;"></div>
+          </div>
+        </div>
+        <span class="bi-amount">${fmt(amt)}</span>
+      </div>`;
+    }).join('');
+
+    // Materials (per 1000 sqft thumb rule, scaled)
+    const sf = totalArea / 1000;
+    const mats = [
+      { val: Math.round(400 * sf), unit: 'bags', name: 'Cement' },
+      { val: Math.round(4 * totalArea), unit: 'kg', name: 'Steel (TMT)' },
+      { val: Math.round(51 * sf), unit: 'm³', name: 'River Sand' },
+      { val: Math.round(38 * sf), unit: 'm³', name: 'Aggregate' },
+      { val: Math.round(8000 * sf), unit: 'nos', name: 'Bricks / Blocks' },
+      { val: Math.round(180 * sf), unit: 'ltrs', name: 'Paint' },
+    ];
+
+    document.getElementById('mat-grid').innerHTML = mats.map(m =>
+      `<div class="mat-item">
+        <div class="mat-val">${m.val.toLocaleString('en-IN')} <span style="font-size:10px;color:var(--text-3)">${m.unit}</span></div>
+        <div class="mat-name">${m.name}</div>
+      </div>`
+    ).join('');
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Edit Space: Modern Villa | EnvizStudio</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Inter:wght@300;400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">tailwind.config = {darkMode: "class", theme: {extend: {colors: {"on-secondary-container": "#242d00", "on-primary-fixed": "#290055", "primary-fixed-dim": "#d8b9ff", "on-tertiary-fixed": "#1a1c1c", "secondary-container": "#839a17", "on-surface": "#e2dfff", primary: "#d8b9ff", "secondary-fixed-dim": "#b7d24e", "inverse-surface": "#e2dfff", tertiary: "#c6c6c7", "tertiary-fixed": "#e2e2e2", "on-tertiary-fixed-variant": "#454747", "on-tertiary": "#2f3131", "primary-fixed": "#eddcff", "surface-container-lowest": "#0a092c", "tertiary-fixed-dim": "#c6c6c7", "tertiary-container": "#909191", "inverse-primary": "#7c2dda", "surface-tint": "#d8b9ff", "inverse-on-surface": "#2d2d50", "on-error": "#690005", "surface-dim": "#100f31", "on-primary-fixed-variant": "#6200bc", "on-primary": "#450087", "surface-variant": "#323154", "surface-container": "#1c1c3e", "surface-container-highest": "#323154", secondary: "#b7d24e", "outline-variant": "#4b4454", "surface-bright": "#363559", error: "#ffb4ab", "on-error-container": "#ffdad6", "surface-container-high": "#272649", "on-secondary-fixed": "#181e00", outline: "#978da0", "on-primary-container": "#3c0077", surface: "#100f31", "on-secondary-fixed-variant": "#3f4c00", "surface-container-low": "#181739", "error-container": "#93000a", "on-surface-variant": "#cec2d7", "on-tertiary-container": "#282a2a", "secondary-fixed": "#d3ef67", "on-secondary": "#2a3400", "primary-container": "#ad72ff", background: "#100f31", "on-background": "#e2dfff"}, borderRadius: {DEFAULT: "0.25rem", lg: "0.5rem", xl: "0.75rem", full: "9999px"}, fontFamily: {headline: ["Plus Jakarta Sans"], body: ["Inter"], label: ["Inter"], display: "Plus Jakarta Sans"}}}};</script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #0b092c;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #323154;
+            border-radius: 10px;
+        }
+        .glass-header {
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body selection:bg-primary selection:text-on-primary-container">
+<!-- TopNavBar - Rendered based on Shared Components JSON -->
+<nav class="docked full-width top-0 sticky z-50 bg-[#100f31] dark:bg-[#100f31] backdrop-blur-xl bg-opacity-60 tonal-shift-no-borders bg-[#272649] flat no shadows">
+<div class="flex justify-between items-center w-full px-8 py-4 max-w-screen-2xl mx-auto font-['Plus_Jakarta_Sans'] tracking-tight">
+<div class="flex items-center gap-12">
+<span class="text-2xl font-bold tracking-tighter text-[#d8b9ff]">EnvizStudio</span>
+<div class="hidden md:flex gap-8 items-center">
+<a class="text-[#cec2d7] hover:text-[#d8b9ff] transition-all duration-300" href="#">Spaces</a>
+<a class="text-[#cec2d7] hover:text-[#d8b9ff] transition-all duration-300" href="#">Solutions</a>
+<a class="text-[#cec2d7] hover:text-[#d8b9ff] transition-all duration-300" href="#">Pricing</a>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<button class="hidden md:flex items-center text-[#cec2d7] hover:text-[#d8b9ff] transition-all">Log In</button>
+<button class="bg-secondary text-on-secondary px-6 py-2 rounded-full font-bold transition-all duration-300 hover:bg-secondary-container active:scale-95">Upload</button>
+<div class="w-10 h-10 rounded-full bg-surface-container-highest flex items-center justify-center border border-outline-variant/20 overflow-hidden">
+<img alt="User Profile" class="w-full h-full object-cover" data-alt="professional portrait of a creative designer with neutral background and soft studio lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCVV88JOCsquLNwkI6p18voCPZTPF6_ZiFm1XaoVr7AfUeBQPjaOp6JfoJrFdhIBtMdmsXNimzGa60E-S36XcPtQKhvyiExf0JG3cPo1Hj-g7qcD05E0OYNM9MN2Tl7YYD8JlGudRMz8aCw4V2wQ7FfnHZVLErnDftG6ZiZLsbYN9taykYHz_cDIv0ZNbioL133JICz1L35wYHGqxiNpi_8qXvNyWzdvV0_MkjhOh3q-aeF851H2QSyozlV_aGYVZbzzu08fhiv0zA"/>
+</div>
+</div>
+</div>
+</nav>
+<main class="max-w-screen-2xl mx-auto px-8 py-12">
+<!-- Header Section -->
+<header class="mb-12">
+<div class="flex items-center gap-4 text-on-surface-variant mb-2">
+<span class="material-symbols-outlined text-sm">arrow_back</span>
+<span class="font-label text-xs uppercase tracking-widest">Back to Dashboard</span>
+</div>
+<h1 class="text-4xl md:text-5xl font-headline font-extrabold tracking-tighter text-on-surface">Edit Space: Modern Villa</h1>
+</header>
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-12">
+<!-- Main Form Column -->
+<form class="lg:col-span-8 space-y-12">
+<!-- General Info Section -->
+<section class="space-y-6">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div class="space-y-2">
+<label class="font-label text-xs uppercase tracking-widest text-on-surface-variant">Space Title</label>
+<input class="w-full bg-surface-container-lowest border-none rounded-lg p-4 text-on-surface focus:ring-2 focus:ring-primary placeholder:text-outline transition-all" type="text" value="Modern Villa"/>
+</div>
+<div class="space-y-2">
+<label class="font-label text-xs uppercase tracking-widest text-on-surface-variant">URL Slug</label>
+<div class="flex items-center bg-surface-container-lowest rounded-lg overflow-hidden">
+<span class="px-4 text-on-surface-variant text-sm font-medium border-r border-outline-variant/10">enviz.studio/s/</span>
+<input class="flex-1 bg-transparent border-none p-4 text-on-surface focus:ring-0" type="text" value="modern-villa-01"/>
+</div>
+</div>
+</div>
+<div class="space-y-2">
+<label class="font-label text-xs uppercase tracking-widest text-on-surface-variant">Tagline</label>
+<input class="w-full bg-surface-container-lowest border-none rounded-lg p-4 text-on-surface focus:ring-2 focus:ring-primary placeholder:text-outline transition-all" placeholder="A brief hook for your 3D experience..." type="text"/>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div class="space-y-2">
+<label class="font-label text-xs uppercase tracking-widest text-on-surface-variant">Classification</label>
+<select class="w-full bg-surface-container-lowest border-none rounded-lg p-4 text-on-surface focus:ring-2 focus:ring-primary appearance-none transition-all">
+<option>Residential Interior</option>
+<option>Commercial Office</option>
+<option>Hospitality</option>
+<option>Retail</option>
+</select>
+</div>
+<div class="space-y-2">
+<label class="font-label text-xs uppercase tracking-widest text-on-surface-variant">Kind of Project</label>
+<select class="w-full bg-surface-container-lowest border-none rounded-lg p-4 text-on-surface focus:ring-2 focus:ring-primary appearance-none transition-all">
+<option>Unity WebGL</option>
+<option>Unreal Engine Pixel Stream</option>
+<option>Three.js / React Three Fiber</option>
+<option>Static 360 Tour</option>
+</select>
+</div>
+</div>
+</section>
+<!-- File Upload Section -->
+<section class="space-y-4">
+<h3 class="text-xl font-headline font-bold text-on-surface">Space Deployment</h3>
+<div class="relative group">
+<div class="w-full h-64 border-2 border-dashed border-outline-variant/30 rounded-xl bg-surface-container-low flex flex-col items-center justify-center gap-4 transition-all group-hover:border-primary/50 group-hover:bg-surface-container">
+<div class="w-16 h-16 rounded-full bg-surface-container-highest flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-4xl">cloud_upload</span>
+</div>
+<div class="text-center">
+<p class="text-on-surface font-medium">Click to upload or drag and drop ZIP file</p>
+<p class="text-on-surface-variant text-sm mt-1">Unity WebGL build (Max 500MB)</p>
+</div>
+<button class="mt-2 bg-surface-container-highest text-primary px-6 py-2 rounded-lg font-bold hover:bg-surface-variant transition-all" type="button">Select Archive</button>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-6 mt-6">
+<div class="space-y-2">
+<label class="font-label text-xs uppercase tracking-widest text-on-surface-variant text-center block">Embed Width</label>
+<input class="w-full bg-surface-container-lowest border-none rounded-lg p-4 text-on-surface focus:ring-2 focus:ring-primary text-center" type="number" value="1280"/>
+</div>
+<div class="space-y-2">
+<label class="font-label text-xs uppercase tracking-widest text-on-surface-variant text-center block">Embed Height</label>
+<input class="w-full bg-surface-container-lowest border-none rounded-lg p-4 text-on-surface focus:ring-2 focus:ring-primary text-center" type="number" value="720"/>
+</div>
+</div>
+</section>
+<!-- Detailed Content -->
+<section class="space-y-6">
+<div class="space-y-2">
+<label class="font-label text-xs uppercase tracking-widest text-on-surface-variant">Description</label>
+<div class="rounded-xl overflow-hidden border border-outline-variant/10 bg-surface-container-lowest">
+<div class="flex gap-4 p-3 border-b border-outline-variant/10 bg-surface-container-low">
+<button class="material-symbols-outlined text-on-surface-variant hover:text-primary" type="button">format_bold</button>
+<button class="material-symbols-outlined text-on-surface-variant hover:text-primary" type="button">format_italic</button>
+<button class="material-symbols-outlined text-on-surface-variant hover:text-primary" type="button">list</button>
+<button class="material-symbols-outlined text-on-surface-variant hover:text-primary" type="button">link</button>
+</div>
+<textarea class="w-full bg-transparent border-none p-6 text-on-surface focus:ring-0 placeholder:text-outline" placeholder="Describe the architectural intent, lighting setup, and interactive features..." rows="8"></textarea>
+</div>
+</div>
+<div class="space-y-2">
+<label class="font-label text-xs uppercase tracking-widest text-on-surface-variant">Tags</label>
+<div class="flex flex-wrap gap-2 p-3 bg-surface-container-lowest rounded-lg border-none">
+<span class="bg-primary/10 text-primary px-3 py-1 rounded-full text-sm flex items-center gap-2">Minimalist <button class="material-symbols-outlined text-xs">close</button></span>
+<span class="bg-primary/10 text-primary px-3 py-1 rounded-full text-sm flex items-center gap-2">Architecture <button class="material-symbols-outlined text-xs">close</button></span>
+<span class="bg-primary/10 text-primary px-3 py-1 rounded-full text-sm flex items-center gap-2">Real-time <button class="material-symbols-outlined text-xs">close</button></span>
+<input class="bg-transparent border-none focus:ring-0 text-sm flex-1 min-w-[120px]" placeholder="Add more..." type="text"/>
+</div>
+</div>
+</section>
+<!-- Visibility Section -->
+<section class="bg-surface-container-low p-8 rounded-2xl space-y-6">
+<h3 class="text-xl font-headline font-bold text-on-surface">Visibility &amp; Access</h3>
+<div class="space-y-4">
+<label class="flex items-center gap-4 cursor-pointer group">
+<input class="w-5 h-5 text-secondary border-outline-variant bg-surface-container-lowest focus:ring-secondary" name="visibility" type="radio"/>
+<div>
+<p class="text-on-surface font-semibold group-hover:text-secondary transition-colors">Draft</p>
+<p class="text-on-surface-variant text-sm">Only you can view and edit this space.</p>
+</div>
+</label>
+<label class="flex items-center gap-4 cursor-pointer group">
+<input class="w-5 h-5 text-secondary border-outline-variant bg-surface-container-lowest focus:ring-secondary" name="visibility" type="radio"/>
+<div>
+<p class="text-on-surface font-semibold group-hover:text-secondary transition-colors">Restricted</p>
+<p class="text-on-surface-variant text-sm">Only people with the secret link can access.</p>
+</div>
+</label>
+<label class="flex items-center gap-4 cursor-pointer group">
+<input checked="" class="w-5 h-5 text-secondary border-outline-variant bg-surface-container-lowest focus:ring-secondary" name="visibility" type="radio"/>
+<div>
+<p class="text-on-surface font-semibold group-hover:text-secondary transition-colors">Public</p>
+<p class="text-on-surface-variant text-sm">Anyone can find and view this on EnvizStudio.</p>
+</div>
+</label>
+</div>
+</section>
+</form>
+<!-- Sidebar -->
+<aside class="lg:col-span-4 space-y-8">
+<!-- Cover Image -->
+<div class="space-y-4">
+<label class="font-label text-xs uppercase tracking-widest text-on-surface-variant">Cover Image</label>
+<div class="aspect-[4/3] rounded-2xl bg-surface-container-high relative overflow-hidden group border border-outline-variant/10">
+<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" data-alt="ultra-modern luxury villa interior with floor-to-ceiling windows, white marble floors, and evening warm lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCYPCNZbATf-2JDQtdi0re0OnLr5ZN7ejGlERNXQE01iNSKu6rtCt5cyOJb6F5QIxLNIO4U5ZsHeZCuTZp3QHqXcEkzV6vR5JIevhxSDKffWCEsvLdu8zdP26yva32hLhj0rsVh-H4dEoFJH8EOY-dW_ZgGHOtmCWAVziHZ0-PeLVYVp5bwuUBIhdVrbhLWS0fsgUWEyG1zrFmbDR8w10AKlbqdGp0FcGDHHvWUP6vco-PjjXqN6zQtrkHcKpUCxn_FLSoMHpffv0E"/>
+<div class="absolute inset-0 bg-surface/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2">
+<span class="material-symbols-outlined text-4xl text-primary">add_a_photo</span>
+<span class="font-bold text-primary">Replace Cover</span>
+</div>
+</div>
+<p class="text-xs text-on-surface-variant italic">Recommended size: 1600x1200px. JPG or PNG.</p>
+</div>
+<!-- Video Trailer -->
+<div class="space-y-4">
+<label class="font-label text-xs uppercase tracking-widest text-on-surface-variant">Video Trailer Link</label>
+<div class="flex items-center bg-surface-container-lowest rounded-lg overflow-hidden px-4 border border-outline-variant/5">
+<span class="material-symbols-outlined text-on-surface-variant">play_circle</span>
+<input class="flex-1 bg-transparent border-none p-4 text-on-surface focus:ring-0" placeholder="YouTube or Vimeo URL" type="text"/>
+</div>
+</div>
+<!-- Screenshots Gallery -->
+<div class="space-y-4">
+<div class="flex justify-between items-center">
+<label class="font-label text-xs uppercase tracking-widest text-on-surface-variant">Screenshots</label>
+<button class="text-primary text-xs font-bold hover:underline">Add More</button>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div class="aspect-square rounded-xl bg-surface-container-lowest overflow-hidden border border-outline-variant/10 group cursor-pointer">
+<img class="w-full h-full object-cover group-hover:opacity-50 transition-opacity" data-alt="minimalist architectural bathroom with freestanding tub, stone walls, and soft natural top lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDZHKLhzdbmhoX5-GZi3zxMTBzk4yxS_IbOFWTqULoiQrACELEQSAlxzBUvUZb556lu51GrLm4tHxYjZEvOA7ssPGBwpUilvy5mYRCY1Voh4n6HcHjogV6it-t4qEn1nmulhDX3fZ9w4pLWfAQbCpHTUX2DNhzhgcZRHTkUsCwF-OQZII0xePvybILcxFxKAY2QbK7lXbKaRkm-ILfiRvA0Q6_ho7Vvpqev_lubxCko2ehL8JLcHnCwJ-8Po5EGxbsidFEOryQ3dmE"/>
+</div>
+<div class="aspect-square rounded-xl bg-surface-container-lowest overflow-hidden border border-outline-variant/10 group cursor-pointer">
+<img class="w-full h-full object-cover group-hover:opacity-50 transition-opacity" data-alt="modern living room with designer furniture, large abstract painting, and sunset light through slats" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCvWEWSaAFhvs-5T7nzzFlkHPbi8KaDc64OtBIUMB9Q_5VCX-D2EBN-PGFPxbNXlN5sAaLS87b0lP9fmT6o6E2Q5GFUjjZsG0tdhwk9kFWeAPPsI-vbF9kqjrcrKrH24NHzR3_lnqCQEnAjm4hkN8MUvcZbXPa0IKIOnJ7lnMuIVK8bIbcjOCiKMMvboMOVBpvXE24FqMZPfhgY13aTvXAyeMfL0QCvfnt2qnjGqRvxA_WW4cW-DTbSnAI1DeaFt0X4HCZzvBshrZM"/>
+</div>
+<div class="aspect-square rounded-xl bg-surface-container-lowest border-2 border-dashed border-outline-variant/20 flex items-center justify-center hover:border-primary/40 transition-colors group">
+<span class="material-symbols-outlined text-outline-variant group-hover:text-primary">add</span>
+</div>
+</div>
+</div>
+<!-- Submission Status Box -->
+<div class="p-6 rounded-2xl bg-surface-container-highest border border-primary-container/20">
+<div class="flex items-center gap-3 mb-4">
+<span class="material-symbols-outlined text-secondary">verified</span>
+<span class="font-bold text-on-surface">System Check</span>
+</div>
+<ul class="space-y-3">
+<li class="flex items-center gap-3 text-sm text-on-surface-variant">
+<span class="material-symbols-outlined text-secondary text-base">check_circle</span>
+                            WebGL Bundle Verified
+                        </li>
+<li class="flex items-center gap-3 text-sm text-on-surface-variant">
+<span class="material-symbols-outlined text-secondary text-base">check_circle</span>
+                            Cover Image optimized
+                        </li>
+<li class="flex items-center gap-3 text-sm text-error">
+<span class="material-symbols-outlined text-base">error</span>
+                            Missing Project Keywords
+                        </li>
+</ul>
+</div>
+</aside>
+</div>
+</main>
+<!-- Bottom Bar -->
+<div class="fixed bottom-0 left-0 right-0 bg-surface-container/80 glass-header border-t border-outline-variant/10 z-40">
+<div class="max-w-screen-2xl mx-auto px-8 py-6 flex justify-between items-center">
+<div class="flex items-center gap-4">
+<div class="w-2 h-2 rounded-full bg-secondary"></div>
+<span class="text-sm font-medium text-on-surface-variant">Last saved: 2 minutes ago</span>
+</div>
+<div class="flex items-center gap-6">
+<a class="text-on-surface-variant font-bold hover:text-primary transition-colors flex items-center gap-2" href="#">
+<span class="material-symbols-outlined text-xl">visibility</span>
+                    View Page
+                </a>
+<button class="bg-secondary text-on-secondary px-10 py-3 rounded-xl font-bold text-lg shadow-lg shadow-secondary/10 hover:shadow-secondary/20 transition-all active:scale-95" type="submit">
+                    Save Space
+                </button>
+</div>
+</div>
+</div>
+<!-- Footer - Rendered based on Shared Components JSON -->
+<footer class="full-width py-12 px-8 bg-[#0b092c] dark:bg-[#0b092c] tonal-shift from surface-container-lowest mt-20 mb-24">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center max-w-screen-2xl mx-auto font-['Inter'] text-sm tracking-wide uppercase">
+<div>
+<span class="text-lg font-black text-[#d8b9ff] mb-4 block">EnvizStudio</span>
+<p class="text-[#cec2d7]">© 2024 EnvizStudio. The Digital Atelier.</p>
+</div>
+<div class="flex flex-wrap md:justify-end gap-x-8 gap-y-4">
+<a class="text-[#cec2d7] hover:text-[#d8b9ff] transition-colors opacity-80 hover:opacity-100" href="#">Resources</a>
+<a class="text-[#cec2d7] hover:text-[#d8b9ff] transition-colors opacity-80 hover:opacity-100" href="#">Privacy Policy</a>
+<a class="text-[#cec2d7] hover:text-[#d8b9ff] transition-colors opacity-80 hover:opacity-100" href="#">Terms of Service</a>
+<a class="text-[#cec2d7] hover:text-[#d8b9ff] transition-colors opacity-80 hover:opacity-100" href="#">Help Center</a>
+</div>
+</div>
+</footer>
+<!-- Padding for bottom bar visibility -->
+<div class="h-24"></div>
+</body></html>
