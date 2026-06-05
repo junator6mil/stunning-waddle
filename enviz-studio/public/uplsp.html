@@ -295,6 +295,7 @@ let playerHeight=BASE_HEIGHT;
 let velY=0, onGround=false, isFlying=false, lastSpaceMs=0;
 let isSprinting=false, sprintLocked=false, lastWTapMs=0;
 let bobYawOff=0, bobPitchOff=0;
+let restoredBuffer=null; // holds ArrayBuffer loaded from IndexedDB
 // no-clip (phase through) — only active in fly mode
 let noClip=false;
 // on-screen button flags
@@ -327,63 +328,99 @@ window.previewPhoto=function(input){
   document.getElementById('photo-label').textContent=file.name;
 };
 
+// ── IndexedDB — model binary storage (no size limit) ──────────────────
+const IDB_DB='enviz_models', IDB_STORE='models';
+function _openIDB(){
+  return new Promise((res,rej)=>{
+    const r=indexedDB.open(IDB_DB,1);
+    r.onupgradeneeded=e=>e.target.result.createObjectStore(IDB_STORE);
+    r.onsuccess=e=>res(e.target.result);
+    r.onerror=rej;
+  });
+}
+async function _saveIDB(id,ab){
+  const db=await _openIDB();
+  return new Promise((res,rej)=>{ const tx=db.transaction(IDB_STORE,'readwrite'); tx.objectStore(IDB_STORE).put(ab,id); tx.oncomplete=res; tx.onerror=rej; });
+}
+async function _loadIDB(id){
+  const db=await _openIDB();
+  return new Promise((res,rej)=>{ const req=db.transaction(IDB_STORE,'readonly').objectStore(IDB_STORE).get(id); req.onsuccess=e=>res(e.target.result); req.onerror=rej; });
+}
+
+// ── Shared GLTF launch (used by fresh upload AND saved-model restore) ────
+// modelName / modelSize are display strings
+function launchGLTF(arrayBuffer, modelName, modelSize){
+  setProgress(40,'Initialising 3D engine…');
+  initThree();
+  setProgress(60,'Loading model…');
+  const loader=new GLTFLoader();
+  loader.parse(arrayBuffer,'',function(gltf){
+    setProgress(90,'Finalising…');
+    scene.add(gltf.scene);
+    modelMeshes=[];
+    gltf.scene.traverse(o=>{ if(o.isMesh) modelMeshes.push(o); });
+    const box=new THREE.Box3().setFromObject(gltf.scene);
+    const size=box.getSize(new THREE.Vector3());
+    const center=box.getCenter(new THREE.Vector3());
+    const spawnY=box.min.y+Math.max(size.y*0.25,1.7);
+    yawObj.position.set(center.x,spawnY,center.z);
+    yaw=0; pitch=0; yawObj.rotation.y=0; camera.rotation.x=0;
+    document.getElementById('model-name-badge').textContent=modelName;
+    document.getElementById('model-size-badge').textContent=modelSize;
+    setProgress(100,'Done!');
+    setTimeout(()=>{
+      document.getElementById('upload-ui').classList.add('hidden');
+      document.getElementById('viewer-ui').classList.remove('hidden');
+      document.querySelector('footer').classList.add('hidden');
+      resizeRenderer();
+      animate();
+    },300);
+  },function(err){
+    document.getElementById('progress-text').textContent='Error: '+err.message;
+    document.getElementById('progress-text').style.color='#ffb4ab';
+  });
+}
+
+// ── Load model (fresh upload) ─────────────────────────────────────────
 window.loadModel=function(){
-  if(!selectedFile) return;
-  // Save metadata to localStorage
+  if(!selectedFile && !restoredBuffer) return;
   const _name=(document.getElementById('space-name').value.trim())||selectedFile.name.replace(/\.(glb|gltf)$/i,'');
   const _desc=document.getElementById('space-desc').value.trim();
   const _photoInput=document.getElementById('cover-photo-input');
+  // Re-use existing ID if editing a saved space, else create new
+  const _urlId=new URLSearchParams(window.location.search).get('id');
+  const _spaceId=_urlId||Date.now().toString();
   const _persist=(b64)=>{
     const sp=JSON.parse(localStorage.getItem('enviz_spaces')||'[]');
-    sp.unshift({id:Date.now().toString(),name:_name,description:_desc,photo:b64||'',modelFileName:selectedFile.name,createdAt:new Date().toISOString()});
+    const idx=sp.findIndex(s=>s.id===_spaceId);
+    const entry={id:_spaceId,name:_name,description:_desc,photo:b64||'',modelFileName:selectedFile.name,createdAt:idx>=0?sp[idx].createdAt:new Date().toISOString()};
+    if(idx>=0) sp[idx]=entry; else sp.unshift(entry);
     localStorage.setItem('enviz_spaces',JSON.stringify(sp.slice(0,50)));
   };
   if(_photoInput.files[0]){
-    const _fr=new FileReader();
-    _fr.onload=ev=>_persist(ev.target.result);
-    _fr.readAsDataURL(_photoInput.files[0]);
-  } else { _persist(''); }
+    const _fr=new FileReader(); _fr.onload=ev=>_persist(ev.target.result); _fr.readAsDataURL(_photoInput.files[0]);
+  } else {
+    // Preserve existing photo when re-opening a saved space
+    if(_urlId){ const ex=(JSON.parse(localStorage.getItem('enviz_spaces')||'[]')).find(s=>s.id===_urlId); _persist(ex?ex.photo:''); }
+    else { _persist(''); }
+  }
   document.getElementById('load-progress').classList.remove('hidden');
   document.getElementById('load-btn').disabled=true;
   setProgress(10,'Reading file…');
-  const reader=new FileReader();
-  reader.onload=function(e){
-    setProgress(40,'Initialising 3D engine…');
-    initThree();
-    setProgress(60,'Loading model…');
-    const loader=new GLTFLoader();
-    loader.parse(e.target.result,'',function(gltf){
-      setProgress(90,'Finalising…');
-      scene.add(gltf.scene);
-      // Collect meshes for collision
-      modelMeshes=[];
-      gltf.scene.traverse(o=>{ if(o.isMesh) modelMeshes.push(o); });
-      // Compute bounding box and spawn above centre
-      const box=new THREE.Box3().setFromObject(gltf.scene);
-      const size=box.getSize(new THREE.Vector3());
-      const center=box.getCenter(new THREE.Vector3());
-      // Spawn at 1/4 height above floor, at model centre XZ
-      const spawnY=box.min.y+Math.max(size.y*0.25, 1.7);
-      yawObj.position.set(center.x, spawnY, center.z);
-      yaw=0; pitch=0;
-      yawObj.rotation.y=0;
-      camera.rotation.x=0;
-      document.getElementById('model-name-badge').textContent=selectedFile.name;
-      document.getElementById('model-size-badge').textContent=formatBytes(selectedFile.size);
-      setProgress(100,'Done!');
-      setTimeout(()=>{
-        document.getElementById('upload-ui').classList.add('hidden');
-        document.getElementById('viewer-ui').classList.remove('hidden');
-        document.querySelector('footer').classList.add('hidden');
-        resizeRenderer();
-        animate();
-      },300);
-    },function(err){
-      document.getElementById('progress-text').textContent='Error: '+err.message;
-      document.getElementById('progress-text').style.color='#ffb4ab';
-    });
-  };
-  reader.readAsArrayBuffer(selectedFile);
+  if(selectedFile){
+    const reader=new FileReader();
+    reader.onload=function(e){
+      const ab=e.target.result;
+      _saveIDB(_spaceId,ab).catch(err=>console.warn('IDB save failed:',err));
+      launchGLTF(ab, selectedFile.name, formatBytes(selectedFile.size));
+    };
+    reader.readAsArrayBuffer(selectedFile);
+  } else {
+    // Use pre-loaded buffer from IndexedDB (no re-read needed)
+    const ab=restoredBuffer; restoredBuffer=null;
+    const _sp=(JSON.parse(localStorage.getItem('enviz_spaces')||'[]')).find(s=>s.id===_spaceId);
+    launchGLTF(ab, _sp?.modelFileName||_name, '');
+  }
 };
 
 function setProgress(pct,txt){
@@ -669,6 +706,37 @@ window.exitViewer=function(){
   document.getElementById('file-name-display').textContent='';
   document.getElementById('load-progress').classList.add('hidden');
 };
+// ── Auto-restore saved space when opened via ?id link ────────────────
+document.addEventListener('DOMContentLoaded',async()=>{
+  const id=new URLSearchParams(window.location.search).get('id');
+  if(!id) return;
+  const spaces=JSON.parse(localStorage.getItem('enviz_spaces')||'[]');
+  const space=spaces.find(s=>s.id===id);
+  if(!space) return;
+  // Pre-fill metadata fields
+  document.getElementById('space-name').value=space.name||'';
+  document.getElementById('space-desc').value=space.description||'';
+  if(space.photo){
+    const prev=document.getElementById('photo-preview');
+    prev.src=space.photo; prev.classList.remove('hidden');
+    document.getElementById('photo-label').textContent='Saved cover photo';
+  }
+  // Try to load model from IndexedDB
+  try{
+    const ab=await _loadIDB(id);
+    if(ab){
+      restoredBuffer=ab;
+      document.getElementById('file-name-display').textContent='✓ '+(space.modelFileName||'Model ready to walk');
+      const btn=document.getElementById('load-btn');
+      btn.disabled=false;
+      btn.className="mt-6 w-full py-4 rounded-xl font-bold text-lg font-['Plus_Jakarta_Sans'] bg-primary text-on-primary-container cursor-pointer transition-all duration-300 hover:brightness-110 active:scale-95";
+    } else {
+      document.getElementById('file-name-display').textContent='⚠ Model data not found — please re-upload the GLB file';
+    }
+  } catch(e){
+    document.getElementById('file-name-display').textContent='⚠ Re-upload the GLB file to walk this space';
+  }
+});
 </script>
 </body>
 </html>

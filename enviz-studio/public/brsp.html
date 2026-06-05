@@ -11,27 +11,43 @@
   .material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;}
   .glass-card{backdrop-filter:blur(20px);background-color:rgba(50,49,84,0.6);}
   @keyframes nav-shimmer{0%,100%{background-position:200% center}50%{background-position:0% center}}
-  .nav-bar{background:linear-gradient(90deg,#100f31 0%,#1a1040 40%,#100f31 100%);box-shadow:0 1px 0 rgba(216,185,255,.1),0 4px 24px rgba(120,60,220,.12);position:relative;}
+  .nav-bar{
+    background:linear-gradient(90deg,rgba(16,15,49,0.88) 0%,rgba(26,16,64,0.88) 40%,rgba(16,15,49,0.88) 100%);
+    backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
+    box-shadow:0 1px 0 rgba(216,185,255,.1),0 4px 24px rgba(120,60,220,.15);
+    position:relative;
+  }
   .nav-bar::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;background:linear-gradient(90deg,transparent,rgba(216,185,255,.25) 40%,rgba(183,210,78,.2) 60%,transparent);animation:nav-shimmer 6s ease-in-out infinite;background-size:200% auto;}
   .hover-line{transition:transform .5s;transform:scaleX(0);transform-origin:left;}
   .group:hover .hover-line{transform:scaleX(1);}
   @keyframes fadein{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
   .fadein{animation:fadein .4s ease forwards;}
-  /* Navy grain texture for empty state */
-  .tri-bg{
-    position:absolute;inset:0;
-    background-color:#1c3870;
-    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.09'/%3E%3C/svg%3E");
-    background-size:300px 300px;
-    opacity:0.45;
-    -webkit-mask:radial-gradient(ellipse 80% 70% at 50% 50%,#000 0%,transparent 75%);
-    mask:radial-gradient(ellipse 80% 70% at 50% 50%,#000 0%,transparent 75%);
-    pointer-events:none;
+  /* ── Smooth breathing: two-layer opacity trick ──────────────────── */
+  /* Layer 1: edges always dark — permanent vignette outside the center */
+  .breath-edges{
+    position:fixed;inset:0;z-index:0;pointer-events:none;
+    background:rgba(16,15,49,0.92);
+    -webkit-mask:radial-gradient(ellipse 52% 44% at 50% 50%,transparent 0%,black 72%);
+    mask:radial-gradient(ellipse 52% 44% at 50% 50%,transparent 0%,black 72%);
+  }
+  /* Layer 2: center gently breathes — opacity never drops below 0.28 so it stays dim */
+  @keyframes breathe-opacity{
+    0%,100%{ opacity:0.88; }
+    50%{     opacity:0.28; }
+  }
+  .breath-center{
+    position:fixed;inset:0;z-index:0;pointer-events:none;
+    background:rgba(16,15,49,0.92);
+    -webkit-mask:radial-gradient(ellipse 52% 44% at 50% 50%,black 0%,transparent 72%);
+    mask:radial-gradient(ellipse 52% 44% at 50% 50%,black 0%,transparent 72%);
+    animation:breathe-opacity 9s ease-in-out infinite;
   }
 </style>
 </head>
-<body class="bg-background text-on-background font-body selection:bg-primary selection:text-on-primary">
+<body class="text-on-background font-body selection:bg-primary selection:text-on-primary min-h-screen flex flex-col" style="background-image:url('bg-wave.jpg');background-size:cover;background-position:center;background-attachment:fixed;">
 
+<div class="breath-edges"></div>
+<div class="breath-center"></div>
 <!-- Nav -->
 <nav class="nav-bar font-['Plus_Jakarta_Sans'] tracking-tight top-0 sticky z-50">
 <div class="flex justify-between items-center w-full px-8 py-4 max-w-screen-2xl mx-auto">
@@ -47,7 +63,7 @@
 </div>
 </nav>
 
-<main class="max-w-screen-2xl mx-auto px-8 py-12">
+<main class="relative z-10 flex-grow max-w-screen-2xl w-full mx-auto px-8 py-12">
 
   <!-- Search / Filter -->
   <section class="mb-12 fadein">
@@ -72,7 +88,7 @@
   </section>
 
   <!-- Your Spaces -->
-  <section class="fadein">
+  <section class="fadein flex-grow flex flex-col">
     <div class="flex justify-between items-end mb-8">
       <div>
         <h2 class="font-headline text-3xl font-extrabold tracking-tight text-primary mb-2">Your Spaces</h2>
@@ -84,11 +100,10 @@
     </div>
 
     <!-- Empty state -->
-    <div id="empty-state" style="display:none;" class="relative flex flex-col items-center justify-center py-32 text-center overflow-hidden rounded-2xl">
-      <div class="tri-bg"></div>
+    <div id="empty-state" style="display:none;" class="flex-grow flex flex-col items-center justify-center py-40 text-center">
       <div class="relative z-10 flex flex-col items-center">
-        <div class="w-24 h-24 rounded-3xl bg-surface-container-high/60 backdrop-blur-sm border border-white/10 flex items-center justify-center mb-6 mx-auto">
-          <span class="material-symbols-outlined text-5xl text-primary/40">view_in_ar</span>
+        <div class="w-24 h-24 rounded-3xl bg-black/30 backdrop-blur-md border border-white/10 flex items-center justify-center mb-6 mx-auto">
+          <span class="material-symbols-outlined text-5xl text-primary/60">view_in_ar</span>
         </div>
         <h3 class="font-headline text-2xl font-bold text-on-surface mb-3">No spaces yet</h3>
         <p class="text-on-surface-variant max-w-sm mb-8">Upload a 3D model and fill in the details — it will appear here as a card in your personal library.</p>
@@ -96,13 +111,14 @@
       </div>
     </div>
 
-    <div id="spaces-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
+    <!-- Spaces grid — flex-wrap + justify-center so cards centre on the page -->
+    <div id="spaces-grid" class="flex flex-wrap justify-center gap-8 py-8"></div>
   </section>
 
 </main>
 
 <!-- Footer -->
-<footer class="bg-[#0b092c] py-12 px-8 border-t border-white/5 mt-16">
+<footer class="relative z-10 bg-[#0b092c]/90 backdrop-blur-sm py-12 px-8 border-t border-white/5 mt-16">
   <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center max-w-screen-2xl mx-auto">
     <div>
       <span class="text-lg font-black text-[#d8b9ff] font-['Plus_Jakarta_Sans']">EnvizStudio</span>
@@ -139,19 +155,27 @@ function renderSpaces(){
   }
   empty.style.display='none';
   grid.innerHTML=spaces.map(s=>`
-    <div class="group relative bg-surface-container-high rounded-xl overflow-hidden transition-all duration-500 hover:-translate-y-2 cursor-pointer" onclick="window.location.href='uplsp.html?id=${s.id}'">
+    <div class="group relative bg-surface-container-high/80 backdrop-blur-sm rounded-xl overflow-hidden transition-all duration-500 hover:-translate-y-2" style="width:340px">
       <div class="absolute top-0 left-0 w-full h-0.5 bg-secondary hover-line"></div>
-      <div class="aspect-[16/10] overflow-hidden relative bg-surface-container">
+      <div class="aspect-[16/10] overflow-hidden relative bg-surface-container cursor-pointer" onclick="window.location.href='uplsp.html?id=${s.id}'">
         ${s.photo
           ?`<img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" src="${s.photo}" alt="${s.name||'Space'}"/>`
           :`<div class="w-full h-full flex items-center justify-center"><span class="material-symbols-outlined text-5xl text-primary/30">view_in_ar</span></div>`}
-        <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-        <div class="absolute bottom-4 left-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-          <span class="text-[#b7d24e] text-xs font-bold uppercase tracking-wider">Walk Space →</span>
+        <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+        <!-- Hover action buttons -->
+        <div class="absolute bottom-4 left-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex gap-2">
+          <button onclick="event.stopPropagation();window.location.href='uplsp.html?id=${s.id}'"
+            class="flex-1 flex items-center justify-center gap-1.5 bg-white/10 backdrop-blur-sm border border-white/20 text-white text-xs font-bold py-2 rounded-lg hover:bg-white/20 transition-all">
+            <span class="material-symbols-outlined text-sm">directions_walk</span> Walk
+          </button>
+          <button onclick="event.stopPropagation();window.location.href='vr.html?id=${s.id}'"
+            class="flex-1 flex items-center justify-center gap-1.5 bg-[#b7d24e]/20 backdrop-blur-sm border border-[#b7d24e]/40 text-[#b7d24e] text-xs font-bold py-2 rounded-lg hover:bg-[#b7d24e]/30 transition-all">
+            <span class="material-symbols-outlined text-sm">cardboard</span> VR
+          </button>
         </div>
       </div>
       <div class="p-5 flex justify-between items-start">
-        <div class="flex-1 min-w-0">
+        <div class="flex-1 min-w-0 cursor-pointer" onclick="window.location.href='uplsp.html?id=${s.id}'">
           <h3 class="font-headline text-lg font-bold truncate group-hover:text-primary transition-colors">${s.name||'Untitled Space'}</h3>
           ${s.description?`<p class="text-on-surface-variant text-sm mt-1 line-clamp-2">${s.description}</p>`:''}
           <p class="text-outline text-xs mt-2">${new Date(s.createdAt).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}</p>
