@@ -258,7 +258,9 @@ async function buildVREnvironment(parsedScene) {
   const sun = new THREE.DirectionalLight(0xfff5e0,2.0);
   sun.position.set(8,15,8); sun.castShadow=true; sun.shadow.mapSize.set(2048,2048);
   vrScene.add(sun);
-  vrScene.add(Object.assign(new THREE.DirectionalLight(0xd8b9ff,0.6),{position:new THREE.Vector3(-8,6,-8)}));
+  const fill = new THREE.DirectionalLight(0xd8b9ff,0.6);
+  fill.position.set(-8,6,-8);
+  vrScene.add(fill);
   vrScene.add(new THREE.GridHelper(60,40,0x4a4870,0x2a2850));
 
   // Add model
