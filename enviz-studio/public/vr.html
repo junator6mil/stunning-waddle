@@ -74,11 +74,12 @@
       </div>
     </div>
     <p id="vr-hint" class="hidden text-center text-xs text-on-surface-variant mt-6 opacity-70">
-      Left thumbstick &mdash; move &nbsp;&middot;&nbsp; Right thumbstick &mdash; turn &nbsp;&middot;&nbsp; Grip &mdash; run
+      Left stick &mdash; move &nbsp;&middot;&nbsp; Right stick &mdash; turn &nbsp;&middot;&nbsp; Grip &mdash; run
     </p>
   </div>
 </main>
-<div id="vr-wrap" class="hidden fixed inset-0 z-50 bg-black">
+<!-- VR canvas: visibility:hidden keeps it sized but invisible during pre-warm -->
+<div id="vr-wrap" class="fixed inset-0 z-50 bg-black" style="display:none">
   <canvas id="vr-canvas" class="w-full h-full block"></canvas>
   <div class="absolute top-4 left-4 glass bg-black/40 border border-white/10 rounded-xl px-4 py-2 text-sm font-bold text-[#d8b9ff]">
     <span id="vr-space-label">EnvizStudio VR</span>
@@ -92,15 +93,20 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
+// IndexedDB
 const IDB_DB='enviz_models',IDB_STORE='models';
 function _openIDB(){return new Promise((res,rej)=>{const r=indexedDB.open(IDB_DB,1);r.onupgradeneeded=e=>e.target.result.createObjectStore(IDB_STORE);r.onsuccess=e=>res(e.target.result);r.onerror=rej;});}
 async function _loadIDB(id){const db=await _openIDB();return new Promise((res,rej)=>{const req=db.transaction(IDB_STORE,'readonly').objectStore(IDB_STORE).get(id);req.onsuccess=e=>res(e.target.result||null);req.onerror=rej;});}
 
-let scene,camera,renderer,vrSession=null,playerDolly,modelBuffer=null,isEntering=false;
-const clock=new THREE.Clock(),MOVE_SPEED=3.2,RUN_SPEED=6.5;
 const params=new URLSearchParams(window.location.search);
 const spaceId=params.get('id');
+const MOVE_SPEED=3.2,RUN_SPEED=6.5;
 
+// Globals
+let renderer,vrSession=null,isEntering=false;
+let vrScene=null,vrDolly=null,vrCamera=null; // pre-built before XR session
+
+// UI helpers
 function setStatus(msg,loading=true){
   document.getElementById('status-text').textContent=msg;
   document.querySelector('#status-row .spin').style.display=loading?'':'none';
@@ -126,122 +132,256 @@ function populateUI(){
   return sp;
 }
 
-function initThree(){
-  scene=new THREE.Scene();
-  scene.background=new THREE.Color(0x0d0c28);
-  scene.fog=new THREE.Fog(0x0d0c28,40,120);
-  playerDolly=new THREE.Group();
-  camera=new THREE.PerspectiveCamera(80,window.innerWidth/window.innerHeight,0.05,300);
-  camera.position.set(0,1.6,0);
-  playerDolly.add(camera);
-  scene.add(playerDolly);
-  const canvas=document.getElementById('vr-canvas');
-  renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:false});
-  renderer.setPixelRatio(Math.min(devicePixelRatio,2));
-  renderer.setSize(window.innerWidth,window.innerHeight);
-  renderer.shadowMap.enabled=true;
-  renderer.shadowMap.type=THREE.PCFSoftShadowMap;
-  renderer.outputColorSpace=THREE.SRGBColorSpace;
-  renderer.toneMapping=THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure=1.1;
-  renderer.xr.enabled=true;
-  scene.add(new THREE.AmbientLight(0xffffff,1.2));
-  const sun=new THREE.DirectionalLight(0xfff5e0,2.0);
-  sun.position.set(8,15,8);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);scene.add(sun);
-  scene.add(Object.assign(new THREE.DirectionalLight(0xd8b9ff,0.6),{position:new THREE.Vector3(-8,6,-8)}));
-  scene.add(new THREE.GridHelper(60,40,0x4a4870,0x2a2850));
-  window.addEventListener('resize',()=>{renderer.setSize(window.innerWidth,window.innerHeight);camera.aspect=window.innerWidth/window.innerHeight;camera.updateProjectionMatrix();});
+// Parse in Web Worker to avoid blocking main thread
+function parseInWorker(buffer) {
+  return new Promise((resolve, reject) => {
+    // Inline worker code as a blob — stubs browser APIs so Three.js can run in worker
+    const workerSrc = `
+// Stub missing browser APIs so Three.js can run headless in a worker
+if (typeof self.Image === 'undefined') {
+  self.Image = class {
+    constructor() { this._src=''; this.onload=null; this.onerror=null; this.width=1; this.height=1; this.naturalWidth=1; this.naturalHeight=1; this.complete=true; }
+    get src(){return this._src;}
+    set src(v){ this._src=v; if(this.onload) setTimeout(()=>this.onload({target:this}),0); }
+    decode(){return Promise.resolve();}
+  };
 }
+if (typeof self.document === 'undefined') {
+  self.document = {
+    createElement:(t)=>({style:{},width:0,height:0,getContext:()=>null}),
+    createElementNS:(n,t)=>({style:{}}),
+    body:{appendChild:()=>{},removeChild:()=>{}}
+  };
+}
+importScripts('https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.min.js');
 
-function setupControllers(){
-  for(let i=0;i<2;i++){
-    const ctrl=renderer.xr.getController(i);
-    ctrl.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0,0,0),new THREE.Vector3(0,0,-2)]),new THREE.LineBasicMaterial({color:0xd8b9ff,transparent:true,opacity:0.5})));
-    scene.add(ctrl);
+// GLTFLoader inline import via fetch+eval approach won't work well.
+// Instead we'll use the global THREE from importScripts above.
+// Fetch and eval GLTFLoader:
+fetch('https://cdn.jsdelivr.net/npm/three@0.165.0/examples/jsm/loaders/GLTFLoader.js')
+  .then(r=>r.text())
+  .then(code=>{
+    // Convert ES module to compatible format
+    code = code.replace(/^import\s+.*?from\s+['"][^'"]+['"]\s*;?/gm,'');
+    code = code.replace(/export\s+\{[^}]*\}\s*;?/g,'');
+    code = code.replace(/export\s+default\s+/g,'');
+    code = code.replace(/export\s+class\s+(\w+)/g,'class $1');
+    code = code.replace(/export\s+function\s+(\w+)/g,'function $1');
+    eval(code);
+    self.loader = new GLTFLoader();
+    self.postMessage({ready:true});
+  }).catch(e=>self.postMessage({ready:false,error:e.message}));
+
+self.onmessage = function(e) {
+  if (!e.data.buffer) return;
+  if (!self.loader) { self.postMessage({ok:false,error:'loader not ready'}); return; }
+  try {
+    self.loader.parse(e.data.buffer,'',function(gltf){
+      try {
+        const json = gltf.scene.toJSON();
+        self.postMessage({ok:true, json:json});
+      } catch(err) {
+        self.postMessage({ok:false,error:'serialize: '+err.message});
+      }
+    }, function(err){
+      self.postMessage({ok:false,error:'parse: '+String(err)});
+    });
+  } catch(err) {
+    self.postMessage({ok:false,error:err.message});
   }
-}
+};
+`;
+    let worker;
+    try {
+      const blob = new Blob([workerSrc], {type:'application/javascript'});
+      worker = new Worker(URL.createObjectURL(blob));
+    } catch(e) {
+      reject(new Error('Worker unavailable: '+e.message));
+      return;
+    }
 
-function parseModel(arrayBuffer){
-  const buf=arrayBuffer.slice(0);
-  return new Promise((res,rej)=>{
-    new GLTFLoader().parse(buf,'',gltf=>{
-      scene.add(gltf.scene);
-      const box=new THREE.Box3().setFromObject(gltf.scene);
-      const center=box.getCenter(new THREE.Vector3());
-      const size=box.getSize(new THREE.Vector3());
-      const maxDim=Math.max(size.x,size.z);
-      playerDolly.position.set(center.x+maxDim*0.6,box.min.y+1.7,center.z+maxDim*0.6);
-      playerDolly.rotation.y=-Math.PI/4;
-      res();
-    },rej);
+    worker.onmessage = (e) => {
+      if (e.data.ready === false) { worker.terminate(); reject(new Error(e.data.error)); return; }
+      if (e.data.ready === true) {
+        // Worker ready, send buffer
+        worker.postMessage({buffer: buffer.slice(0)});
+        return;
+      }
+      worker.terminate();
+      if (e.data.ok) {
+        try {
+          const loader = new THREE.ObjectLoader();
+          resolve({scene: loader.parse(e.data.json), fromWorker:true});
+        } catch(err) {
+          reject(err);
+        }
+      } else {
+        reject(new Error(e.data.error));
+      }
+    };
+    worker.onerror = (e) => { worker.terminate(); reject(new Error(e.message||'Worker error')); };
   });
 }
 
-const _fwd=new THREE.Vector3(),_right=new THREE.Vector3(),_turnState={right:false};
+// Fallback: parse on main thread (will block, but at least works)
+function parseOnMainThread(buffer) {
+  return new Promise((res,rej)=>{
+    new GLTFLoader().parse(buffer.slice(0),'',gltf=>res({scene:gltf.scene,fromWorker:false}),rej);
+  });
+}
+
+// Build the pre-warmed Three.js scene + renderer BEFORE XR session starts
+async function buildVREnvironment(parsedScene) {
+  // Reveal canvas for WebGL context (still behind UI z-index)
+  const wrap = document.getElementById('vr-wrap');
+  wrap.style.display = 'block';
+  wrap.style.visibility = 'hidden'; // invisible but sized
+  document.getElementById('pre-ui').style.zIndex = '60'; // keep UI on top during build
+
+  const canvas = document.getElementById('vr-canvas');
+  renderer = new THREE.WebGLRenderer({canvas, antialias:true, alpha:false});
+  renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.1;
+  renderer.xr.enabled = true;
+
+  vrScene = new THREE.Scene();
+  vrScene.background = new THREE.Color(0x0d0c28);
+  vrScene.fog = new THREE.Fog(0x0d0c28,40,120);
+
+  // Lighting
+  vrScene.add(new THREE.AmbientLight(0xffffff,1.2));
+  const sun = new THREE.DirectionalLight(0xfff5e0,2.0);
+  sun.position.set(8,15,8); sun.castShadow=true; sun.shadow.mapSize.set(2048,2048);
+  vrScene.add(sun);
+  vrScene.add(Object.assign(new THREE.DirectionalLight(0xd8b9ff,0.6),{position:new THREE.Vector3(-8,6,-8)}));
+  vrScene.add(new THREE.GridHelper(60,40,0x4a4870,0x2a2850));
+
+  // Add model
+  const modelScene = parsedScene;
+  vrScene.add(modelScene);
+
+  // Spawn position
+  const box = new THREE.Box3().setFromObject(modelScene);
+  const center = box.getCenter(new THREE.Vector3());
+  const size = box.getSize(new THREE.Vector3());
+  const maxDim = Math.max(size.x,size.z);
+
+  vrDolly = new THREE.Group();
+  vrCamera = new THREE.PerspectiveCamera(80,window.innerWidth/window.innerHeight,0.05,300);
+  vrCamera.position.set(0,1.6,0);
+  vrDolly.add(vrCamera);
+  vrScene.add(vrDolly);
+  vrDolly.position.set(center.x+maxDim*0.6, box.min.y+1.7, center.z+maxDim*0.6);
+  vrDolly.rotation.y = -Math.PI/4;
+
+  // Controllers
+  for(let i=0;i<2;i++){
+    const ctrl=renderer.xr.getController(i);
+    ctrl.add(new THREE.Line(
+      new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0,0,0),new THREE.Vector3(0,0,-2)]),
+      new THREE.LineBasicMaterial({color:0xd8b9ff,transparent:true,opacity:0.5})
+    ));
+    vrScene.add(ctrl);
+  }
+
+  // Pre-warm GPU: render one frame off-screen so shaders are compiled
+  renderer.render(vrScene, vrCamera);
+  await new Promise(r=>requestAnimationFrame(r)); // yield
+
+  window.addEventListener('resize',()=>{
+    renderer.setSize(window.innerWidth,window.innerHeight);
+    vrCamera.aspect=window.innerWidth/window.innerHeight;
+    vrCamera.updateProjectionMatrix();
+  });
+}
+
+// Locomotion
+const _fwd=new THREE.Vector3(),_right=new THREE.Vector3(),_turn={right:false};
 function handleLocomotion(dt){
-  if(!vrSession)return;
+  if(!vrSession||!vrDolly||!vrCamera)return;
   for(const src of vrSession.inputSources){
     if(!src.gamepad)continue;
     const ax=src.gamepad.axes;
     const lx=ax.length>3?ax[2]:ax[0]||0;
     const lz=ax.length>3?ax[3]:ax[1]||0;
-    const running=src.gamepad.buttons[1]?.pressed||false;
-    const spd=running?RUN_SPEED:MOVE_SPEED;
+    const spd=(src.gamepad.buttons[1]?.pressed)?RUN_SPEED:MOVE_SPEED;
     if(src.handedness==='left'&&(Math.abs(lx)>0.12||Math.abs(lz)>0.12)){
-      camera.getWorldDirection(_fwd);_fwd.y=0;_fwd.normalize();
+      vrCamera.getWorldDirection(_fwd);_fwd.y=0;_fwd.normalize();
       _right.crossVectors(new THREE.Vector3(0,1,0),_fwd).negate();
-      playerDolly.position.addScaledVector(_fwd,-lz*spd*dt);
-      playerDolly.position.addScaledVector(_right,lx*spd*dt);
+      vrDolly.position.addScaledVector(_fwd,-lz*spd*dt);
+      vrDolly.position.addScaledVector(_right,lx*spd*dt);
     }
     if(src.handedness==='right'){
       const rx=ax.length>3?ax[2]:ax[0]||0;
       const active=Math.abs(rx)>0.65;
-      if(active&&!_turnState.right)playerDolly.rotation.y-=Math.sign(rx)*(Math.PI/6);
-      _turnState.right=active;
+      if(active&&!_turn.right)vrDolly.rotation.y-=Math.sign(rx)*(Math.PI/6);
+      _turn.right=active;
     }
   }
 }
-
-function tick(){handleLocomotion(Math.min(clock.getDelta(),0.1));renderer.render(scene,camera);}
 
 async function enterVR(){
   if(isEntering)return;
   isEntering=true;
   const btn=document.getElementById('enter-vr-btn');
-  const prevHTML=btn.innerHTML;
   btn.disabled=true;
-  btn.innerHTML='<span class="material-symbols-outlined text-2xl spin">autorenew</span>Connecting...';
-  if(vrSession){try{await vrSession.end();}catch(_){}vrSession=null;await new Promise(r=>setTimeout(r,400));}
+  btn.innerHTML='<span class="material-symbols-outlined text-2xl spin">autorenew</span>Starting...';
+
+  if(vrSession){try{await vrSession.end();}catch(_){}vrSession=null;await new Promise(r=>setTimeout(r,300));}
+
   let session;
   try{
-    session=await navigator.xr.requestSession('immersive-vr',{optionalFeatures:['local-floor','bounded-floor','hand-tracking']});
+    // Scene is already built and GPU is pre-warmed — request session now
+    session=await navigator.xr.requestSession('immersive-vr',{
+      optionalFeatures:['local-floor','bounded-floor','hand-tracking']
+    });
   }catch(e){
-    setStatus('Session error: '+e.message,false);
-    btn.disabled=false;btn.innerHTML=prevHTML;isEntering=false;return;
+    setStatus('Could not start VR: '+e.message,false);
+    const wrap=document.getElementById('vr-wrap');
+    wrap.style.display='none'; wrap.style.visibility='';
+    document.getElementById('pre-ui').style.zIndex='';
+    isEntering=false;
+    setBtn('Enter VR','cardboard',"w-full py-4 rounded-2xl font-bold text-lg font-['Plus_Jakarta_Sans'] flex items-center justify-center gap-3 bg-[#b7d24e] text-[#2a3400] cursor-pointer hover:brightness-110 active:scale-95 shadow-lg transition-all",enterVR);
+    return;
   }
+
   vrSession=session;
+
+  // NOW show canvas, hide UI
+  const wrap=document.getElementById('vr-wrap');
+  wrap.style.visibility='';
   document.getElementById('pre-ui').classList.add('hidden');
-  document.getElementById('vr-wrap').classList.remove('hidden');
-  initThree();setupControllers();
-  try{await parseModel(modelBuffer);}catch(e){console.error('Parse:',e);}
+
   await renderer.xr.setSession(session);
+
+  const clock=new THREE.Clock();
   session.addEventListener('end',()=>{vrSession=null;isEntering=false;exitVR();});
-  renderer.setAnimationLoop(tick);
+  renderer.setAnimationLoop(()=>{
+    handleLocomotion(Math.min(clock.getDelta(),0.1));
+    renderer.render(vrScene,vrCamera);
+  });
 }
 
 window.exitVR=function(){
   renderer?.setAnimationLoop(null);
   if(vrSession){try{vrSession.end();}catch(_){}vrSession=null;}
   isEntering=false;
-  document.getElementById('vr-wrap').classList.add('hidden');
+  const wrap=document.getElementById('vr-wrap');
+  wrap.style.display='none'; wrap.style.visibility='';
   document.getElementById('pre-ui').classList.remove('hidden');
+  document.getElementById('pre-ui').style.zIndex='';
 };
 
 async function checkVRSupport(){
   const badge=document.getElementById('vr-support-badge');
   badge.classList.remove('hidden');
   if(!navigator.xr){
-    badge.textContent='WebXR not supported - try Chrome or Edge';
+    badge.textContent='WebXR not supported - use Chrome or Edge';
     badge.className='mb-6 text-xs font-bold px-3 py-1.5 rounded-lg w-fit bg-red-900/30 border border-red-500/30 text-red-300';
     return false;
   }
@@ -251,7 +391,7 @@ async function checkVRSupport(){
     badge.className='mb-6 text-xs font-bold px-3 py-1.5 rounded-lg w-fit bg-[#b7d24e]/10 border border-[#b7d24e]/30 text-[#b7d24e]';
     document.getElementById('vr-hint').classList.remove('hidden');
   }else{
-    badge.textContent='No VR headset found - use Walk on Desktop below';
+    badge.textContent='No VR headset - use Walk on Desktop below';
     badge.className='mb-6 text-xs font-bold px-3 py-1.5 rounded-lg w-fit bg-white/5 border border-white/10 text-on-surface-variant';
   }
   return ok;
@@ -260,16 +400,39 @@ async function checkVRSupport(){
 document.addEventListener('DOMContentLoaded',async()=>{
   try{
     const sp=populateUI();if(!sp)return;
-    setStatus('Loading model from storage...',true);
+    setStatus('Loading from storage...',true);
     const ab=await _loadIDB(spaceId).catch(()=>null);
     if(!ab){
       setStatus('Model not cached - open Walk on Desktop first.',false);
       document.getElementById('walk-btn').classList.add('ring-2','ring-primary/40');
-      setBtn('Model Not Cached','warning',"w-full py-4 rounded-2xl font-bold text-lg flex items-center justify-center gap-3 bg-white/5 text-on-surface-variant border border-white/10 cursor-not-allowed",null);
+      setBtn('Not Cached','warning',"w-full py-4 rounded-2xl font-bold text-lg flex items-center justify-center gap-3 bg-white/5 text-on-surface-variant border border-white/10 cursor-not-allowed",null);
       return;
     }
-    modelBuffer=ab;
-    setStatus('Model ready - click Enter VR',false);
+
+    // Try worker first (non-blocking), fallback to main thread
+    let parsed;
+    try{
+      setStatus('Parsing model in background...',true);
+      parsed=await parseInWorker(ab);
+      setStatus('Model ready (background parsed)',false);
+    }catch(workerErr){
+      console.warn('Worker parse failed, using main thread:',workerErr);
+      setStatus('Parsing model (please wait)...',true);
+      await new Promise(r=>setTimeout(r,80)); // let status paint
+      try{
+        parsed=await parseOnMainThread(ab);
+        setStatus('Model ready',false);
+      }catch(e){
+        setStatus('Parse error: '+e.message,false);
+        return;
+      }
+    }
+
+    // Pre-build scene + warm GPU while still on pre-entry screen
+    setStatus('Preparing VR scene...',true);
+    await buildVREnvironment(parsed.scene);
+    setStatus('Ready - click Enter VR',false);
+
     const vrOk=await checkVRSupport();
     if(vrOk){
       setBtn('Enter VR','cardboard',"w-full py-4 rounded-2xl font-bold text-lg font-['Plus_Jakarta_Sans'] flex items-center justify-center gap-3 bg-[#b7d24e] text-[#2a3400] cursor-pointer hover:brightness-110 active:scale-95 shadow-lg shadow-[#b7d24e]/20 transition-all",enterVR);
