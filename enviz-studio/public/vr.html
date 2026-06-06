@@ -22,11 +22,23 @@
   @keyframes spin{to{transform:rotate(360deg)}}
   .spin{animation:spin 1s linear infinite;}
   .glass{backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);}
+  /* VR HUD overlay (shown inside headset via DOM Overlay) */
+  #vr-hud{position:fixed;top:24px;left:50%;transform:translateX(-50%);z-index:9999;pointer-events:none;display:none;}
+  #mode-badge{font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:700;padding:6px 18px;border-radius:999px;letter-spacing:0.08em;text-transform:uppercase;backdrop-filter:blur(8px);border:1.5px solid rgba(255,255,255,0.15);transition:background .3s,color .3s,border-color .3s;}
+  .mode-walk{background:rgba(183,210,78,0.18);color:#b7d24e;border-color:#b7d24e55;}
+  .mode-fly{background:rgba(216,185,255,0.18);color:#d8b9ff;border-color:#d8b9ff55;}
+  .mode-phase{background:rgba(255,136,0,0.18);color:#ff8800;border-color:#ff880055;}
 </style>
 </head>
 <body class="text-on-background font-body min-h-screen flex flex-col" style="background-image:url('bg-wave.jpg');background-size:cover;background-position:center;background-attachment:fixed;">
 <div class="breath-edges"></div>
 <div class="breath-center"></div>
+
+<!-- VR HUD: shown as DOM overlay inside headset -->
+<div id="vr-hud">
+  <div id="mode-badge" class="mode-walk">WALK</div>
+</div>
+
 <nav class="nav-bar font-['Plus_Jakarta_Sans'] tracking-tight top-0 sticky z-50">
 <div class="flex justify-between items-center w-full px-8 py-4 max-w-screen-2xl mx-auto">
   <div class="flex items-center gap-12">
@@ -39,6 +51,7 @@
   <div id="nav-space-name" class="text-sm text-on-surface-variant font-medium hidden"></div>
 </div>
 </nav>
+
 <main id="pre-ui" class="relative z-10 flex-grow flex items-center justify-center px-6 py-12">
   <div class="fadein w-full max-w-lg">
     <div class="glass bg-white/5 border border-white/10 rounded-3xl overflow-hidden shadow-2xl">
@@ -73,15 +86,23 @@
         </div>
       </div>
     </div>
-    <div id="vr-hint" class="hidden mt-6 glass bg-white/5 border border-white/10 rounded-2xl p-4 text-xs text-on-surface-variant space-y-1.5">
-      <div class="text-[#b7d24e] font-bold mb-2">Controls in VR</div>
-      <div>&#x2022; <b>Point right controller at floor</b> &rarr; green circle appears</div>
-      <div>&#x2022; <b>Squeeze right trigger</b> &rarr; teleport there</div>
-      <div>&#x2022; <b>Right thumbstick left/right</b> &rarr; snap turn 30&deg;</div>
-      <div>&#x2022; <b>Look around freely</b> with head tracking</div>
+
+    <!-- Controls card -->
+    <div id="vr-hint" class="hidden mt-5 glass bg-white/5 border border-white/10 rounded-2xl overflow-hidden">
+      <div class="px-5 py-3 border-b border-white/10 text-xs font-bold text-[#b7d24e] uppercase tracking-widest">Meta Quest 3S Controls</div>
+      <div class="grid grid-cols-2 gap-0 text-xs text-on-surface-variant">
+        <div class="px-5 py-2.5 border-b border-white/5 flex items-center gap-2"><span class="text-[#b7d24e] font-bold w-24 shrink-0">Left Stick</span>Move</div>
+        <div class="px-5 py-2.5 border-b border-white/5 flex items-center gap-2"><span class="text-[#b7d24e] font-bold w-24 shrink-0">Right Stick</span>Turn</div>
+        <div class="px-5 py-2.5 border-b border-white/5 flex items-center gap-2"><span class="text-[#b7d24e] font-bold w-24 shrink-0">A (press)</span>Jump</div>
+        <div class="px-5 py-2.5 border-b border-white/5 flex items-center gap-2"><span class="text-[#d8b9ff] font-bold w-24 shrink-0">A (double)</span>Fly mode</div>
+        <div class="px-5 py-2.5 border-b border-white/5 flex items-center gap-2"><span class="text-[#b7d24e] font-bold w-24 shrink-0">X button</span>Lower height</div>
+        <div class="px-5 py-2.5 border-b border-white/5 flex items-center gap-2"><span class="text-[#b7d24e] font-bold w-24 shrink-0">Y button</span>Raise height</div>
+        <div class="col-span-2 px-5 py-2.5 flex items-center gap-2"><span class="text-[#ff8800] font-bold w-24 shrink-0">Hold R2</span>Phase mode (no-clip)</div>
+      </div>
     </div>
   </div>
 </main>
+
 <div id="vr-wrap" class="fixed inset-0 z-50 bg-black" style="display:none">
   <canvas id="vr-canvas" class="w-full h-full block"></canvas>
   <div class="absolute top-4 left-4 glass bg-black/40 border border-white/10 rounded-xl px-4 py-2 text-sm font-bold text-[#d8b9ff]">
@@ -91,6 +112,7 @@
     <span class="material-symbols-outlined text-lg">close</span> Exit VR
   </button>
 </div>
+
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.165.0/examples/jsm/"}}</script>
 <script type="module">
 import * as THREE from 'three';
@@ -104,13 +126,35 @@ async function _loadIDB(id){const db=await _openIDB();return new Promise((res,re
 const params=new URLSearchParams(window.location.search);
 const spaceId=params.get('id');
 
-// ── Globals ────────────────────────────────────────────────────────────
+// ── Scene globals ──────────────────────────────────────────────────────
 let renderer,vrSession=null,isEntering=false;
 let vrScene=null,vrDolly=null,vrCamera=null;
-let floorMesh=null,landingMarker=null,teleportTarget=null;
-const raycaster=new THREE.Raycaster();
-const snapTurnState={right:false};
-let floorY=0;
+let floorY=0; // model floor Y (set after parse)
+
+// ─────────────────────────────────────────────────────────────────────
+//  LOCOMOTION STATE
+// ─────────────────────────────────────────────────────────────────────
+const WALK_SPEED  = 3.5;   // m/s
+const FLY_SPEED   = 5.0;
+const PHASE_SPEED = 7.0;
+const GRAVITY     = -9.8;
+const JUMP_VEL    = 5.5;
+const HEIGHT_STEP = 2.5;   // m/s for X/Y buttons
+const TURN_SPEED  = 1.3;   // rad/s smooth turn
+
+let mode     = 'WALK';  // 'WALK' | 'FLY' | 'PHASE'
+let prevMode = 'WALK';  // remembered before entering PHASE
+let velY     = 0;
+let onGround = true;
+
+// Button edge detection
+const _prev={A:false,X:false,Y:false,R2:false};
+let _lastAMs=0;
+
+// Reusable vectors
+const _fwd  =new THREE.Vector3();
+const _right=new THREE.Vector3();
+const _UP   =new THREE.Vector3(0,1,0);
 
 // ── UI helpers ─────────────────────────────────────────────────────────
 function setStatus(msg,loading=true){
@@ -123,7 +167,6 @@ function setBtn(label,icon,cls,handler){
   btn.innerHTML=`<span class="material-symbols-outlined text-2xl">${icon}</span>${label}`;
   btn.onclick=handler;
 }
-
 function populateUI(){
   if(!spaceId){setStatus('No space ID.',false);return null;}
   const sp=(JSON.parse(localStorage.getItem('enviz_spaces')||'[]')).find(s=>s.id===spaceId);
@@ -138,7 +181,125 @@ function populateUI(){
   return sp;
 }
 
-// ── Parse in Web Worker (non-blocking) ─────────────────────────────────
+// ── Mode HUD (shown as DOM overlay in headset) ─────────────────────────
+function setMode(m){
+  mode=m;
+  const badge=document.getElementById('mode-badge');
+  badge.className='mode-badge';
+  if(m==='WALK'){badge.textContent='WALK';badge.className='mode-badge mode-walk';}
+  else if(m==='FLY'){badge.textContent='FLY MODE';badge.className='mode-badge mode-fly';}
+  else{badge.textContent='PHASE';badge.className='mode-badge mode-phase';}
+  // Update controller line colors
+  if(renderer){
+    const colors={WALK:0xb7d24e,FLY:0xd8b9ff,PHASE:0xff8800};
+    for(let i=0;i<2;i++){
+      const ctrl=renderer.xr.getController(i);
+      if(ctrl.userData.line) ctrl.userData.line.material.color.setHex(colors[m]);
+    }
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────
+//  LOCOMOTION — called every frame from render loop
+// ─────────────────────────────────────────────────────────────────────
+function handleLocomotion(dt){
+  if(!vrSession||!vrDolly||!vrCamera) return;
+
+  let leftSrc=null,rightSrc=null;
+  for(const src of vrSession.inputSources){
+    if(src.handedness==='left')  leftSrc=src;
+    if(src.handedness==='right') rightSrc=src;
+  }
+  const lgp=leftSrc?.gamepad;
+  const rgp=rightSrc?.gamepad;
+
+  // ── R2 (Right Trigger = buttons[0]) → Phase mode ──────────────────
+  const r2=rgp?.buttons[0]?.pressed||false;
+  if(r2&&!_prev.R2&&mode!=='PHASE'){
+    prevMode=mode; setMode('PHASE'); velY=0;
+  }else if(!r2&&_prev.R2&&mode==='PHASE'){
+    setMode(prevMode);
+    if(prevMode==='WALK'){
+      if(vrDolly.position.y<floorY) vrDolly.position.y=floorY;
+      velY=0;
+    }
+  }
+  _prev.R2=r2;
+
+  // ── A button (Right buttons[4]) → Jump / Double-press Fly ─────────
+  const a=rgp?.buttons[4]?.pressed||false;
+  if(a&&!_prev.A&&mode!=='PHASE'){
+    const now=performance.now();
+    if(now-_lastAMs<350){
+      // Double press: toggle fly
+      setMode(mode==='FLY'?'WALK':'FLY');
+      velY=0;
+    }else if(mode==='WALK'&&onGround){
+      // Single press: jump
+      velY=JUMP_VEL; onGround=false;
+    }
+    _lastAMs=now;
+  }
+  _prev.A=a;
+
+  // ── Left Stick (axes[0]=strafe, axes[1]=fwd/back) → Move ──────────
+  if(lgp){
+    const lx=lgp.axes[0]||0;
+    const lz=lgp.axes[1]||0;
+    if(Math.abs(lx)>0.12||Math.abs(lz)>0.12){
+      const spd=mode==='PHASE'?PHASE_SPEED:mode==='FLY'?FLY_SPEED:WALK_SPEED;
+      // Move relative to where HEAD is looking (horizontal projection)
+      vrCamera.getWorldDirection(_fwd);
+      _fwd.y=0; _fwd.normalize();
+      _right.crossVectors(_UP,_fwd).negate();
+      vrDolly.position.addScaledVector(_fwd,-lz*spd*dt);
+      vrDolly.position.addScaledVector(_right, lx*spd*dt);
+    }
+  }
+
+  // ── Right Stick → Smooth yaw turn (axes[0]) + Vertical in fly (axes[1]) ──
+  if(rgp){
+    const rx=rgp.axes[0]||0;
+    if(Math.abs(rx)>0.15) vrDolly.rotation.y-=rx*TURN_SPEED*dt;
+
+    // Right stick Y controls vertical in FLY and PHASE
+    if(mode==='FLY'||mode==='PHASE'){
+      const ry=rgp.axes[1]||0;
+      if(Math.abs(ry)>0.15) vrDolly.position.y-=ry*FLY_SPEED*dt;
+    }
+  }
+
+  // ── X button (Left buttons[4]) → Lower height ─────────────────────
+  // ── Y button (Left buttons[5]) → Raise height ─────────────────────
+  if(lgp){
+    if(lgp.buttons[4]?.pressed) vrDolly.position.y-=HEIGHT_STEP*dt;
+    if(lgp.buttons[5]?.pressed) vrDolly.position.y+=HEIGHT_STEP*dt;
+  }
+
+  // ── Physics: Gravity + Floor collision ────────────────────────────
+  if(mode==='WALK'){
+    // Gravity
+    velY+=GRAVITY*dt;
+    vrDolly.position.y+=velY*dt;
+    // Floor collision — no phase through in WALK
+    if(vrDolly.position.y<=floorY){
+      vrDolly.position.y=floorY;
+      if(velY<0){velY=0; onGround=true;}
+    }else{
+      onGround=false;
+    }
+  }else if(mode==='FLY'){
+    // No gravity, no floor collision
+    onGround=false;
+  }else{
+    // PHASE: no collision at all (can go through everything)
+    onGround=false;
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────
+//  WORKER PARSE (non-blocking)
+// ─────────────────────────────────────────────────────────────────────
 function parseInWorker(buffer){
   return new Promise((resolve,reject)=>{
     const workerSrc=`
@@ -167,12 +328,13 @@ self.onmessage=function(e){
     worker.onerror=(e)=>{worker.terminate();reject(new Error(e.message||'Worker error'));};
   });
 }
-
 function parseOnMainThread(buffer){
   return new Promise((res,rej)=>{new GLTFLoader().parse(buffer.slice(0),'',gltf=>res({scene:gltf.scene}),rej);});
 }
 
-// ── Build scene & renderer BEFORE XR session ───────────────────────────
+// ─────────────────────────────────────────────────────────────────────
+//  BUILD SCENE (before XR session — pre-warms GPU)
+// ─────────────────────────────────────────────────────────────────────
 async function buildVREnvironment(parsedScene){
   const wrap=document.getElementById('vr-wrap');
   wrap.style.display='block';
@@ -181,60 +343,42 @@ async function buildVREnvironment(parsedScene){
 
   const canvas=document.getElementById('vr-canvas');
   renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:false});
-  renderer.setPixelRatio(1); // fixed at 1 = best performance
+  renderer.setPixelRatio(1);
   renderer.setSize(window.innerWidth,window.innerHeight);
-  renderer.shadowMap.enabled=false; // shadows OFF = biggest perf boost
+  renderer.shadowMap.enabled=false;
   renderer.outputColorSpace=THREE.SRGBColorSpace;
   renderer.toneMapping=THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure=1.0;
   renderer.xr.enabled=true;
 
   vrScene=new THREE.Scene();
-  // Neutral warm background hides model gaps — no jarring black void
   vrScene.background=new THREE.Color(0xd4cfc8);
-  vrScene.fog=new THREE.FogExp2(0xd4cfc8,0.015);
+  vrScene.fog=new THREE.FogExp2(0xd4cfc8,0.012);
 
-  // Simple lighting — no shadows, performant
-  vrScene.add(new THREE.AmbientLight(0xffffff,1.5));
+  // Lighting (no shadows for performance)
+  vrScene.add(new THREE.AmbientLight(0xffffff,1.4));
   const sun=new THREE.DirectionalLight(0xfff5e0,1.2);
   sun.position.set(5,10,5);
-  sun.castShadow=false;
   vrScene.add(sun);
-  const fill=new THREE.DirectionalLight(0xd8e8ff,0.6);
+  const fill=new THREE.DirectionalLight(0xd8e8ff,0.5);
   fill.position.set(-5,8,-5);
   vrScene.add(fill);
 
-  // Add model
+  // Model
   vrScene.add(parsedScene);
 
-  // Compute bounding box
+  // Bounding box for spawn
   const box=new THREE.Box3().setFromObject(parsedScene);
   const center=box.getCenter(new THREE.Vector3());
   const size=box.getSize(new THREE.Vector3());
   floorY=box.min.y;
-  spawnFloorY=box.min.y; // used by trigger handler
-  // Use a mathematical plane for raycasting — no mesh added to scene (was causing white slab)
-  // floorMesh is not used; raycasting uses THREE.Plane directly in updateTeleportAndTurn()
 
-  // ── Landing marker (teleport target indicator) ──
-  const ringGeo=new THREE.RingGeometry(0.25,0.5,32);
-  ringGeo.rotateX(-Math.PI/2);
-  const ringMat=new THREE.MeshBasicMaterial({color:0xb7d24e,transparent:true,opacity:0.85,side:THREE.DoubleSide});
-  landingMarker=new THREE.Mesh(ringGeo,ringMat);
-  const innerGeo=new THREE.CircleGeometry(0.25,32);
-  innerGeo.rotateX(-Math.PI/2);
-  const innerMat=new THREE.MeshBasicMaterial({color:0xb7d24e,transparent:true,opacity:0.25,side:THREE.DoubleSide});
-  landingMarker.add(new THREE.Mesh(innerGeo,innerMat));
-  landingMarker.visible=false;
-  vrScene.add(landingMarker);
-
-  // ── Player dolly — spawn INSIDE model center ──
+  // Player dolly — spawn matches desktop walker
   vrDolly=new THREE.Group();
   vrCamera=new THREE.PerspectiveCamera(80,window.innerWidth/window.innerHeight,0.05,200);
   vrCamera.position.set(0,1.65,0);
   vrDolly.add(vrCamera);
   vrScene.add(vrDolly);
-  // Spawn matches desktop walker: center X/Z, Y = floor + max(25% height, 1.7m) - eye offset
   const spawnEyeY=box.min.y+Math.max(size.y*0.25,1.7);
   vrDolly.position.set(center.x, spawnEyeY-1.65, center.z);
 
@@ -249,139 +393,76 @@ async function buildVREnvironment(parsedScene){
   });
 }
 
-// ── Controller setup ────────────────────────────────────────────────────
+// ── Controller visuals ─────────────────────────────────────────────────
 function setupControllers(){
   for(let i=0;i<2;i++){
     const ctrl=renderer.xr.getController(i);
-
-    // Ray line (only shown on right controller)
-    const lineGeo=new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0,0,0),new THREE.Vector3(0,0,-4)]);
-    const lineMat=new THREE.LineBasicMaterial({color:0xb7d24e,transparent:true,opacity:0.6});
+    // Small pointer dot + ray line
+    const lineGeo=new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0,0,0),new THREE.Vector3(0,0,-0.15)]);
+    const lineMat=new THREE.LineBasicMaterial({color:0xb7d24e,transparent:true,opacity:0.8});
     const line=new THREE.Line(lineGeo,lineMat);
-    line.visible=false;
     ctrl.add(line);
     ctrl.userData.line=line;
-
-    // Detect handedness when controller connects
-    ctrl.addEventListener('connected',(e)=>{
-      ctrl.userData.handedness=e.data.handedness;
-      line.visible=(e.data.handedness==='right');
-    });
-
-    // Trigger pressed → teleport on ANY controller (handedness may not be set yet at first press)
-    ctrl.addEventListener('selectstart',()=>{
-      if(teleportTarget&&vrDolly){
-        vrDolly.position.x=teleportTarget.x;
-        vrDolly.position.z=teleportTarget.z;
-        vrDolly.position.y=spawnFloorY; // floor reference set globally
-      }
-    });
-
+    ctrl.addEventListener('connected',(e)=>{ctrl.userData.handedness=e.data.handedness;});
     vrScene.add(ctrl);
   }
 }
 
-// ── Teleport aim & snap turn ────────────────────────────────────────────
-const _ctrlOrigin=new THREE.Vector3();
-const _ctrlDir=new THREE.Vector3();
-const _ctrlMat=new THREE.Matrix4();
-
-// Math plane for floor raycasting — no mesh, no white slab
-const _floorPlane=new THREE.Plane(new THREE.Vector3(0,1,0),0);
-const _floorHit=new THREE.Vector3();
-let spawnFloorY=0; // set when scene is built
-
-function updateTeleportAndTurn(){
-  if(!vrSession)return;
-
-  // Find right controller — fallback to controller 0 if handedness not yet set
-  let aimCtrl=null;
-  for(let i=0;i<2;i++){
-    const c=renderer.xr.getController(i);
-    if(c.userData.handedness==='right'){aimCtrl=c;break;}
-  }
-  if(!aimCtrl) aimCtrl=renderer.xr.getController(0);
-
-  // Raycast against mathematical floor plane (no scene mesh needed)
-  if(aimCtrl&&landingMarker){
-    _floorPlane.constant=-floorY; // plane at floor Y
-    _ctrlMat.identity().extractRotation(aimCtrl.matrixWorld);
-    _ctrlOrigin.setFromMatrixPosition(aimCtrl.matrixWorld);
-    _ctrlDir.set(0,0,-1).applyMatrix4(_ctrlMat);
-    raycaster.set(_ctrlOrigin,_ctrlDir);
-    const hit=raycaster.ray.intersectPlane(_floorPlane,_floorHit);
-    const dist=hit?_ctrlOrigin.distanceTo(_floorHit):Infinity;
-    if(hit&&dist>0.3&&dist<20){
-      teleportTarget=_floorHit.clone();
-      landingMarker.position.set(_floorHit.x,floorY+0.03,_floorHit.z);
-      landingMarker.visible=true;
-    }else{
-      teleportTarget=null;
-      landingMarker.visible=false;
-    }
-  }
-
-  // Snap turn from right thumbstick
-  for(const src of vrSession.inputSources){
-    if(src.handedness==='right'&&src.gamepad){
-      const ax=src.gamepad.axes;
-      const rx=ax.length>3?ax[2]:ax[0]||0;
-      const active=Math.abs(rx)>0.6;
-      if(active&&!snapTurnState.right&&vrDolly){
-        vrDolly.rotation.y-=Math.sign(rx)*(Math.PI/6); // 30deg snap
-      }
-      snapTurnState.right=active;
-    }
-  }
-
-  // Animate landing marker (gentle pulse scale)
-  if(landingMarker.visible){
-    const t=performance.now()/1000;
-    const s=1+0.08*Math.sin(t*4);
-    landingMarker.scale.set(s,1,s);
-  }
-}
-
-// ── Render loop ─────────────────────────────────────────────────────────
+// ── Render loop ────────────────────────────────────────────────────────
 function tick(){
-  updateTeleportAndTurn();
+  const dt=Math.min(clock.getDelta(),0.1);
+  handleLocomotion(dt);
   renderer.render(vrScene,vrCamera);
 }
+const clock=new THREE.Clock();
 
-// ── Enter VR ────────────────────────────────────────────────────────────
+// ── Enter VR ──────────────────────────────────────────────────────────
 async function enterVR(){
   if(isEntering)return;
   isEntering=true;
   const btn=document.getElementById('enter-vr-btn');
   btn.disabled=true;
   btn.innerHTML='<span class="material-symbols-outlined text-2xl spin">autorenew</span>Starting...';
-
   if(vrSession){try{await vrSession.end();}catch(_){}vrSession=null;await new Promise(r=>setTimeout(r,300));}
 
   let session;
   try{
     session=await navigator.xr.requestSession('immersive-vr',{
-      optionalFeatures:['local-floor','bounded-floor','hand-tracking']
+      optionalFeatures:['local-floor','bounded-floor','hand-tracking','dom-overlay'],
+      domOverlay:{root:document.getElementById('vr-hud')}
     });
   }catch(e){
-    setStatus('Could not start VR: '+e.message,false);
-    const wrap=document.getElementById('vr-wrap');
-    wrap.style.display='none';wrap.style.visibility='';
-    document.getElementById('pre-ui').style.zIndex='';
-    isEntering=false;
-    setBtn('Enter VR','cardboard',"w-full py-4 rounded-2xl font-bold text-lg font-['Plus_Jakarta_Sans'] flex items-center justify-center gap-3 bg-[#b7d24e] text-[#2a3400] cursor-pointer hover:brightness-110 active:scale-95 shadow-lg transition-all",enterVR);
-    return;
+    // Retry without dom-overlay if it caused the failure
+    try{
+      session=await navigator.xr.requestSession('immersive-vr',{
+        optionalFeatures:['local-floor','bounded-floor','hand-tracking']
+      });
+    }catch(e2){
+      setStatus('Could not start VR: '+e2.message,false);
+      const wrap=document.getElementById('vr-wrap');
+      wrap.style.display='none';wrap.style.visibility='';
+      document.getElementById('pre-ui').style.zIndex='';
+      isEntering=false;
+      setBtn('Enter VR','cardboard',"w-full py-4 rounded-2xl font-bold text-lg font-['Plus_Jakarta_Sans'] flex items-center justify-center gap-3 bg-[#b7d24e] text-[#2a3400] cursor-pointer hover:brightness-110 active:scale-95 shadow-lg transition-all",enterVR);
+      return;
+    }
   }
 
   vrSession=session;
+  // Show HUD overlay
+  document.getElementById('vr-hud').style.display='block';
+  // Reset locomotion state
+  setMode('WALK'); velY=0; onGround=true;
+  _prev.A=false;_prev.R2=false;_prev.X=false;_prev.Y=false;
+
   const wrap=document.getElementById('vr-wrap');
   wrap.style.visibility='';
   document.getElementById('pre-ui').classList.add('hidden');
 
   setupControllers();
   await renderer.xr.setSession(session);
-
   session.addEventListener('end',()=>{vrSession=null;isEntering=false;exitVR();});
+  clock.start();
   renderer.setAnimationLoop(tick);
 }
 
@@ -389,13 +470,14 @@ window.exitVR=function(){
   renderer?.setAnimationLoop(null);
   if(vrSession){try{vrSession.end();}catch(_){}vrSession=null;}
   isEntering=false;
+  document.getElementById('vr-hud').style.display='none';
   const wrap=document.getElementById('vr-wrap');
   wrap.style.display='none';wrap.style.visibility='';
   document.getElementById('pre-ui').classList.remove('hidden');
   document.getElementById('pre-ui').style.zIndex='';
 };
 
-// ── VR detection ─────────────────────────────────────────────────────────
+// ── VR detection ──────────────────────────────────────────────────────
 async function checkVRSupport(){
   const badge=document.getElementById('vr-support-badge');
   badge.classList.remove('hidden');
@@ -416,7 +498,7 @@ async function checkVRSupport(){
   return ok;
 }
 
-// ── Boot ──────────────────────────────────────────────────────────────────
+// ── Boot ──────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded',async()=>{
   try{
     const sp=populateUI();if(!sp)return;
@@ -428,23 +510,19 @@ document.addEventListener('DOMContentLoaded',async()=>{
       setBtn('Not Cached','warning',"w-full py-4 rounded-2xl font-bold text-lg flex items-center justify-center gap-3 bg-white/5 text-on-surface-variant border border-white/10 cursor-not-allowed",null);
       return;
     }
-
     let parsed;
     try{
       setStatus('Parsing model in background...',true);
       parsed=await parseInWorker(ab);
-      setStatus('Building scene...',true);
-    }catch(workerErr){
-      console.warn('Worker failed, using main thread:',workerErr);
-      setStatus('Parsing model (please wait ~10s)...',true);
+    }catch(e){
+      console.warn('Worker failed, using main thread:',e);
+      setStatus('Parsing model (please wait)...',true);
       await new Promise(r=>setTimeout(r,80));
-      try{parsed=await parseOnMainThread(ab);}
-      catch(e){setStatus('Parse error: '+e.message,false);return;}
+      try{parsed=await parseOnMainThread(ab);}catch(e2){setStatus('Parse error: '+e2.message,false);return;}
     }
-
+    setStatus('Building scene...',true);
     await buildVREnvironment(parsed.scene);
     setStatus('Ready',false);
-
     const vrOk=await checkVRSupport();
     if(vrOk){
       setBtn('Enter VR','cardboard',"w-full py-4 rounded-2xl font-bold text-lg font-['Plus_Jakarta_Sans'] flex items-center justify-center gap-3 bg-[#b7d24e] text-[#2a3400] cursor-pointer hover:brightness-110 active:scale-95 shadow-lg shadow-[#b7d24e]/20 transition-all",enterVR);
