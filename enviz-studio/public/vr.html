@@ -212,13 +212,9 @@ async function buildVREnvironment(parsedScene){
   const center=box.getCenter(new THREE.Vector3());
   const size=box.getSize(new THREE.Vector3());
   floorY=box.min.y;
-
-  // ── Invisible floor for teleport raycasting ──
-  const floorGeo=new THREE.PlaneGeometry(size.x*3,size.z*3);
-  floorGeo.rotateX(-Math.PI/2);
-  floorMesh=new THREE.Mesh(floorGeo,new THREE.MeshBasicMaterial({visible:false,side:THREE.DoubleSide}));
-  floorMesh.position.set(center.x,floorY+0.01,center.z);
-  vrScene.add(floorMesh);
+  spawnFloorY=box.min.y; // used by trigger handler
+  // Use a mathematical plane for raycasting — no mesh added to scene (was causing white slab)
+  // floorMesh is not used; raycasting uses THREE.Plane directly in updateTeleportAndTurn()
 
   // ── Landing marker (teleport target indicator) ──
   const ringGeo=new THREE.RingGeometry(0.25,0.5,32);
@@ -238,8 +234,9 @@ async function buildVREnvironment(parsedScene){
   vrCamera.position.set(0,1.65,0);
   vrDolly.add(vrCamera);
   vrScene.add(vrDolly);
-  // Spawn at center of model horizontally, at floor height + eye level
-  vrDolly.position.set(center.x, floorY, center.z);
+  // Spawn matches desktop walker: center X/Z, Y = floor + max(25% height, 1.7m) - eye offset
+  const spawnEyeY=box.min.y+Math.max(size.y*0.25,1.7);
+  vrDolly.position.set(center.x, spawnEyeY-1.65, center.z);
 
   // Pre-warm GPU
   renderer.render(vrScene,vrCamera);
@@ -271,12 +268,12 @@ function setupControllers(){
       line.visible=(e.data.handedness==='right');
     });
 
-    // Trigger pressed → teleport (right controller only)
+    // Trigger pressed → teleport on ANY controller (handedness may not be set yet at first press)
     ctrl.addEventListener('selectstart',()=>{
-      if(ctrl.userData.handedness==='right'&&teleportTarget&&vrDolly){
+      if(teleportTarget&&vrDolly){
         vrDolly.position.x=teleportTarget.x;
         vrDolly.position.z=teleportTarget.z;
-        vrDolly.position.y=floorY; // stay at floor level
+        vrDolly.position.y=spawnFloorY; // floor reference set globally
       }
     });
 
@@ -289,25 +286,34 @@ const _ctrlOrigin=new THREE.Vector3();
 const _ctrlDir=new THREE.Vector3();
 const _ctrlMat=new THREE.Matrix4();
 
+// Math plane for floor raycasting — no mesh, no white slab
+const _floorPlane=new THREE.Plane(new THREE.Vector3(0,1,0),0);
+const _floorHit=new THREE.Vector3();
+let spawnFloorY=0; // set when scene is built
+
 function updateTeleportAndTurn(){
   if(!vrSession)return;
 
-  // Find right controller for teleport aim
-  let rightCtrl=null;
+  // Find right controller — fallback to controller 0 if handedness not yet set
+  let aimCtrl=null;
   for(let i=0;i<2;i++){
     const c=renderer.xr.getController(i);
-    if(c.userData.handedness==='right'){rightCtrl=c;break;}
+    if(c.userData.handedness==='right'){aimCtrl=c;break;}
   }
+  if(!aimCtrl) aimCtrl=renderer.xr.getController(0);
 
-  if(rightCtrl&&floorMesh&&landingMarker){
-    _ctrlMat.identity().extractRotation(rightCtrl.matrixWorld);
-    _ctrlOrigin.setFromMatrixPosition(rightCtrl.matrixWorld);
+  // Raycast against mathematical floor plane (no scene mesh needed)
+  if(aimCtrl&&landingMarker){
+    _floorPlane.constant=-floorY; // plane at floor Y
+    _ctrlMat.identity().extractRotation(aimCtrl.matrixWorld);
+    _ctrlOrigin.setFromMatrixPosition(aimCtrl.matrixWorld);
     _ctrlDir.set(0,0,-1).applyMatrix4(_ctrlMat);
     raycaster.set(_ctrlOrigin,_ctrlDir);
-    const hits=raycaster.intersectObject(floorMesh);
-    if(hits.length>0&&hits[0].point.y<floorY+0.5){
-      teleportTarget=hits[0].point;
-      landingMarker.position.set(teleportTarget.x,floorY+0.03,teleportTarget.z);
+    const hit=raycaster.ray.intersectPlane(_floorPlane,_floorHit);
+    const dist=hit?_ctrlOrigin.distanceTo(_floorHit):Infinity;
+    if(hit&&dist>0.3&&dist<20){
+      teleportTarget=_floorHit.clone();
+      landingMarker.position.set(_floorHit.x,floorY+0.03,_floorHit.z);
       landingMarker.visible=true;
     }else{
       teleportTarget=null;
