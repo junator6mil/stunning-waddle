@@ -6,59 +6,56 @@
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
-<script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{colors:{"on-secondary-container":"#242d00","on-primary-fixed":"#290055","primary-fixed-dim":"#d8b9ff","secondary-container":"#839a17","on-surface":"#e2dfff",primary:"#d8b9ff","secondary-fixed-dim":"#b7d24e","inverse-surface":"#e2dfff",tertiary:"#c6c6c7","inverse-primary":"#7c2dda","surface-tint":"#d8b9ff","inverse-on-surface":"#2d2d50","on-error":"#690005","surface-dim":"#100f31","on-primary":"#450087","surface-variant":"#323154","surface-container":"#1c1c3e","surface-container-highest":"#323154",secondary:"#b7d24e","outline-variant":"#4b4454","surface-bright":"#363559",error:"#ffb4ab","surface-container-high":"#272649",outline:"#978da0","on-primary-container":"#3c0077",surface:"#100f31","surface-container-low":"#181739","error-container":"#93000a","on-surface-variant":"#cec2d7","secondary-fixed":"#d3ef67","on-secondary":"#2a3400","primary-container":"#ad72ff",background:"#100f31","on-background":"#e2dfff"},fontFamily:{headline:["Plus Jakarta Sans"],body:["Inter"]}}}};</script>
+<script>tailwind.config={darkMode:"class",theme:{extend:{colors:{primary:"#d8b9ff",secondary:"#b7d24e","on-surface":"#e2dfff","on-surface-variant":"#cec2d7","surface-container":"#1c1c3e","surface-container-high":"#272649","surface-container-highest":"#323154",background:"#100f31","on-background":"#e2dfff"},fontFamily:{headline:["Plus Jakarta Sans"],body:["Inter"]}}}};</script>
 <style>
   .material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;}
-  @keyframes nav-shimmer{0%,100%{background-position:200% center}50%{background-position:0% center}}
-  .nav-bar{background:linear-gradient(90deg,rgba(16,15,49,0.88) 0%,rgba(26,16,64,0.88) 40%,rgba(16,15,49,0.88) 100%);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);box-shadow:0 1px 0 rgba(216,185,255,.1),0 4px 24px rgba(120,60,220,.15);position:relative;}
-  .nav-bar::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;background:linear-gradient(90deg,transparent,rgba(216,185,255,.25) 40%,rgba(183,210,78,.2) 60%,transparent);animation:nav-shimmer 6s ease-in-out infinite;background-size:200% auto;}
-  .breath-edges{position:fixed;inset:0;z-index:0;pointer-events:none;background:rgba(16,15,49,0.92);-webkit-mask:radial-gradient(ellipse 52% 44% at 50% 50%,transparent 0%,black 72%);mask:radial-gradient(ellipse 52% 44% at 50% 50%,transparent 0%,black 72%);}
-  @keyframes breathe-opacity{0%,100%{opacity:0.88;}50%{opacity:0.28;}}
-  .breath-center{position:fixed;inset:0;z-index:0;pointer-events:none;background:rgba(16,15,49,0.92);-webkit-mask:radial-gradient(ellipse 52% 44% at 50% 50%,black 0%,transparent 72%);mask:radial-gradient(ellipse 52% 44% at 50% 50%,black 0%,transparent 72%);animation:breathe-opacity 9s ease-in-out infinite;}
-  @keyframes fadein{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+  @keyframes shimmer{0%,100%{background-position:200% center}50%{background-position:0% center}}
+  .nav-bar{background:linear-gradient(90deg,rgba(16,15,49,.88) 0%,rgba(26,16,64,.88) 40%,rgba(16,15,49,.88) 100%);backdrop-filter:blur(24px);box-shadow:0 1px 0 rgba(216,185,255,.1),0 4px 24px rgba(120,60,220,.15);position:relative;}
+  .nav-bar::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;background:linear-gradient(90deg,transparent,rgba(216,185,255,.25) 40%,rgba(183,210,78,.2) 60%,transparent);animation:shimmer 6s ease-in-out infinite;background-size:200% auto;}
+  .breath-edges{position:fixed;inset:0;z-index:0;pointer-events:none;background:rgba(16,15,49,.92);-webkit-mask:radial-gradient(ellipse 52% 44% at 50% 50%,transparent 0%,black 72%);mask:radial-gradient(ellipse 52% 44% at 50% 50%,transparent 0%,black 72%);}
+  @keyframes breathe{0%,100%{opacity:.88}50%{opacity:.28}}
+  .breath-center{position:fixed;inset:0;z-index:0;pointer-events:none;background:rgba(16,15,49,.92);-webkit-mask:radial-gradient(ellipse 52% 44% at 50% 50%,black 0%,transparent 72%);mask:radial-gradient(ellipse 52% 44% at 50% 50%,black 0%,transparent 72%);animation:breathe 9s ease-in-out infinite;}
+  @keyframes fadein{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
   .fadein{animation:fadein .5s ease forwards;}
-  @keyframes vr-ring{0%{transform:scale(1);opacity:0.6}100%{transform:scale(1.7);opacity:0}}
-  .vr-ring{animation:vr-ring 2s ease-out infinite;}
+  @keyframes ring{0%{transform:scale(1);opacity:.6}100%{transform:scale(1.7);opacity:0}}
+  .vr-ring{animation:ring 2s ease-out infinite;}
   @keyframes spin{to{transform:rotate(360deg)}}
   .spin{animation:spin 1s linear infinite;}
-  .glass{backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);}
-  /* VR HUD overlay (shown inside headset via DOM Overlay) */
-  #vr-hud{position:fixed;top:24px;left:50%;transform:translateX(-50%);z-index:9999;pointer-events:none;display:none;}
-  #mode-badge{font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:700;padding:6px 18px;border-radius:999px;letter-spacing:0.08em;text-transform:uppercase;backdrop-filter:blur(8px);border:1.5px solid rgba(255,255,255,0.15);transition:background .3s,color .3s,border-color .3s;}
-  .mode-walk{background:rgba(183,210,78,0.18);color:#b7d24e;border-color:#b7d24e55;}
-  .mode-fly{background:rgba(216,185,255,0.18);color:#d8b9ff;border-color:#d8b9ff55;}
-  .mode-phase{background:rgba(255,136,0,0.18);color:#ff8800;border-color:#ff880055;}
+  .glass{backdrop-filter:blur(20px);}
+  /* In-headset HUD via DOM overlay */
+  #vr-hud{position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:9999;pointer-events:none;display:none;font-family:'Plus Jakarta Sans',sans-serif;}
+  #mode-pill{font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;padding:5px 16px;border-radius:999px;border:1.5px solid;transition:all .3s;}
+  .m-walk{background:rgba(183,210,78,.15);color:#b7d24e;border-color:#b7d24e66;}
+  .m-fly {background:rgba(216,185,255,.15);color:#d8b9ff;border-color:#d8b9ff66;}
+  .m-phase{background:rgba(255,136,0,.15);color:#ff8800;border-color:#ff880066;}
 </style>
 </head>
 <body class="text-on-background font-body min-h-screen flex flex-col" style="background-image:url('bg-wave.jpg');background-size:cover;background-position:center;background-attachment:fixed;">
-<div class="breath-edges"></div>
-<div class="breath-center"></div>
+<div class="breath-edges"></div><div class="breath-center"></div>
 
-<!-- VR HUD: shown as DOM overlay inside headset -->
-<div id="vr-hud">
-  <div id="mode-badge" class="mode-walk">WALK</div>
-</div>
+<!-- DOM overlay HUD — shows inside headset -->
+<div id="vr-hud"><div id="mode-pill" class="m-fly">FLY MODE</div></div>
 
-<nav class="nav-bar font-['Plus_Jakarta_Sans'] tracking-tight top-0 sticky z-50">
-<div class="flex justify-between items-center w-full px-8 py-4 max-w-screen-2xl mx-auto">
-  <div class="flex items-center gap-12">
-    <a href="index.html" class="text-2xl font-bold tracking-tighter text-[#d8b9ff] hover:opacity-80 transition-opacity">EnvizStudio</a>
-    <div class="hidden md:flex gap-8 items-center">
-      <a class="text-[#cec2d7] hover:text-[#d8b9ff] transition-all duration-300" href="brsp.html">Spaces</a>
-      <a class="text-[#cec2d7] hover:text-[#d8b9ff] transition-all duration-300" href="cost-estimator.html">Cost Estimator</a>
+<nav class="nav-bar top-0 sticky z-50">
+  <div class="flex justify-between items-center w-full px-8 py-4 max-w-screen-2xl mx-auto">
+    <div class="flex items-center gap-12">
+      <a href="index.html" class="text-2xl font-bold tracking-tighter text-[#d8b9ff] hover:opacity-80 transition-opacity font-['Plus_Jakarta_Sans']">EnvizStudio</a>
+      <div class="hidden md:flex gap-8">
+        <a class="text-[#cec2d7] hover:text-[#d8b9ff] transition-colors" href="brsp.html">Spaces</a>
+        <a class="text-[#cec2d7] hover:text-[#d8b9ff] transition-colors" href="cost-estimator.html">Cost Estimator</a>
+      </div>
     </div>
+    <div id="nav-space-name" class="text-sm text-on-surface-variant font-medium hidden"></div>
   </div>
-  <div id="nav-space-name" class="text-sm text-on-surface-variant font-medium hidden"></div>
-</div>
 </nav>
 
 <main id="pre-ui" class="relative z-10 flex-grow flex items-center justify-center px-6 py-12">
-  <div class="fadein w-full max-w-lg">
+  <div class="fadein w-full max-w-lg space-y-5">
     <div class="glass bg-white/5 border border-white/10 rounded-3xl overflow-hidden shadow-2xl">
-      <div id="cover-wrap" class="aspect-video bg-surface-container-high relative overflow-hidden">
+      <div id="cover-wrap" class="aspect-video bg-[#1c1c3e] relative overflow-hidden">
         <img id="cover-img" src="" alt="" class="w-full h-full object-cover hidden"/>
-        <div id="cover-placeholder" class="w-full h-full flex items-center justify-center">
-          <span class="material-symbols-outlined text-7xl text-primary/20">view_in_ar</span>
+        <div id="cover-ph" class="w-full h-full flex items-center justify-center">
+          <span class="material-symbols-outlined text-7xl text-[#d8b9ff]/20">view_in_ar</span>
         </div>
         <div class="absolute top-4 right-4 glass bg-black/40 border border-white/10 rounded-lg px-3 py-1 text-xs font-bold text-[#b7d24e] flex items-center gap-1.5">
           <span class="material-symbols-outlined text-sm">cardboard</span> WebXR
@@ -66,38 +63,44 @@
       </div>
       <div class="p-8">
         <h1 id="space-title" class="font-['Plus_Jakarta_Sans'] text-2xl font-extrabold text-on-surface mb-2">Loading...</h1>
-        <p id="space-desc" class="text-on-surface-variant text-sm leading-relaxed mb-8 min-h-[40px]"></p>
-        <div id="status-row" class="flex items-center gap-2 mb-6 text-sm">
-          <span class="material-symbols-outlined spin text-primary text-lg">autorenew</span>
-          <span id="status-text" class="text-on-surface-variant">Loading model from storage...</span>
+        <p id="space-desc" class="text-[#cec2d7] text-sm leading-relaxed mb-8 min-h-[36px]"></p>
+        <div id="status-row" class="flex items-center gap-2 mb-5 text-sm">
+          <span class="material-symbols-outlined spin text-[#d8b9ff] text-lg">autorenew</span>
+          <span id="status-text" class="text-[#cec2d7]">Loading...</span>
         </div>
-        <div id="vr-support-badge" class="hidden mb-6 text-xs font-bold px-3 py-1.5 rounded-lg w-fit"></div>
+        <div id="vr-badge" class="hidden mb-5 text-xs font-bold px-3 py-1.5 rounded-lg w-fit"></div>
         <div class="flex flex-col gap-3">
           <div class="relative flex justify-center">
-            <div id="vr-ring1" class="hidden absolute inset-0 m-auto w-16 h-16 rounded-full border-2 border-[#b7d24e]/40 vr-ring"></div>
-            <div id="vr-ring2" class="hidden absolute inset-0 m-auto w-16 h-16 rounded-full border-2 border-[#b7d24e]/20 vr-ring" style="animation-delay:0.7s"></div>
-            <button id="enter-vr-btn" disabled class="w-full py-4 rounded-2xl font-bold text-lg font-['Plus_Jakarta_Sans'] flex items-center justify-center gap-3 transition-all duration-300 bg-white/5 text-on-surface-variant cursor-not-allowed border border-white/10">
+            <div id="ring1" class="hidden absolute inset-0 m-auto w-16 h-16 rounded-full border-2 border-[#b7d24e]/40 vr-ring"></div>
+            <div id="ring2" class="hidden absolute inset-0 m-auto w-16 h-16 rounded-full border-2 border-[#b7d24e]/20 vr-ring" style="animation-delay:.7s"></div>
+            <button id="vr-btn" disabled class="w-full py-4 rounded-2xl font-bold text-lg font-['Plus_Jakarta_Sans'] flex items-center justify-center gap-3 transition-all bg-white/5 text-[#cec2d7] cursor-not-allowed border border-white/10">
               <span class="material-symbols-outlined text-2xl">cardboard</span>Enter VR
             </button>
           </div>
-          <button id="walk-btn" class="w-full py-3 rounded-2xl font-semibold text-sm font-['Plus_Jakarta_Sans'] flex items-center justify-center gap-2 transition-all duration-300 bg-white/5 text-on-surface-variant border border-white/10 hover:bg-white/10 hover:text-on-surface">
-            <span class="material-symbols-outlined text-lg">directions_walk</span>Walk on Desktop Instead
+          <button id="walk-btn" class="w-full py-3 rounded-2xl font-semibold text-sm font-['Plus_Jakarta_Sans'] flex items-center justify-center gap-2 transition-all bg-white/5 text-[#cec2d7] border border-white/10 hover:bg-white/10">
+            <span class="material-symbols-outlined text-lg">directions_walk</span>Walk on Desktop
           </button>
         </div>
       </div>
     </div>
-
-    <!-- Controls card -->
-    <div id="vr-hint" class="hidden mt-5 glass bg-white/5 border border-white/10 rounded-2xl overflow-hidden">
-      <div class="px-5 py-3 border-b border-white/10 text-xs font-bold text-[#b7d24e] uppercase tracking-widest">Meta Quest 3S Controls</div>
-      <div class="grid grid-cols-2 gap-0 text-xs text-on-surface-variant">
-        <div class="px-5 py-2.5 border-b border-white/5 flex items-center gap-2"><span class="text-[#b7d24e] font-bold w-24 shrink-0">Left Stick</span>Move</div>
-        <div class="px-5 py-2.5 border-b border-white/5 flex items-center gap-2"><span class="text-[#b7d24e] font-bold w-24 shrink-0">Right Stick</span>Turn</div>
-        <div class="px-5 py-2.5 border-b border-white/5 flex items-center gap-2"><span class="text-[#b7d24e] font-bold w-24 shrink-0">A (press)</span>Jump</div>
-        <div class="px-5 py-2.5 border-b border-white/5 flex items-center gap-2"><span class="text-[#d8b9ff] font-bold w-24 shrink-0">A (double)</span>Fly mode</div>
-        <div class="px-5 py-2.5 border-b border-white/5 flex items-center gap-2"><span class="text-[#b7d24e] font-bold w-24 shrink-0">X button</span>Lower height</div>
-        <div class="px-5 py-2.5 border-b border-white/5 flex items-center gap-2"><span class="text-[#b7d24e] font-bold w-24 shrink-0">Y button</span>Raise height</div>
-        <div class="col-span-2 px-5 py-2.5 flex items-center gap-2"><span class="text-[#ff8800] font-bold w-24 shrink-0">Hold R2</span>Phase mode (no-clip)</div>
+    <!-- Controls reference -->
+    <div id="ctrl-card" class="hidden glass bg-white/5 border border-white/10 rounded-2xl overflow-hidden text-xs">
+      <div class="px-5 py-3 border-b border-white/10 text-[#b7d24e] font-bold uppercase tracking-widest text-[11px]">Meta Quest 3S Controls</div>
+      <div class="divide-y divide-white/5">
+        <div class="grid grid-cols-2 divide-x divide-white/5">
+          <div class="px-4 py-2.5 text-[#cec2d7]"><span class="text-[#b7d24e] font-bold">Left Stick</span> — Move</div>
+          <div class="px-4 py-2.5 text-[#cec2d7]"><span class="text-[#b7d24e] font-bold">Right Stick</span> — Snap turn 30&deg;</div>
+        </div>
+        <div class="grid grid-cols-2 divide-x divide-white/5">
+          <div class="px-4 py-2.5 text-[#cec2d7]"><span class="text-[#b7d24e] font-bold">A (press)</span> — Jump</div>
+          <div class="px-4 py-2.5 text-[#cec2d7]"><span class="text-[#d8b9ff] font-bold">A (double)</span> — Walk/Fly toggle</div>
+        </div>
+        <div class="grid grid-cols-2 divide-x divide-white/5">
+          <div class="px-4 py-2.5 text-[#cec2d7]"><span class="text-[#b7d24e] font-bold">X</span> — Lower height</div>
+          <div class="px-4 py-2.5 text-[#cec2d7]"><span class="text-[#b7d24e] font-bold">Y</span> — Raise height</div>
+        </div>
+        <div class="px-4 py-2.5 text-[#cec2d7]"><span class="text-[#ff8800] font-bold">Hold R2 (right trigger)</span> — Phase / no-clip</div>
+        <div class="px-4 py-2.5 text-[#cec2d7]/60 italic">Starts in FLY mode. Double-press A to switch to WALK.</div>
       </div>
     </div>
   </div>
@@ -106,10 +109,10 @@
 <div id="vr-wrap" class="fixed inset-0 z-50 bg-black" style="display:none">
   <canvas id="vr-canvas" class="w-full h-full block"></canvas>
   <div class="absolute top-4 left-4 glass bg-black/40 border border-white/10 rounded-xl px-4 py-2 text-sm font-bold text-[#d8b9ff]">
-    <span id="vr-space-label">EnvizStudio VR</span>
+    <span id="vr-label">EnvizStudio VR</span>
   </div>
-  <button onclick="exitVR()" class="absolute top-4 right-4 glass bg-black/40 border border-white/10 rounded-xl px-4 py-2 text-sm font-bold text-on-surface-variant hover:text-on-surface transition-colors flex items-center gap-2">
-    <span class="material-symbols-outlined text-lg">close</span> Exit VR
+  <button onclick="exitVR()" class="absolute top-4 right-4 glass bg-black/40 border border-white/10 rounded-xl px-4 py-2 text-sm font-bold text-[#cec2d7] hover:text-white transition-colors flex items-center gap-2">
+    <span class="material-symbols-outlined text-lg">close</span>Exit VR
   </button>
 </div>
 
@@ -120,231 +123,252 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 // ── IndexedDB ─────────────────────────────────────────────────────────
 const IDB_DB='enviz_models',IDB_STORE='models';
-function _openIDB(){return new Promise((res,rej)=>{const r=indexedDB.open(IDB_DB,1);r.onupgradeneeded=e=>e.target.result.createObjectStore(IDB_STORE);r.onsuccess=e=>res(e.target.result);r.onerror=rej;});}
-async function _loadIDB(id){const db=await _openIDB();return new Promise((res,rej)=>{const req=db.transaction(IDB_STORE,'readonly').objectStore(IDB_STORE).get(id);req.onsuccess=e=>res(e.target.result||null);req.onerror=rej;});}
+function openDB(){return new Promise((res,rej)=>{const r=indexedDB.open(IDB_DB,1);r.onupgradeneeded=e=>e.target.result.createObjectStore(IDB_STORE);r.onsuccess=e=>res(e.target.result);r.onerror=rej;});}
+async function loadFromDB(id){const db=await openDB();return new Promise((res,rej)=>{const r=db.transaction(IDB_STORE,'readonly').objectStore(IDB_STORE).get(id);r.onsuccess=e=>res(e.target.result||null);r.onerror=rej;});}
 
-const params=new URLSearchParams(window.location.search);
-const spaceId=params.get('id');
+const spaceId=new URLSearchParams(location.search).get('id');
 
-// ── Scene globals ──────────────────────────────────────────────────────
+// ── Renderer / scene globals ───────────────────────────────────────────
 let renderer,vrSession=null,isEntering=false;
 let vrScene=null,vrDolly=null,vrCamera=null;
-let floorY=0; // model floor Y (set after parse)
+let modelScene=null; // ref to parsed model for raycasting
 
-// ─────────────────────────────────────────────────────────────────────
-//  LOCOMOTION STATE
-// ─────────────────────────────────────────────────────────────────────
-const WALK_SPEED  = 3.5;   // m/s
-const FLY_SPEED   = 5.0;
-const PHASE_SPEED = 7.0;
-const GRAVITY     = -9.8;
-const JUMP_VEL    = 5.5;
-const HEIGHT_STEP = 2.5;   // m/s for X/Y buttons
-const TURN_SPEED  = 1.3;   // rad/s smooth turn
+// ── Floor ─────────────────────────────────────────────────────────────
+let floorY=0;          // detected actual floor at spawn point
+let walkFloorY=0;      // same — used for WALK mode floor collision
 
-let mode     = 'WALK';  // 'WALK' | 'FLY' | 'PHASE'
-let prevMode = 'WALK';  // remembered before entering PHASE
+// ── Locomotion constants ───────────────────────────────────────────────
+const WALK_SPEED  = 4.0;   // m/s
+const FLY_SPEED   = 6.0;
+const PHASE_SPEED = 8.0;
+const GRAVITY     = -9.0;
+const JUMP_VEL    = 5.0;
+const HEIGHT_STEP = 3.0;   // m/s hold
+const SNAP_DEG    = 30;    // degrees per snap turn
+
+// ── Mode state ─────────────────────────────────────────────────────────
+// Start in FLY — avoids stuck-underground until floor is properly detected
+let mode     = 'FLY';  // 'WALK' | 'FLY' | 'PHASE'
+let prevMode = 'FLY';  // mode before phase
 let velY     = 0;
-let onGround = true;
+let onGround = false;
 
-// Button edge detection
-const _prev={A:false,X:false,Y:false,R2:false};
-let _lastAMs=0;
+// Button edge state (per-frame prev values)
+const prev = {A:false, X:false, Y:false, R2:false, Rsnap:false};
+let lastAMs = 0; // timestamp of last A press for double-click
 
-// Reusable vectors
-const _fwd  =new THREE.Vector3();
-const _right=new THREE.Vector3();
-const _UP   =new THREE.Vector3(0,1,0);
+// Vectors (reused each frame)
+const vFwd   = new THREE.Vector3();
+const vRight = new THREE.Vector3();
+const vUp    = new THREE.Vector3(0,1,0);
 
-// ── UI helpers ─────────────────────────────────────────────────────────
-function setStatus(msg,loading=true){
+// ─────────────────────────────────────────────────────────────────────
+//  UI helpers
+// ─────────────────────────────────────────────────────────────────────
+function setStatus(msg,spin=true){
   document.getElementById('status-text').textContent=msg;
-  document.querySelector('#status-row .spin').style.display=loading?'':'none';
+  document.querySelector('#status-row .spin').style.display=spin?'':'none';
 }
-function setBtn(label,icon,cls,handler){
-  const btn=document.getElementById('enter-vr-btn');
-  btn.disabled=!handler;btn.className=cls;
-  btn.innerHTML=`<span class="material-symbols-outlined text-2xl">${icon}</span>${label}`;
-  btn.onclick=handler;
+function setVRBtn(label,icon,cls,fn){
+  const b=document.getElementById('vr-btn');
+  b.disabled=!fn; b.className=cls;
+  b.innerHTML=`<span class="material-symbols-outlined text-2xl">${icon}</span>${label}`;
+  b.onclick=fn;
 }
 function populateUI(){
   if(!spaceId){setStatus('No space ID.',false);return null;}
   const sp=(JSON.parse(localStorage.getItem('enviz_spaces')||'[]')).find(s=>s.id===spaceId);
   if(!sp){setStatus('Space not found.',false);return null;}
-  document.getElementById('space-title').textContent=sp.name||'Untitled Space';
+  document.getElementById('space-title').textContent=sp.name||'Untitled';
   document.getElementById('space-desc').textContent=sp.description||'';
   document.getElementById('nav-space-name').textContent=sp.name||'';
   document.getElementById('nav-space-name').classList.remove('hidden');
-  document.getElementById('vr-space-label').textContent=sp.name||'EnvizStudio VR';
+  document.getElementById('vr-label').textContent=sp.name||'EnvizStudio VR';
   document.getElementById('walk-btn').onclick=()=>location.href=`uplsp.html?id=${spaceId}`;
-  if(sp.photo){const img=document.getElementById('cover-img');img.src=sp.photo;img.classList.remove('hidden');document.getElementById('cover-placeholder').classList.add('hidden');}
+  if(sp.photo){const i=document.getElementById('cover-img');i.src=sp.photo;i.classList.remove('hidden');document.getElementById('cover-ph').classList.add('hidden');}
   return sp;
 }
 
-// ── Mode HUD (shown as DOM overlay in headset) ─────────────────────────
+// ─────────────────────────────────────────────────────────────────────
+//  Mode HUD
+// ─────────────────────────────────────────────────────────────────────
 function setMode(m){
   mode=m;
-  const badge=document.getElementById('mode-badge');
-  badge.className='mode-badge';
-  if(m==='WALK'){badge.textContent='WALK';badge.className='mode-badge mode-walk';}
-  else if(m==='FLY'){badge.textContent='FLY MODE';badge.className='mode-badge mode-fly';}
-  else{badge.textContent='PHASE';badge.className='mode-badge mode-phase';}
-  // Update controller line colors
+  const pill=document.getElementById('mode-pill');
+  pill.className=''; // clear
+  if(m==='WALK'){pill.textContent='WALK';pill.className='m-walk';}
+  else if(m==='FLY'){pill.textContent='FLY MODE';pill.className='m-fly';}
+  else{pill.textContent='PHASE';pill.className='m-phase';}
+  // Controller line colour
+  const colours={WALK:0xb7d24e,FLY:0xd8b9ff,PHASE:0xff8800};
   if(renderer){
-    const colors={WALK:0xb7d24e,FLY:0xd8b9ff,PHASE:0xff8800};
     for(let i=0;i<2;i++){
-      const ctrl=renderer.xr.getController(i);
-      if(ctrl.userData.line) ctrl.userData.line.material.color.setHex(colors[m]);
+      const c=renderer.xr.getController(i);
+      if(c.userData.lineMat) c.userData.lineMat.color.setHex(colours[m]);
     }
   }
 }
 
 // ─────────────────────────────────────────────────────────────────────
-//  LOCOMOTION — called every frame from render loop
+//  Robust gamepad fetch
+//  Quest 3S always sets handedness — but we fall back to index if not.
+// ─────────────────────────────────────────────────────────────────────
+function getGamepads(){
+  let L=null,R=null;
+  if(!vrSession) return {L,R};
+  const srcs=[...vrSession.inputSources];
+  for(const s of srcs){
+    if(s.handedness==='left')  L=s.gamepad;
+    if(s.handedness==='right') R=s.gamepad;
+  }
+  // Fallback: handedness not reported — use indices 0=right 1=left (Quest default)
+  if(!R && srcs[0]) R=srcs[0].gamepad;
+  if(!L && srcs[1]) L=srcs[1].gamepad;
+  return {L,R};
+}
+function btn(gp,i){return gp?.buttons?.[i]?.pressed||false;}
+function axis(gp,i){return gp?.axes?.[i]||0;}
+
+// ─────────────────────────────────────────────────────────────────────
+//  Downward raycast to find actual visual floor at a position
+// ─────────────────────────────────────────────────────────────────────
+function detectFloor(scene,x,z,startY){
+  const ray=new THREE.Raycaster(new THREE.Vector3(x,startY+5,z),new THREE.Vector3(0,-1,0),0,startY+10);
+  const hits=ray.intersectObjects(scene.children,true);
+  for(const h of hits){
+    // Accept surfaces whose normal has a significant upward component
+    if(h.face && h.face.normal.y>0.4) return h.point.y;
+  }
+  return null;
+}
+
+// ─────────────────────────────────────────────────────────────────────
+//  LOCOMOTION — called each frame
 // ─────────────────────────────────────────────────────────────────────
 function handleLocomotion(dt){
-  if(!vrSession||!vrDolly||!vrCamera) return;
+  if(!vrDolly||!vrCamera) return;
+  const {L,R}=getGamepads();
 
-  let leftSrc=null,rightSrc=null;
-  for(const src of vrSession.inputSources){
-    if(src.handedness==='left')  leftSrc=src;
-    if(src.handedness==='right') rightSrc=src;
-  }
-  const lgp=leftSrc?.gamepad;
-  const rgp=rightSrc?.gamepad;
-
-  // ── R2 (Right Trigger = buttons[0]) → Phase mode ──────────────────
-  const r2=rgp?.buttons[0]?.pressed||false;
-  if(r2&&!_prev.R2&&mode!=='PHASE'){
-    prevMode=mode; setMode('PHASE'); velY=0;
-  }else if(!r2&&_prev.R2&&mode==='PHASE'){
+  // ── R2 = right trigger = buttons[0] on right controller ────────────
+  const r2=btn(R,0);
+  if(r2&&!prev.R2&&mode!=='PHASE'){ prevMode=mode; setMode('PHASE'); velY=0; }
+  if(!r2&&prev.R2&&mode==='PHASE'){
     setMode(prevMode);
-    if(prevMode==='WALK'){
-      if(vrDolly.position.y<floorY) vrDolly.position.y=floorY;
-      velY=0;
-    }
+    if(prevMode==='WALK'){ velY=0; if(vrDolly.position.y<walkFloorY) vrDolly.position.y=walkFloorY; }
   }
-  _prev.R2=r2;
+  prev.R2=r2;
 
-  // ── A button (Right buttons[4]) → Jump / Double-press Fly ─────────
-  const a=rgp?.buttons[4]?.pressed||false;
-  if(a&&!_prev.A&&mode!=='PHASE'){
+  // ── A = right buttons[4] = Jump / double-press FLY toggle ──────────
+  const a=btn(R,4);
+  if(a&&!prev.A&&mode!=='PHASE'){
     const now=performance.now();
-    if(now-_lastAMs<350){
-      // Double press: toggle fly
+    if(now-lastAMs<380){
+      // Double press: toggle WALK <-> FLY
       setMode(mode==='FLY'?'WALK':'FLY');
       velY=0;
+      if(mode==='WALK'){
+        // Snap to detected floor when landing from fly
+        vrDolly.position.y=walkFloorY;
+        onGround=true;
+      }
     }else if(mode==='WALK'&&onGround){
       // Single press: jump
       velY=JUMP_VEL; onGround=false;
     }
-    _lastAMs=now;
+    lastAMs=now;
   }
-  _prev.A=a;
+  prev.A=a;
 
-  // ── Left Stick (axes[0]=strafe, axes[1]=fwd/back) → Move ──────────
-  if(lgp){
-    const lx=lgp.axes[0]||0;
-    const lz=lgp.axes[1]||0;
-    if(Math.abs(lx)>0.12||Math.abs(lz)>0.12){
-      const spd=mode==='PHASE'?PHASE_SPEED:mode==='FLY'?FLY_SPEED:WALK_SPEED;
-      // Move relative to where HEAD is looking (horizontal projection)
-      vrCamera.getWorldDirection(_fwd);
-      _fwd.y=0; _fwd.normalize();
-      _right.crossVectors(_UP,_fwd).negate();
-      vrDolly.position.addScaledVector(_fwd,-lz*spd*dt);
-      vrDolly.position.addScaledVector(_right, lx*spd*dt);
-    }
-  }
-
-  // ── Right Stick → Smooth yaw turn (axes[0]) + Vertical in fly (axes[1]) ──
-  if(rgp){
-    const rx=rgp.axes[0]||0;
-    if(Math.abs(rx)>0.15) vrDolly.rotation.y-=rx*TURN_SPEED*dt;
-
-    // Right stick Y controls vertical in FLY and PHASE
-    if(mode==='FLY'||mode==='PHASE'){
-      const ry=rgp.axes[1]||0;
-      if(Math.abs(ry)>0.15) vrDolly.position.y-=ry*FLY_SPEED*dt;
-    }
+  // ── LEFT STICK: Move (axes[0]=strafe, axes[1]=fwd/back) ────────────
+  const lx=axis(L,0);
+  const lz=axis(L,1);
+  const DEAD=0.15;
+  if(Math.abs(lx)>DEAD||Math.abs(lz)>DEAD){
+    const spd=mode==='PHASE'?PHASE_SPEED:mode==='FLY'?FLY_SPEED:WALK_SPEED;
+    // Direction relative to where HEAD (camera) is looking, projected horizontal
+    vrCamera.getWorldDirection(vFwd);
+    vFwd.y=0; vFwd.normalize();
+    vRight.crossVectors(vUp,vFwd).negate();
+    vrDolly.position.addScaledVector(vFwd,-lz*spd*dt);
+    vrDolly.position.addScaledVector(vRight, lx*spd*dt);
   }
 
-  // ── X button (Left buttons[4]) → Lower height ─────────────────────
-  // ── Y button (Left buttons[5]) → Raise height ─────────────────────
-  if(lgp){
-    if(lgp.buttons[4]?.pressed) vrDolly.position.y-=HEIGHT_STEP*dt;
-    if(lgp.buttons[5]?.pressed) vrDolly.position.y+=HEIGHT_STEP*dt;
+  // ── RIGHT STICK: SNAP TURN 30 degrees ──────────────────────────────
+  const rx=axis(R,0);
+  const snapActive=Math.abs(rx)>0.6;
+  if(snapActive&&!prev.Rsnap){
+    vrDolly.rotation.y-=Math.sign(rx)*(SNAP_DEG*Math.PI/180);
+  }
+  prev.Rsnap=snapActive;
+
+  // Right stick Y = vertical in FLY / PHASE mode
+  if(mode==='FLY'||mode==='PHASE'){
+    const ry=axis(R,1);
+    if(Math.abs(ry)>DEAD) vrDolly.position.y-=ry*FLY_SPEED*dt;
   }
 
-  // ── Physics: Gravity + Floor collision ────────────────────────────
+  // ── X/Y BUTTONS: Height (left buttons[4]=X lower, buttons[5]=Y raise)
+  if(btn(L,4)) vrDolly.position.y-=HEIGHT_STEP*dt; // X = lower
+  if(btn(L,5)) vrDolly.position.y+=HEIGHT_STEP*dt; // Y = raise
+
+  // ── GRAVITY + FLOOR (WALK mode only, no phase-through) ─────────────
   if(mode==='WALK'){
-    // Gravity
     velY+=GRAVITY*dt;
     vrDolly.position.y+=velY*dt;
-    // Floor collision — no phase through in WALK
-    if(vrDolly.position.y<=floorY){
-      vrDolly.position.y=floorY;
-      if(velY<0){velY=0; onGround=true;}
+    if(vrDolly.position.y<=walkFloorY){
+      vrDolly.position.y=walkFloorY;
+      velY=Math.max(velY,0);
+      onGround=true;
     }else{
       onGround=false;
     }
   }else if(mode==='FLY'){
-    // No gravity, no floor collision
-    onGround=false;
-  }else{
-    // PHASE: no collision at all (can go through everything)
-    onGround=false;
+    onGround=false; // no gravity
   }
+  // PHASE: no collision, gravity still affects velY but floor is ignored
 }
 
 // ─────────────────────────────────────────────────────────────────────
-//  WORKER PARSE (non-blocking)
+//  Worker-based parsing (non-blocking)
 // ─────────────────────────────────────────────────────────────────────
-function parseInWorker(buffer){
-  return new Promise((resolve,reject)=>{
-    const workerSrc=`
-if(typeof self.Image==='undefined'){self.Image=class{constructor(){this._s='';this.onload=null;this.onerror=null;this.width=1;this.height=1;this.naturalWidth=1;this.naturalHeight=1;this.complete=true;}get src(){return this._s;}set src(v){this._s=v;if(this.onload)setTimeout(()=>this.onload({target:this}),0);}decode(){return Promise.resolve();}}}
-if(typeof self.document==='undefined'){self.document={createElement:(t)=>({style:{},width:0,height:0,getContext:()=>null}),createElementNS:(n,t)=>({style:{}}),body:{appendChild:()=>{},removeChild:()=>{}}};}
+function parseInWorker(buf){
+  return new Promise((res,rej)=>{
+    const src=`
+if(typeof Image==='undefined'){self.Image=class{constructor(){this._s='';this.onload=null;}get src(){return this._s;}set src(v){this._s=v;if(this.onload)setTimeout(()=>this.onload({target:this}),0);}decode(){return Promise.resolve();}get complete(){return true;}get naturalWidth(){return 1;}get naturalHeight(){return 1;}}}
+if(typeof document==='undefined'){self.document={createElement:()=>({style:{},width:0,height:0,getContext:()=>null}),createElementNS:()=>({style:{}}),body:{appendChild:()=>{},removeChild:()=>{}}};}
 importScripts('https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.min.js');
 fetch('https://cdn.jsdelivr.net/npm/three@0.165.0/examples/jsm/loaders/GLTFLoader.js').then(r=>r.text()).then(code=>{
-  code=code.replace(/^import\\s+.*?from\\s+['""][^'""]+['""]\\s*;?/gm,'').replace(/export\\s+\\{[^}]*\\}\\s*;?/g,'').replace(/export\\s+default\\s+/g,'').replace(/export\\s+class\\s+(\\w+)/g,'class $1').replace(/export\\s+function\\s+(\\w+)/g,'function $1');
+  code=code.replace(/^import\\s+.*?from\\s+['""][^'"]+['""]\\s*;?/gm,'').replace(/export\\s+\\{[^}]*\\}\\s*;?/g,'').replace(/export\\s+default\\s+/g,'').replace(/export\\s+class\\s+(\\w+)/g,'class $1').replace(/export\\s+function\\s+(\\w+)/g,'function $1');
   eval(code);self.loader=new GLTFLoader();self.postMessage({ready:true});
 }).catch(e=>self.postMessage({ready:false,error:e.message}));
-self.onmessage=function(e){
-  if(!e.data.buffer)return;
-  if(!self.loader){self.postMessage({ok:false,error:'loader not ready'});return;}
-  try{self.loader.parse(e.data.buffer,'',function(gltf){try{self.postMessage({ok:true,json:gltf.scene.toJSON()});}catch(err){self.postMessage({ok:false,error:'serialize:'+err.message});}},function(err){self.postMessage({ok:false,error:'parse:'+String(err)});});}catch(err){self.postMessage({ok:false,error:err.message});}
-};`;
-    let worker;
-    try{const blob=new Blob([workerSrc],{type:'application/javascript'});worker=new Worker(URL.createObjectURL(blob));}
-    catch(e){reject(new Error('Worker unavailable'));return;}
-    worker.onmessage=(e)=>{
-      if(e.data.ready===false){worker.terminate();reject(new Error(e.data.error));return;}
-      if(e.data.ready===true){worker.postMessage({buffer:buffer.slice(0)});return;}
-      worker.terminate();
-      if(e.data.ok){try{resolve({scene:new THREE.ObjectLoader().parse(e.data.json)});}catch(err){reject(err);}}
-      else{reject(new Error(e.data.error));}
+self.onmessage=e=>{if(!e.data.buffer)return;if(!self.loader){self.postMessage({ok:false,error:'no loader'});return;}try{self.loader.parse(e.data.buffer,'',g=>{try{self.postMessage({ok:true,json:g.scene.toJSON()});}catch(err){self.postMessage({ok:false,error:err.message});}},err=>self.postMessage({ok:false,error:String(err)}));}catch(err){self.postMessage({ok:false,error:err.message});}};`;
+    let w;
+    try{w=new Worker(URL.createObjectURL(new Blob([src],{type:'application/javascript'})));}
+    catch(e){rej(new Error('worker unavailable'));return;}
+    w.onmessage=e=>{
+      if(e.data.ready===false){w.terminate();rej(new Error(e.data.error));return;}
+      if(e.data.ready===true){w.postMessage({buffer:buf.slice(0)});return;}
+      w.terminate();
+      if(e.data.ok){try{res({scene:new THREE.ObjectLoader().parse(e.data.json)});}catch(err){rej(err);}}
+      else rej(new Error(e.data.error));
     };
-    worker.onerror=(e)=>{worker.terminate();reject(new Error(e.message||'Worker error'));};
+    w.onerror=e=>{w.terminate();rej(new Error(e.message||'worker error'));};
   });
 }
-function parseOnMainThread(buffer){
-  return new Promise((res,rej)=>{new GLTFLoader().parse(buffer.slice(0),'',gltf=>res({scene:gltf.scene}),rej);});
-}
+function parseMain(buf){return new Promise((res,rej)=>new GLTFLoader().parse(buf.slice(0),'',g=>res({scene:g.scene}),rej));}
 
 // ─────────────────────────────────────────────────────────────────────
-//  BUILD SCENE (before XR session — pre-warms GPU)
+//  Build renderer + scene BEFORE XR session (pre-warms GPU)
 // ─────────────────────────────────────────────────────────────────────
-async function buildVREnvironment(parsedScene){
+async function buildScene(parsed){
+  // Reveal canvas but keep invisible behind UI
   const wrap=document.getElementById('vr-wrap');
-  wrap.style.display='block';
-  wrap.style.visibility='hidden';
+  wrap.style.display='block'; wrap.style.visibility='hidden';
   document.getElementById('pre-ui').style.zIndex='60';
 
-  const canvas=document.getElementById('vr-canvas');
-  renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:false});
+  renderer=new THREE.WebGLRenderer({canvas:document.getElementById('vr-canvas'),antialias:true});
   renderer.setPixelRatio(1);
-  renderer.setSize(window.innerWidth,window.innerHeight);
+  renderer.setSize(innerWidth,innerHeight);
   renderer.shadowMap.enabled=false;
   renderer.outputColorSpace=THREE.SRGBColorSpace;
   renderer.toneMapping=THREE.ACESFilmicToneMapping;
@@ -355,40 +379,41 @@ async function buildVREnvironment(parsedScene){
   vrScene.background=new THREE.Color(0xd4cfc8);
   vrScene.fog=new THREE.FogExp2(0xd4cfc8,0.012);
 
-  // Lighting (no shadows for performance)
   vrScene.add(new THREE.AmbientLight(0xffffff,1.4));
-  const sun=new THREE.DirectionalLight(0xfff5e0,1.2);
-  sun.position.set(5,10,5);
-  vrScene.add(sun);
-  const fill=new THREE.DirectionalLight(0xd8e8ff,0.5);
-  fill.position.set(-5,8,-5);
-  vrScene.add(fill);
+  const sun=new THREE.DirectionalLight(0xfff5e0,1.2); sun.position.set(5,10,5); vrScene.add(sun);
+  const fill=new THREE.DirectionalLight(0xd8e8ff,0.5); fill.position.set(-5,8,-5); vrScene.add(fill);
 
-  // Model
-  vrScene.add(parsedScene);
+  modelScene=parsed.scene;
+  vrScene.add(modelScene);
 
-  // Bounding box for spawn
-  const box=new THREE.Box3().setFromObject(parsedScene);
+  const box=new THREE.Box3().setFromObject(modelScene);
   const center=box.getCenter(new THREE.Vector3());
   const size=box.getSize(new THREE.Vector3());
-  floorY=box.min.y;
 
-  // Player dolly — spawn matches desktop walker
+  // ── Detect actual visual floor via downward raycast ──────────────
+  const bbFloor=box.min.y;
+  const detected=detectFloor(modelScene,center.x,center.z,center.y);
+  floorY    = detected!==null ? detected : bbFloor;
+  walkFloorY= floorY;
+
+  // ── Player dolly — spawn at center XZ, safely above detected floor ─
   vrDolly=new THREE.Group();
-  vrCamera=new THREE.PerspectiveCamera(80,window.innerWidth/window.innerHeight,0.05,200);
+  vrCamera=new THREE.PerspectiveCamera(80,innerWidth/innerHeight,0.05,200);
   vrCamera.position.set(0,1.65,0);
   vrDolly.add(vrCamera);
   vrScene.add(vrDolly);
-  const spawnEyeY=box.min.y+Math.max(size.y*0.25,1.7);
-  vrDolly.position.set(center.x, spawnEyeY-1.65, center.z);
+
+  // Place dolly at detected floor Y — XR tracking adds real eye height on top
+  vrDolly.position.set(center.x, floorY, center.z);
+  vrDolly.rotation.y=0;
 
   // Pre-warm GPU
   renderer.render(vrScene,vrCamera);
   await new Promise(r=>requestAnimationFrame(r));
 
-  window.addEventListener('resize',()=>{
-    renderer.setSize(window.innerWidth,window.innerHeight);
-    vrCamera.aspect=window.innerWidth/window.innerHeight;
+  addEventListener('resize',()=>{
+    renderer.setSize(innerWidth,innerHeight);
+    vrCamera.aspect=innerWidth/innerHeight;
     vrCamera.updateProjectionMatrix();
   });
 }
@@ -397,66 +422,59 @@ async function buildVREnvironment(parsedScene){
 function setupControllers(){
   for(let i=0;i<2;i++){
     const ctrl=renderer.xr.getController(i);
-    // Small pointer dot + ray line
-    const lineGeo=new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0,0,0),new THREE.Vector3(0,0,-0.15)]);
-    const lineMat=new THREE.LineBasicMaterial({color:0xb7d24e,transparent:true,opacity:0.8});
-    const line=new THREE.Line(lineGeo,lineMat);
+    const mat=new THREE.LineBasicMaterial({color:0xd8b9ff,transparent:true,opacity:0.7});
+    const geo=new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0,0,0),new THREE.Vector3(0,0,-.12)]);
+    const line=new THREE.Line(geo,mat);
     ctrl.add(line);
-    ctrl.userData.line=line;
-    ctrl.addEventListener('connected',(e)=>{ctrl.userData.handedness=e.data.handedness;});
+    ctrl.userData.lineMat=mat;
+    ctrl.addEventListener('connected',e=>{ctrl.userData.handedness=e.data.handedness;});
     vrScene.add(ctrl);
   }
 }
 
 // ── Render loop ────────────────────────────────────────────────────────
+const clock=new THREE.Clock();
 function tick(){
-  const dt=Math.min(clock.getDelta(),0.1);
-  handleLocomotion(dt);
+  handleLocomotion(Math.min(clock.getDelta(),.1));
   renderer.render(vrScene,vrCamera);
 }
-const clock=new THREE.Clock();
 
 // ── Enter VR ──────────────────────────────────────────────────────────
 async function enterVR(){
   if(isEntering)return;
   isEntering=true;
-  const btn=document.getElementById('enter-vr-btn');
-  btn.disabled=true;
-  btn.innerHTML='<span class="material-symbols-outlined text-2xl spin">autorenew</span>Starting...';
+  const b=document.getElementById('vr-btn');
+  b.disabled=true;
+  b.innerHTML='<span class="material-symbols-outlined text-2xl spin">autorenew</span>Starting...';
+
   if(vrSession){try{await vrSession.end();}catch(_){}vrSession=null;await new Promise(r=>setTimeout(r,300));}
 
   let session;
-  try{
-    session=await navigator.xr.requestSession('immersive-vr',{
-      optionalFeatures:['local-floor','bounded-floor','hand-tracking','dom-overlay'],
-      domOverlay:{root:document.getElementById('vr-hud')}
-    });
-  }catch(e){
-    // Retry without dom-overlay if it caused the failure
-    try{
-      session=await navigator.xr.requestSession('immersive-vr',{
-        optionalFeatures:['local-floor','bounded-floor','hand-tracking']
-      });
-    }catch(e2){
-      setStatus('Could not start VR: '+e2.message,false);
-      const wrap=document.getElementById('vr-wrap');
-      wrap.style.display='none';wrap.style.visibility='';
-      document.getElementById('pre-ui').style.zIndex='';
-      isEntering=false;
-      setBtn('Enter VR','cardboard',"w-full py-4 rounded-2xl font-bold text-lg font-['Plus_Jakarta_Sans'] flex items-center justify-center gap-3 bg-[#b7d24e] text-[#2a3400] cursor-pointer hover:brightness-110 active:scale-95 shadow-lg transition-all",enterVR);
-      return;
-    }
+  // Try with DOM overlay first (shows HUD in headset), fall back without
+  for(const opts of[
+    {optionalFeatures:['local-floor','bounded-floor','hand-tracking','dom-overlay'],domOverlay:{root:document.getElementById('vr-hud')}},
+    {optionalFeatures:['local-floor','bounded-floor','hand-tracking']}
+  ]){
+    try{session=await navigator.xr.requestSession('immersive-vr',opts);break;}
+    catch(_){}
+  }
+  if(!session){
+    setStatus('Could not start VR session.',false);
+    document.getElementById('vr-wrap').style.display='none';
+    document.getElementById('pre-ui').style.zIndex='';
+    isEntering=false;
+    setVRBtn('Enter VR','cardboard',"w-full py-4 rounded-2xl font-bold text-lg font-['Plus_Jakarta_Sans'] flex items-center justify-center gap-3 bg-[#b7d24e] text-[#2a3400] cursor-pointer hover:brightness-110 active:scale-95 shadow-lg transition-all",enterVR);
+    return;
   }
 
   vrSession=session;
-  // Show HUD overlay
-  document.getElementById('vr-hud').style.display='block';
-  // Reset locomotion state
-  setMode('WALK'); velY=0; onGround=true;
-  _prev.A=false;_prev.R2=false;_prev.X=false;_prev.Y=false;
 
-  const wrap=document.getElementById('vr-wrap');
-  wrap.style.visibility='';
+  // Reset locomotion
+  setMode('FLY'); velY=0; onGround=false;
+  Object.keys(prev).forEach(k=>prev[k]=false);
+
+  document.getElementById('vr-hud').style.display='block';
+  document.getElementById('vr-wrap').style.visibility='';
   document.getElementById('pre-ui').classList.add('hidden');
 
   setupControllers();
@@ -471,65 +489,59 @@ window.exitVR=function(){
   if(vrSession){try{vrSession.end();}catch(_){}vrSession=null;}
   isEntering=false;
   document.getElementById('vr-hud').style.display='none';
-  const wrap=document.getElementById('vr-wrap');
-  wrap.style.display='none';wrap.style.visibility='';
+  const w=document.getElementById('vr-wrap');
+  w.style.display='none'; w.style.visibility='';
   document.getElementById('pre-ui').classList.remove('hidden');
   document.getElementById('pre-ui').style.zIndex='';
 };
 
-// ── VR detection ──────────────────────────────────────────────────────
-async function checkVRSupport(){
-  const badge=document.getElementById('vr-support-badge');
-  badge.classList.remove('hidden');
-  if(!navigator.xr){
-    badge.textContent='WebXR not supported - use Chrome or Edge';
-    badge.className='mb-6 text-xs font-bold px-3 py-1.5 rounded-lg w-fit bg-red-900/30 border border-red-500/30 text-red-300';
-    return false;
-  }
+// ── Check XR support ──────────────────────────────────────────────────
+async function checkXR(){
+  const b=document.getElementById('vr-badge');
+  b.classList.remove('hidden');
+  if(!navigator.xr){b.textContent='WebXR not supported';b.className='hidden mb-5 text-xs font-bold px-3 py-1.5 rounded-lg w-fit bg-red-900/30 border border-red-500/30 text-red-300';b.classList.remove('hidden');return false;}
   const ok=await navigator.xr.isSessionSupported('immersive-vr').catch(()=>false);
-  if(ok){
-    badge.textContent='VR headset detected - ready to enter';
-    badge.className='mb-6 text-xs font-bold px-3 py-1.5 rounded-lg w-fit bg-[#b7d24e]/10 border border-[#b7d24e]/30 text-[#b7d24e]';
-    document.getElementById('vr-hint').classList.remove('hidden');
-  }else{
-    badge.textContent='No VR headset - use Walk on Desktop below';
-    badge.className='mb-6 text-xs font-bold px-3 py-1.5 rounded-lg w-fit bg-white/5 border border-white/10 text-on-surface-variant';
-  }
+  if(ok){b.textContent='VR headset ready';b.className='mb-5 text-xs font-bold px-3 py-1.5 rounded-lg w-fit bg-[#b7d24e]/10 border border-[#b7d24e]/30 text-[#b7d24e]';}
+  else{b.textContent='No VR headset - use desktop mode';b.className='mb-5 text-xs font-bold px-3 py-1.5 rounded-lg w-fit bg-white/5 border border-white/10 text-[#cec2d7]';}
   return ok;
 }
 
 // ── Boot ──────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded',async()=>{
   try{
-    const sp=populateUI();if(!sp)return;
+    const sp=populateUI(); if(!sp)return;
     setStatus('Loading from storage...',true);
-    const ab=await _loadIDB(spaceId).catch(()=>null);
+    const ab=await loadFromDB(spaceId).catch(()=>null);
     if(!ab){
-      setStatus('Model not cached - open Walk on Desktop first.',false);
-      document.getElementById('walk-btn').classList.add('ring-2','ring-primary/40');
-      setBtn('Not Cached','warning',"w-full py-4 rounded-2xl font-bold text-lg flex items-center justify-center gap-3 bg-white/5 text-on-surface-variant border border-white/10 cursor-not-allowed",null);
+      setStatus('Model not cached — open Walk on Desktop first.',false);
+      document.getElementById('walk-btn').classList.add('ring-2','ring-[#d8b9ff]/40');
+      setVRBtn('Not Cached','warning',"w-full py-4 rounded-2xl font-bold text-lg flex items-center justify-center gap-3 bg-white/5 text-[#cec2d7] border border-white/10 cursor-not-allowed",null);
       return;
     }
+
     let parsed;
-    try{
-      setStatus('Parsing model in background...',true);
-      parsed=await parseInWorker(ab);
-    }catch(e){
-      console.warn('Worker failed, using main thread:',e);
-      setStatus('Parsing model (please wait)...',true);
-      await new Promise(r=>setTimeout(r,80));
-      try{parsed=await parseOnMainThread(ab);}catch(e2){setStatus('Parse error: '+e2.message,false);return;}
+    setStatus('Parsing model in background...',true);
+    try{ parsed=await parseInWorker(ab); }
+    catch(e){
+      console.warn('Worker parse failed:',e);
+      setStatus('Parsing (please wait ~10s)...',true);
+      await new Promise(r=>setTimeout(r,60));
+      try{ parsed=await parseMain(ab); }
+      catch(e2){ setStatus('Error: '+e2.message,false); return; }
     }
+
     setStatus('Building scene...',true);
-    await buildVREnvironment(parsed.scene);
-    setStatus('Ready',false);
-    const vrOk=await checkVRSupport();
-    if(vrOk){
-      setBtn('Enter VR','cardboard',"w-full py-4 rounded-2xl font-bold text-lg font-['Plus_Jakarta_Sans'] flex items-center justify-center gap-3 bg-[#b7d24e] text-[#2a3400] cursor-pointer hover:brightness-110 active:scale-95 shadow-lg shadow-[#b7d24e]/20 transition-all",enterVR);
-      document.getElementById('vr-ring1').classList.remove('hidden');
-      document.getElementById('vr-ring2').classList.remove('hidden');
+    await buildScene(parsed);
+    setStatus('Ready — click Enter VR',false);
+
+    const ok=await checkXR();
+    if(ok){
+      setVRBtn('Enter VR','cardboard',"w-full py-4 rounded-2xl font-bold text-lg font-['Plus_Jakarta_Sans'] flex items-center justify-center gap-3 bg-[#b7d24e] text-[#2a3400] cursor-pointer hover:brightness-110 active:scale-95 shadow-lg shadow-[#b7d24e]/20 transition-all",enterVR);
+      document.getElementById('ring1').classList.remove('hidden');
+      document.getElementById('ring2').classList.remove('hidden');
+      document.getElementById('ctrl-card').classList.remove('hidden');
     }else{
-      setBtn('Walk in 3D (Desktop)','view_in_ar',"w-full py-4 rounded-2xl font-bold text-lg font-['Plus_Jakarta_Sans'] flex items-center justify-center gap-3 bg-primary/15 text-primary cursor-pointer hover:bg-primary/25 active:scale-95 border border-primary/20 transition-all",()=>location.href=`uplsp.html?id=${spaceId}`);
+      setVRBtn('Walk in 3D (Desktop)','view_in_ar',"w-full py-4 rounded-2xl font-bold text-lg font-['Plus_Jakarta_Sans'] flex items-center justify-center gap-3 bg-[#d8b9ff]/15 text-[#d8b9ff] cursor-pointer hover:bg-[#d8b9ff]/25 border border-[#d8b9ff]/20 transition-all",()=>location.href=`uplsp.html?id=${spaceId}`);
     }
   }catch(e){setStatus('Error: '+e.message,false);console.error(e);}
 });
