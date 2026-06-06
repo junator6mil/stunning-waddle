@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html class="dark" lang="en"><head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
@@ -10,35 +10,23 @@
 <style>
   .material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;}
   @keyframes nav-shimmer{0%,100%{background-position:200% center}50%{background-position:0% center}}
-  .nav-bar{
-    background:linear-gradient(90deg,rgba(16,15,49,0.88) 0%,rgba(26,16,64,0.88) 40%,rgba(16,15,49,0.88) 100%);
-    backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
-    box-shadow:0 1px 0 rgba(216,185,255,.1),0 4px 24px rgba(120,60,220,.15);
-    position:relative;
-  }
+  .nav-bar{background:linear-gradient(90deg,rgba(16,15,49,0.88) 0%,rgba(26,16,64,0.88) 40%,rgba(16,15,49,0.88) 100%);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);box-shadow:0 1px 0 rgba(216,185,255,.1),0 4px 24px rgba(120,60,220,.15);position:relative;}
   .nav-bar::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;background:linear-gradient(90deg,transparent,rgba(216,185,255,.25) 40%,rgba(183,210,78,.2) 60%,transparent);animation:nav-shimmer 6s ease-in-out infinite;background-size:200% auto;}
-  /* Breathing overlay */
   .breath-edges{position:fixed;inset:0;z-index:0;pointer-events:none;background:rgba(16,15,49,0.92);-webkit-mask:radial-gradient(ellipse 52% 44% at 50% 50%,transparent 0%,black 72%);mask:radial-gradient(ellipse 52% 44% at 50% 50%,transparent 0%,black 72%);}
   @keyframes breathe-opacity{0%,100%{opacity:0.88;}50%{opacity:0.28;}}
   .breath-center{position:fixed;inset:0;z-index:0;pointer-events:none;background:rgba(16,15,49,0.92);-webkit-mask:radial-gradient(ellipse 52% 44% at 50% 50%,black 0%,transparent 72%);mask:radial-gradient(ellipse 52% 44% at 50% 50%,black 0%,transparent 72%);animation:breathe-opacity 9s ease-in-out infinite;}
   @keyframes fadein{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
   .fadein{animation:fadein .5s ease forwards;}
-  /* VR pulse ring */
   @keyframes vr-ring{0%{transform:scale(1);opacity:0.6}100%{transform:scale(1.7);opacity:0}}
   .vr-ring{animation:vr-ring 2s ease-out infinite;}
-  /* Spinner */
   @keyframes spin{to{transform:rotate(360deg)}}
   .spin{animation:spin 1s linear infinite;}
-  /* Glass card */
   .glass{backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);}
 </style>
 </head>
 <body class="text-on-background font-body min-h-screen flex flex-col" style="background-image:url('bg-wave.jpg');background-size:cover;background-position:center;background-attachment:fixed;">
-
 <div class="breath-edges"></div>
 <div class="breath-center"></div>
-
-<!-- Nav -->
 <nav class="nav-bar font-['Plus_Jakarta_Sans'] tracking-tight top-0 sticky z-50">
 <div class="flex justify-between items-center w-full px-8 py-4 max-w-screen-2xl mx-auto">
   <div class="flex items-center gap-12">
@@ -51,71 +39,45 @@
   <div id="nav-space-name" class="text-sm text-on-surface-variant font-medium hidden"></div>
 </div>
 </nav>
-
-<!-- Pre-entry UI -->
 <main id="pre-ui" class="relative z-10 flex-grow flex items-center justify-center px-6 py-12">
   <div class="fadein w-full max-w-lg">
-
-    <!-- Space info card -->
     <div class="glass bg-white/5 border border-white/10 rounded-3xl overflow-hidden shadow-2xl">
-
-      <!-- Cover photo / placeholder -->
       <div id="cover-wrap" class="aspect-video bg-surface-container-high relative overflow-hidden">
         <img id="cover-img" src="" alt="" class="w-full h-full object-cover hidden"/>
         <div id="cover-placeholder" class="w-full h-full flex items-center justify-center">
           <span class="material-symbols-outlined text-7xl text-primary/20">view_in_ar</span>
         </div>
-        <!-- VR badge top right -->
         <div class="absolute top-4 right-4 glass bg-black/40 border border-white/10 rounded-lg px-3 py-1 text-xs font-bold text-[#b7d24e] flex items-center gap-1.5">
           <span class="material-symbols-outlined text-sm">cardboard</span> WebXR
         </div>
       </div>
-
-      <!-- Info -->
       <div class="p-8">
-        <h1 id="space-title" class="font-['Plus_Jakarta_Sans'] text-2xl font-extrabold text-on-surface mb-2">Loadingâ€¦</h1>
+        <h1 id="space-title" class="font-['Plus_Jakarta_Sans'] text-2xl font-extrabold text-on-surface mb-2">Loading...</h1>
         <p id="space-desc" class="text-on-surface-variant text-sm leading-relaxed mb-8 min-h-[40px]"></p>
-
-        <!-- Status row -->
         <div id="status-row" class="flex items-center gap-2 mb-6 text-sm">
           <span class="material-symbols-outlined spin text-primary text-lg">autorenew</span>
-          <span id="status-text" class="text-on-surface-variant">Loading model from storageâ€¦</span>
+          <span id="status-text" class="text-on-surface-variant">Loading model from storage...</span>
         </div>
-
-        <!-- VR support badge -->
         <div id="vr-support-badge" class="hidden mb-6 text-xs font-bold px-3 py-1.5 rounded-lg w-fit"></div>
-
-        <!-- Action buttons -->
         <div class="flex flex-col gap-3">
-          <!-- Enter VR -->
           <div class="relative flex justify-center">
-            <!-- Pulse rings (shown when ready) -->
             <div id="vr-ring1" class="hidden absolute inset-0 m-auto w-16 h-16 rounded-full border-2 border-[#b7d24e]/40 vr-ring"></div>
             <div id="vr-ring2" class="hidden absolute inset-0 m-auto w-16 h-16 rounded-full border-2 border-[#b7d24e]/20 vr-ring" style="animation-delay:0.7s"></div>
-            <button id="enter-vr-btn" disabled
-              class="w-full py-4 rounded-2xl font-bold text-lg font-['Plus_Jakarta_Sans'] flex items-center justify-center gap-3 transition-all duration-300 bg-white/5 text-on-surface-variant cursor-not-allowed border border-white/10">
-              <span class="material-symbols-outlined text-2xl">cardboard</span>
-              Enter VR
+            <button id="enter-vr-btn" disabled class="w-full py-4 rounded-2xl font-bold text-lg font-['Plus_Jakarta_Sans'] flex items-center justify-center gap-3 transition-all duration-300 bg-white/5 text-on-surface-variant cursor-not-allowed border border-white/10">
+              <span class="material-symbols-outlined text-2xl">cardboard</span>Enter VR
             </button>
           </div>
-          <!-- Walk on desktop -->
-          <button id="walk-btn"
-            class="w-full py-3 rounded-2xl font-semibold text-sm font-['Plus_Jakarta_Sans'] flex items-center justify-center gap-2 transition-all duration-300 bg-white/5 text-on-surface-variant border border-white/10 hover:bg-white/10 hover:text-on-surface">
-            <span class="material-symbols-outlined text-lg">directions_walk</span>
-            Walk on Desktop Instead
+          <button id="walk-btn" class="w-full py-3 rounded-2xl font-semibold text-sm font-['Plus_Jakarta_Sans'] flex items-center justify-center gap-2 transition-all duration-300 bg-white/5 text-on-surface-variant border border-white/10 hover:bg-white/10 hover:text-on-surface">
+            <span class="material-symbols-outlined text-lg">directions_walk</span>Walk on Desktop Instead
           </button>
         </div>
       </div>
     </div>
-
-    <!-- Controls hint -->
     <p id="vr-hint" class="hidden text-center text-xs text-on-surface-variant mt-6 opacity-70">
-      ðŸŽ® Left thumbstick â€” move &nbsp;Â·&nbsp; Right thumbstick â€” turn &nbsp;Â·&nbsp; Hold trigger â€” run
+      Left thumbstick &mdash; move &nbsp;&middot;&nbsp; Right thumbstick &mdash; turn &nbsp;&middot;&nbsp; Grip &mdash; run
     </p>
   </div>
 </main>
-
-<!-- Full-screen VR canvas (hidden until session) -->
 <div id="vr-wrap" class="hidden fixed inset-0 z-50 bg-black">
   <canvas id="vr-canvas" class="w-full h-full block"></canvas>
   <div class="absolute top-4 left-4 glass bg-black/40 border border-white/10 rounded-xl px-4 py-2 text-sm font-bold text-[#d8b9ff]">
@@ -125,280 +87,198 @@
     <span class="material-symbols-outlined text-lg">close</span> Exit VR
   </button>
 </div>
-
-<!-- Three.js importmap -->
-<script type="importmap">
-{
-  "imports": {
-    "three": "https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js",
-    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.165.0/examples/jsm/"
-  }
-}
-</script>
-
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.165.0/examples/jsm/"}}</script>
 <script type="module">
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
-// â”€â”€ IndexedDB (same DB as uplsp.html) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-const IDB_DB='enviz_models', IDB_STORE='models';
-function _openIDB(){
-  return new Promise((res,rej)=>{
-    const r=indexedDB.open(IDB_DB,1);
-    r.onupgradeneeded=e=>e.target.result.createObjectStore(IDB_STORE);
-    r.onsuccess=e=>res(e.target.result); r.onerror=rej;
-  });
-}
-async function _loadIDB(id){
-  const db=await _openIDB();
-  return new Promise((res,rej)=>{
-    const req=db.transaction(IDB_STORE,'readonly').objectStore(IDB_STORE).get(id);
-    req.onsuccess=e=>res(e.target.result||null); req.onerror=rej;
-  });
-}
+const IDB_DB='enviz_models',IDB_STORE='models';
+function _openIDB(){return new Promise((res,rej)=>{const r=indexedDB.open(IDB_DB,1);r.onupgradeneeded=e=>e.target.result.createObjectStore(IDB_STORE);r.onsuccess=e=>res(e.target.result);r.onerror=rej;});}
+async function _loadIDB(id){const db=await _openIDB();return new Promise((res,rej)=>{const req=db.transaction(IDB_STORE,'readonly').objectStore(IDB_STORE).get(id);req.onsuccess=e=>res(e.target.result||null);req.onerror=rej;});}
 
-// â”€â”€ State â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-let scene, camera, renderer, vrSession=null;
-let playerDolly, modelBuffer=null;
-const clock=new THREE.Clock();
-const MOVE_SPEED=3.2, RUN_SPEED=6.5;
-
-// â”€â”€ URL params â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+let scene,camera,renderer,vrSession=null,playerDolly,modelBuffer=null,isEntering=false;
+const clock=new THREE.Clock(),MOVE_SPEED=3.2,RUN_SPEED=6.5;
 const params=new URLSearchParams(window.location.search);
 const spaceId=params.get('id');
 
-// â”€â”€ UI helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-function setStatus(msg, loading=true){
+function setStatus(msg,loading=true){
   document.getElementById('status-text').textContent=msg;
   document.querySelector('#status-row .spin').style.display=loading?'':'none';
 }
-function setBtn(label, icon, cls, handler){
+function setBtn(label,icon,cls,handler){
   const btn=document.getElementById('enter-vr-btn');
-  btn.disabled=false;
-  btn.className=cls;
+  btn.disabled=!handler;btn.className=cls;
   btn.innerHTML=`<span class="material-symbols-outlined text-2xl">${icon}</span>${label}`;
   btn.onclick=handler;
 }
 
-// â”€â”€ Populate metadata from localStorage â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function populateUI(){
-  if(!spaceId){ setStatus('No space ID in URL.',false); return null; }
+  if(!spaceId){setStatus('No space ID.',false);return null;}
   const sp=(JSON.parse(localStorage.getItem('enviz_spaces')||'[]')).find(s=>s.id===spaceId);
-  if(!sp){ setStatus('Space not found.',false); return null; }
+  if(!sp){setStatus('Space not found.',false);return null;}
   document.getElementById('space-title').textContent=sp.name||'Untitled Space';
   document.getElementById('space-desc').textContent=sp.description||'';
   document.getElementById('nav-space-name').textContent=sp.name||'';
   document.getElementById('nav-space-name').classList.remove('hidden');
   document.getElementById('vr-space-label').textContent=sp.name||'EnvizStudio VR';
   document.getElementById('walk-btn').onclick=()=>location.href=`uplsp.html?id=${spaceId}`;
-  if(sp.photo){
-    const img=document.getElementById('cover-img');
-    img.src=sp.photo; img.classList.remove('hidden');
-    document.getElementById('cover-placeholder').classList.add('hidden');
-  }
+  if(sp.photo){const img=document.getElementById('cover-img');img.src=sp.photo;img.classList.remove('hidden');document.getElementById('cover-placeholder').classList.add('hidden');}
   return sp;
 }
 
-// â”€â”€ Init Three.js (called just before entering VR, canvas is visible) â”€
 function initThree(){
   scene=new THREE.Scene();
-  scene.background=new THREE.Color(0x100f31);
-  scene.fog=new THREE.Fog(0xf0eaff,30,100);
-
+  scene.background=new THREE.Color(0x0d0c28);
+  scene.fog=new THREE.Fog(0x0d0c28,40,120);
   playerDolly=new THREE.Group();
-  camera=new THREE.PerspectiveCamera(75,window.innerWidth/window.innerHeight,0.05,300);
+  camera=new THREE.PerspectiveCamera(80,window.innerWidth/window.innerHeight,0.05,300);
   camera.position.set(0,1.6,0);
   playerDolly.add(camera);
   scene.add(playerDolly);
-
   const canvas=document.getElementById('vr-canvas');
-  renderer=new THREE.WebGLRenderer({canvas,antialias:true});
+  renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:false});
   renderer.setPixelRatio(Math.min(devicePixelRatio,2));
-  renderer.setSize(canvas.clientWidth||window.innerWidth, canvas.clientHeight||window.innerHeight);
+  renderer.setSize(window.innerWidth,window.innerHeight);
   renderer.shadowMap.enabled=true;
+  renderer.shadowMap.type=THREE.PCFSoftShadowMap;
   renderer.outputColorSpace=THREE.SRGBColorSpace;
   renderer.toneMapping=THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure=1.2;
+  renderer.toneMappingExposure=1.1;
   renderer.xr.enabled=true;
-
-  // Lighting
-  scene.add(new THREE.AmbientLight(0xd8b9ff,0.7));
-  const sun=new THREE.DirectionalLight(0xffffff,1.5);
-  sun.position.set(10,20,10); sun.castShadow=true; scene.add(sun);
-  scene.add(Object.assign(new THREE.DirectionalLight(0xb7d24e,0.3),{position:new THREE.Vector3(-10,5,-10)}));
-
-  window.addEventListener('resize',()=>{
-    renderer.setSize(window.innerWidth,window.innerHeight);
-    camera.aspect=window.innerWidth/window.innerHeight;
-    camera.updateProjectionMatrix();
-  });
+  scene.add(new THREE.AmbientLight(0xffffff,1.2));
+  const sun=new THREE.DirectionalLight(0xfff5e0,2.0);
+  sun.position.set(8,15,8);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);scene.add(sun);
+  scene.add(Object.assign(new THREE.DirectionalLight(0xd8b9ff,0.6),{position:new THREE.Vector3(-8,6,-8)}));
+  scene.add(new THREE.GridHelper(60,40,0x4a4870,0x2a2850));
+  window.addEventListener('resize',()=>{renderer.setSize(window.innerWidth,window.innerHeight);camera.aspect=window.innerWidth/window.innerHeight;camera.updateProjectionMatrix();});
 }
 
-// â”€â”€ Setup XR controllers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function setupControllers(){
   for(let i=0;i<2;i++){
     const ctrl=renderer.xr.getController(i);
-    const pts=[new THREE.Vector3(0,0,0),new THREE.Vector3(0,0,-2)];
-    ctrl.add(new THREE.Line(
-      new THREE.BufferGeometry().setFromPoints(pts),
-      new THREE.LineBasicMaterial({color:0xd8b9ff,transparent:true,opacity:0.5})
-    ));
+    ctrl.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0,0,0),new THREE.Vector3(0,0,-2)]),new THREE.LineBasicMaterial({color:0xd8b9ff,transparent:true,opacity:0.5})));
     scene.add(ctrl);
   }
 }
 
-// â”€â”€ Parse and place model â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function parseModel(arrayBuffer){
+  const buf=arrayBuffer.slice(0);
   return new Promise((res,rej)=>{
-    new GLTFLoader().parse(arrayBuffer,'',gltf=>{
+    new GLTFLoader().parse(buf,'',gltf=>{
       scene.add(gltf.scene);
       const box=new THREE.Box3().setFromObject(gltf.scene);
       const center=box.getCenter(new THREE.Vector3());
-      playerDolly.position.set(center.x, box.min.y+1.7, center.z);
+      const size=box.getSize(new THREE.Vector3());
+      const maxDim=Math.max(size.x,size.z);
+      playerDolly.position.set(center.x+maxDim*0.6,box.min.y+1.7,center.z+maxDim*0.6);
+      playerDolly.rotation.y=-Math.PI/4;
       res();
     },rej);
   });
 }
 
-// â”€â”€ Locomotion (thumbstick) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-const _fwd=new THREE.Vector3();
-const _right=new THREE.Vector3();
-const _turnState={left:false, right:false};
+const _fwd=new THREE.Vector3(),_right=new THREE.Vector3(),_turnState={right:false};
 function handleLocomotion(dt){
-  if(!vrSession) return;
+  if(!vrSession)return;
   for(const src of vrSession.inputSources){
-    if(!src.gamepad) continue;
+    if(!src.gamepad)continue;
     const ax=src.gamepad.axes;
     const lx=ax.length>3?ax[2]:ax[0]||0;
     const lz=ax.length>3?ax[3]:ax[1]||0;
-    const running=src.gamepad.buttons[1]?.pressed||false; // grip = run
+    const running=src.gamepad.buttons[1]?.pressed||false;
     const spd=running?RUN_SPEED:MOVE_SPEED;
-
     if(src.handedness==='left'&&(Math.abs(lx)>0.12||Math.abs(lz)>0.12)){
-      camera.getWorldDirection(_fwd); _fwd.y=0; _fwd.normalize();
+      camera.getWorldDirection(_fwd);_fwd.y=0;_fwd.normalize();
       _right.crossVectors(new THREE.Vector3(0,1,0),_fwd).negate();
       playerDolly.position.addScaledVector(_fwd,-lz*spd*dt);
-      playerDolly.position.addScaledVector(_right, lx*spd*dt);
+      playerDolly.position.addScaledVector(_right,lx*spd*dt);
     }
     if(src.handedness==='right'){
       const rx=ax.length>3?ax[2]:ax[0]||0;
       const active=Math.abs(rx)>0.65;
-      if(active&&!_turnState.right){
-        playerDolly.rotation.y-=Math.sign(rx)*(Math.PI/6);
-      }
-      _turnState.right=active; // debounce: only fire once per flick
+      if(active&&!_turnState.right)playerDolly.rotation.y-=Math.sign(rx)*(Math.PI/6);
+      _turnState.right=active;
     }
   }
 }
 
-// â”€â”€ Render loop â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-function tick(){
-  handleLocomotion(Math.min(clock.getDelta(),0.1));
-  renderer.render(scene,camera);
-}
+function tick(){handleLocomotion(Math.min(clock.getDelta(),0.1));renderer.render(scene,camera);}
 
-// â”€â”€ Enter VR â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function enterVR(){
-  // FIX: local-floor is optional â€” works with or without floor tracking
+  if(isEntering)return;
+  isEntering=true;
+  const btn=document.getElementById('enter-vr-btn');
+  const prevHTML=btn.innerHTML;
+  btn.disabled=true;
+  btn.innerHTML='<span class="material-symbols-outlined text-2xl spin">autorenew</span>Connecting...';
+  if(vrSession){try{await vrSession.end();}catch(_){}vrSession=null;await new Promise(r=>setTimeout(r,400));}
   let session;
   try{
-    session=await navigator.xr.requestSession('immersive-vr',{
-      optionalFeatures:['local-floor','bounded-floor','hand-tracking']
-    });
-  } catch(e){
-    setStatus('VR session failed: '+e.message, false);
-    return;
+    session=await navigator.xr.requestSession('immersive-vr',{optionalFeatures:['local-floor','bounded-floor','hand-tracking']});
+  }catch(e){
+    setStatus('Session error: '+e.message,false);
+    btn.disabled=false;btn.innerHTML=prevHTML;isEntering=false;return;
   }
-
   vrSession=session;
-
-  // Show canvas, hide UI
   document.getElementById('pre-ui').classList.add('hidden');
-  const wrap=document.getElementById('vr-wrap');
-  wrap.classList.remove('hidden');
-
-  // FIX: init Three.js NOW when canvas is visible & sized
-  initThree();
-  setupControllers();
-
-  // Parse model into visible scene
-  setStatus('Loadingâ€¦', true);
-  try{ await parseModel(modelBuffer); }
-  catch(e){ console.error('Model parse error:',e); }
-
+  document.getElementById('vr-wrap').classList.remove('hidden');
+  initThree();setupControllers();
+  try{await parseModel(modelBuffer);}catch(e){console.error('Parse:',e);}
   await renderer.xr.setSession(session);
-  session.addEventListener('end',()=>{ vrSession=null; exitVR(); });
+  session.addEventListener('end',()=>{vrSession=null;isEntering=false;exitVR();});
   renderer.setAnimationLoop(tick);
 }
 
 window.exitVR=function(){
   renderer?.setAnimationLoop(null);
-  if(vrSession){ try{ vrSession.end(); }catch(_){} vrSession=null; }
+  if(vrSession){try{vrSession.end();}catch(_){}vrSession=null;}
+  isEntering=false;
   document.getElementById('vr-wrap').classList.add('hidden');
   document.getElementById('pre-ui').classList.remove('hidden');
 };
 
-// â”€â”€ Check WebXR support â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function checkVRSupport(){
   const badge=document.getElementById('vr-support-badge');
   badge.classList.remove('hidden');
   if(!navigator.xr){
-    badge.textContent='âš  WebXR not supported in this browser (try Chrome/Edge)';
+    badge.textContent='WebXR not supported - try Chrome or Edge';
     badge.className='mb-6 text-xs font-bold px-3 py-1.5 rounded-lg w-fit bg-red-900/30 border border-red-500/30 text-red-300';
     return false;
   }
   const ok=await navigator.xr.isSessionSupported('immersive-vr').catch(()=>false);
   if(ok){
-    badge.textContent='âœ“ VR headset detected â€” ready to enter';
+    badge.textContent='VR headset detected - ready to enter';
     badge.className='mb-6 text-xs font-bold px-3 py-1.5 rounded-lg w-fit bg-[#b7d24e]/10 border border-[#b7d24e]/30 text-[#b7d24e]';
     document.getElementById('vr-hint').classList.remove('hidden');
-  } else {
-    badge.textContent='â„¹ No VR headset â€” use "Walk on Desktop" below';
+  }else{
+    badge.textContent='No VR headset found - use Walk on Desktop below';
     badge.className='mb-6 text-xs font-bold px-3 py-1.5 rounded-lg w-fit bg-white/5 border border-white/10 text-on-surface-variant';
   }
   return ok;
 }
 
-// â”€â”€ Boot â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 document.addEventListener('DOMContentLoaded',async()=>{
   try{
-    const sp=populateUI();
-    if(!sp) return;
-
-    setStatus('Loading model from storageâ€¦', true);
+    const sp=populateUI();if(!sp)return;
+    setStatus('Loading model from storage...',true);
     const ab=await _loadIDB(spaceId).catch(()=>null);
-
     if(!ab){
-      setStatus('Model not cached â€” open "Walk on Desktop" first to cache it.',false);
+      setStatus('Model not cached - open Walk on Desktop first.',false);
       document.getElementById('walk-btn').classList.add('ring-2','ring-primary/40');
-      setBtn('Model Not Cached','warning','w-full py-4 rounded-2xl font-bold text-lg flex items-center justify-center gap-3 bg-white/5 text-on-surface-variant border border-white/10 cursor-not-allowed',null);
-      document.getElementById('enter-vr-btn').disabled=true;
+      setBtn('Model Not Cached','warning',"w-full py-4 rounded-2xl font-bold text-lg flex items-center justify-center gap-3 bg-white/5 text-on-surface-variant border border-white/10 cursor-not-allowed",null);
       return;
     }
-
-    modelBuffer=ab; // store for later use in enterVR()
-    setStatus('Model ready âœ“', false);
-
+    modelBuffer=ab;
+    setStatus('Model ready - click Enter VR',false);
     const vrOk=await checkVRSupport();
     if(vrOk){
-      setBtn(
-        'Enter VR','cardboard',
-        "w-full py-4 rounded-2xl font-bold text-lg font-['Plus_Jakarta_Sans'] flex items-center justify-center gap-3 bg-[#b7d24e] text-[#2a3400] cursor-pointer hover:brightness-110 active:scale-95 shadow-lg shadow-[#b7d24e]/20 transition-all",
-        enterVR
-      );
+      setBtn('Enter VR','cardboard',"w-full py-4 rounded-2xl font-bold text-lg font-['Plus_Jakarta_Sans'] flex items-center justify-center gap-3 bg-[#b7d24e] text-[#2a3400] cursor-pointer hover:brightness-110 active:scale-95 shadow-lg shadow-[#b7d24e]/20 transition-all",enterVR);
       document.getElementById('vr-ring1').classList.remove('hidden');
       document.getElementById('vr-ring2').classList.remove('hidden');
-    } else {
-      setBtn(
-        'Walk in 3D (Desktop)','view_in_ar',
-        "w-full py-4 rounded-2xl font-bold text-lg font-['Plus_Jakarta_Sans'] flex items-center justify-center gap-3 bg-primary/15 text-primary cursor-pointer hover:bg-primary/25 active:scale-95 border border-primary/20 transition-all",
-        ()=>location.href=`uplsp.html?id=${spaceId}`
-      );
+    }else{
+      setBtn('Walk in 3D (Desktop)','view_in_ar',"w-full py-4 rounded-2xl font-bold text-lg font-['Plus_Jakarta_Sans'] flex items-center justify-center gap-3 bg-primary/15 text-primary cursor-pointer hover:bg-primary/25 active:scale-95 border border-primary/20 transition-all",()=>location.href=`uplsp.html?id=${spaceId}`);
     }
-  } catch(e){
-    setStatus('Error: '+e.message, false);
-    console.error('VR boot error:',e);
-  }
+  }catch(e){setStatus('Error: '+e.message,false);console.error(e);}
 });
 </script>
 </body>
